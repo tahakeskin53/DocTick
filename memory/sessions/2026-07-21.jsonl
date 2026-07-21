@@ -1,0 +1,2 @@
+{"ts": "2026-07-21T14:57:43.504698", "event": "memkraft setup done", "tags": ["setup"], "importance": "high", "entity": "", "task": "", "decision": ""}
+{"ts": "2026-07-21T14:59:06.051899", "event": "memkraft memory layer seeded for DocTick (entities, facts, decisions)", "tags": ["setup"], "importance": "high", "entity": "DocTick", "task": "", "decision": ""}

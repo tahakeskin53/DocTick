@@ -46,3 +46,48 @@ Intensite seviyeleri (`/ponytail lite|full|ultra` ile değiştirilebilir): **lit
 
 <!-- Bu projeye özel notlar, mimari kararlar, teknoloji yığını vb. buraya eklenecek. -->
 <!-- Örnek: Backend = ..., Frontend = ..., Veritabanı = ... -->
+
+## Teknoloji yığını / Memory katmanı
+
+- **Memory katmanı:** [memkraft](https://github.com/seojoonkim/memkraft) v3.0.3 — proje-local `./memory/` içinde düz Markdown, zero-dependency. Agent (Claude Code) bu projede çalışırken öğrendiklerini buraya yazar, sonraki oturumda geri çağırır.
+- **Kurulum yeri:** proje venv'i `.venv/` (global Python'a bulaşmaz). CLI: `.venv/Scripts/memkraft.exe`.
+- **Windows zorunlu notu:** memkraft CLI başarı/hata mesajlarında emoji basar; Türkçe cp1254 konsolunda `UnicodeEncodeError` verir. Bu yüzden **CLI daima `PYTHONUTF8=1` ile çağrılır**: `PYTHONUTF8=1 .venv/Scripts/memkraft.exe <komut>`. Python API kendi script'inden kullanılıyorsa script başında `sys.stdout.reconfigure(encoding="utf-8")` yap.
+- **Tüm özellik testi:** `PYTHONUTF8=1 .venv/Scripts/python.exe scripts/check_memkraft.py`
+- **Agent hint kaynağı:** `PYTHONUTF8=1 .venv/Scripts/memkraft.exe agents-hint claude-code --base-dir ./memory`
+
+<!-- MEMKRAFT-BLOCK-START (v3.0.3) -->
+## 🧠 MemKraft — Memory API first
+
+MemKraft v3.0.3 kurulu. **`memory/*` dosyalarını elle düzenlemeden önce Python API'sini dene.**
+
+Base dir: `./memory` (proje kökünden göreceli)
+
+### 6 çekirdek çağrı
+
+```python
+from memkraft import MemKraft
+mk = MemKraft(base_dir="memory")            # ./memory (varsayılan; MemKraft() de aynı)
+
+mk.track("DocTick", entity_type="project", source="manual")        # varlık takibi başlat
+mk.update("DocTick", "memkraft memory katmanı eklendi", source="setup")  # bilgi biriktir
+mk.search("memory katmanı")                                        # hibrit arama
+mk.tier_set("doctick", tier="core")                               # core / recall / archival
+mk.fact_add("DocTick", "memory_tool", "memkraft", valid_from="2026-07-21")  # bitemporal fact
+mk.log_event("memkraft setup done", tags="setup", importance="high")
+```
+
+### Tuzaklar (gotchas)
+
+- **Tier değerleri sadece `core` / `recall` / `archival`** (`critical` ❌)
+- `decay_rate` (0,1) açık aralıktadır — `weight` değil
+- `promote()` (markdown tag) ≠ `tier_set()` (frontmatter). Tercihen `tier_set`.
+- Geçmiş memory sorgularında `grep`'ten önce `mk.search(...)` dene
+- `[[wiki-link]]` düzenlemesinden sonra `mk.link_scan()` çağır
+
+### API mi, doğrudan dosya mı?
+
+- ✅ API öncelikli: kişi/kurum/proje, zaman-kapsamlı fact, deploy/karar olayı, arama
+- 📝 Doğrudan düzenleme OK: uzun yazılar, serbest günlük, birebir alıntı (`originals/`)
+
+Tetikleyiciler: `memory`, `remember`, `recall`, `memkraft`, `mk`, `bitemporal`, `decay`, `tier`, `entity`
+<!-- MEMKRAFT-BLOCK-END -->

@@ -90,13 +90,13 @@ DocTick/
 
 ## 6. Başarı Kriterleri
 
-- [ ] `memkraft --version` venv içinde çalışıyor.
-- [ ] `memory/` doğru yapıda oluştu, CLAUDE.md ponytail kuralları korunuyor.
-- [ ] CLAUDE.md'de memkraft wiring'i var.
-- [ ] `scripts/check_memkraft.py` tüm özellikler PASS.
-- [ ] `memkraft health-check` ≥ B (tercihen A).
-- [ ] memory'de DocTick/ponytail/memkraft seed'li.
-- [ ] Her şey commit'li.
+- [x] `memkraft --version` venv içinde çalışıyor. (v3.0.3, `.venv/Scripts/memkraft.exe`)
+- [x] `memory/` doğru yapıda oluştu, CLAUDE.md ponytail kuralları korunuyor. (template CLAUDE.md'ye dokunmadı)
+- [x] CLAUDE.md'de memkraft wiring'i var. (agents-hint + Windows UTF-8 notu)
+- [x] `scripts/check_memkraft.py` tüm özellikler PASS. (75 deep PASS / 0 FAIL · 182 surface OK / 0 ERR)
+- [x] `memkraft health-check` ≥ B (tercihen A). (Score A, 80%, 4/5)
+- [x] memory'de DocTick/ponytail/memkraft seed'li.
+- [x] Her şey commit'li.
 
 ## 7. Riskler & Mitigasyon
 
