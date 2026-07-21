@@ -1,0 +1,22 @@
+# Python (project-local venv)
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+
+# OS cruft
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# NOTE: memory/ and .memkraft/ are intentionally TRACKED.
+# memkraft's whole point is git-friendly plain-Markdown memory.
