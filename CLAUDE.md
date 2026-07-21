@@ -91,3 +91,21 @@ mk.log_event("memkraft setup done", tags="setup", importance="high")
 
 Tetikleyiciler: `memory`, `remember`, `recall`, `memkraft`, `mk`, `bitemporal`, `decay`, `tier`, `entity`
 <!-- MEMKRAFT-BLOCK-END -->
+
+---
+
+## Agent skills
+
+[mattpocock/skills](https://github.com/mattpocock/skills) — skills.sh `--copy` ile kuruldu (gerçek dosyalar `.claude/skills/` + `.agents/skills/` içinde, repoya commit). Güncelleme: `npx skills@latest update -p -y` (clandestine agent dizinleri tekrar dolmasın diye bare `experimental_sync`'ten kaçın; agent hedefi daima `claude-code` ile sınırla).
+
+### Issue tracker
+
+Issues/specs yerel markdown olarak `.scratch/<feature>/` altında (GitHub remote yok). Detay: `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Beş varsayılan triage rolü: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. Eşleme: `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: kök `CONTEXT.md` + `docs/adr/` (henüz yok — `/domain-modeling` lazım oldukça yaratır). Tüketim kuralları: `docs/agents/domain.md`.

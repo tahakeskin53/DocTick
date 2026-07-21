@@ -13,6 +13,25 @@ __pycache__/
 Thumbs.db
 desktop.ini
 
+# --- .NET backend ---
+backend/bin/
+backend/obj/
+backend/doctick.db
+backend/doctick.db-*
+backend.Tests/bin/
+backend.Tests/obj/
+*.user
+*.suo
+
+# --- Frontend (Vite/React) ---
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
+frontend/.env.*.local
+
+# .NET solution user prefs
+*.userprefs
+
 # Editors
 .vscode/
 .idea/
