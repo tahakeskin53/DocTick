@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card } from '../../components/display/Card.jsx';
 import { Button } from '../../components/forms/Button.jsx';
 import { Badge } from '../../components/display/Badge.jsx';
+import { Switch } from '../../components/forms/Switch.jsx';
 import { IconButton } from '../../components/forms/IconButton.jsx';
 import { Input } from '../../components/forms/Input.jsx';
 import { Select } from '../../components/forms/Select.jsx';
@@ -10,6 +11,8 @@ import { Dialog } from '../../components/feedback/Dialog.jsx';
 import { Icon } from '../../components/display/Icon.jsx';
 import { Api } from '../../api/client';
 import { useToast } from '../../components/ToastProvider';
+
+interface EditState { id: number; name: string; deptId: number; isActive: boolean }
 
 export function Doctors() {
   const qc = useQueryClient();
@@ -19,10 +22,11 @@ export function Doctors() {
   const [add, setAdd] = useState(false);
   const [name, setName] = useState('');
   const [dept, setDept] = useState('');
+  const [edit, setEdit] = useState<EditState | null>(null);
 
   const upd = useMutation({
     mutationFn: (v: { id: number; name: string; deptId: number; isActive: boolean }) => Api.updateDoctor(v.id, v.name, v.deptId, v.isActive),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['admin', 'doctors'] }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['admin', 'doctors'] }); toast('success', 'Doktor güncellendi.'); },
   });
   const del = useMutation({
     mutationFn: (id: number) => Api.deleteDoctor(id),
@@ -49,7 +53,7 @@ export function Doctors() {
             </span>
             <Badge status={r.isActive ? 'confirmed' : 'neutral'}>{r.isActive ? 'Randevuya açık' : 'Kapalı'}</Badge>
             <span style={{ display: 'flex', gap: 4 }}>
-              <IconButton size="sm" label="Aç/kapa" onClick={() => upd.mutate({ id: r.id, name: r.name, deptId: r.departmentId, isActive: !r.isActive })}><Icon name="pencil" size={15} /></IconButton>
+              <IconButton size="sm" label="Düzenle" onClick={() => setEdit({ id: r.id, name: r.name, deptId: r.departmentId, isActive: r.isActive })}><Icon name="pencil" size={15} /></IconButton>
               <IconButton size="sm" label="Sil" onClick={() => del.mutate(r.id)}><Icon name="trash" size={15} /></IconButton>
             </span>
           </div>
@@ -66,6 +70,25 @@ export function Doctors() {
           <Select label="Bölüm" placeholder="Bölüm seçin" value={dept} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setDept(e.target.value)}
             options={(depts || []).map(d => ({ value: String(d.id), label: d.name }))} />
         </div>
+      </Dialog>
+
+      <Dialog open={!!edit} title="Doktoru düzenle" onClose={() => setEdit(null)}
+        footer={<>
+          <Button variant="secondary" onClick={() => setEdit(null)}>Vazgeç</Button>
+          <Button disabled={!edit?.name || !edit?.deptId || upd.isPending}
+            onClick={() => { if (edit) { upd.mutate(edit); setEdit(null); } }}>Kaydet</Button>
+        </>}>
+        {edit && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <Input label="Ad soyad (unvanla)" value={edit.name}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEdit({ ...edit, name: e.target.value })} />
+            <Select label="Bölüm" value={String(edit.deptId)}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setEdit({ ...edit, deptId: Number(e.target.value) })}
+              options={(depts || []).map(d => ({ value: String(d.id), label: d.name }))} />
+            <Switch label="Randevuya açık" checked={edit.isActive}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEdit({ ...edit, isActive: e.target.checked })} />
+          </div>
+        )}
       </Dialog>
     </div>
   );

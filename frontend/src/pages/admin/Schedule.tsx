@@ -10,6 +10,7 @@ import { useToast } from '../../components/ToastProvider';
 const TIMES = ['09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '13:30', '14:00', '14:30', '15:00'];
 const DAYS: { dow: number; label: string }[] = [
   { dow: 1, label: 'Pzt' }, { dow: 2, label: 'Sal' }, { dow: 3, label: 'Çar' }, { dow: 4, label: 'Per' }, { dow: 5, label: 'Cum' },
+  { dow: 6, label: 'Cmt' }, { dow: 0, label: 'Paz' },
 ];
 
 export function Schedule() {

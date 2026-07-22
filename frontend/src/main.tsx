@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider } from 'react-router';
 import './styles/styles.css';
 import { AuthProvider } from './auth/Auth';
+import { SmoothScroll } from './components/scroll/SmoothScroll';
 import { ToastProvider } from './components/ToastProvider';
 import { router } from './router';
 
@@ -17,7 +18,9 @@ createRoot(document.getElementById('root')!).render(
       <QueryClientProvider client={qc}>
         <ToastProvider>
           <AuthProvider>
-            <RouterProvider router={router} />
+            <SmoothScroll>
+              <RouterProvider router={router} />
+            </SmoothScroll>
           </AuthProvider>
         </ToastProvider>
       </QueryClientProvider>

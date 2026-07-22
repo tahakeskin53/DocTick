@@ -6,6 +6,7 @@ import { HastaLayout } from './pages/hasta/HastaLayout';
 import { Home } from './pages/hasta/Home';
 import { Booking } from './pages/hasta/Booking';
 import { Appointments } from './pages/hasta/Appointments';
+import { Iletisim } from './pages/hasta/Iletisim';
 import { AdminLayout } from './pages/admin/AdminLayout';
 import { Overview } from './pages/admin/Overview';
 import { Departments } from './pages/admin/Departments';
@@ -55,6 +56,7 @@ export const router = createBrowserRouter([
           { index: true, element: <Home /> },
           { path: 'randevu-al', element: <Booking /> },
           { path: 'randevularim', element: <Appointments /> },
+          { path: 'iletisim', element: <Iletisim /> },
         ],
       },
     ],

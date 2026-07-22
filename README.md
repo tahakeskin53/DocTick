@@ -3,6 +3,10 @@
 Hastaneden online randevu alma, görüntüleme, hatırlatma ve değerlendirme. İki yüzey:
 **Hasta uygulaması** ve **Admin paneli** (bölüm/doktor/saat yönetimi + kullanıcı onayı + e-posta ayarları).
 
+## 📚 Teknik dökümantasyon
+
+Detaylı teknik el kitabı (mimari diyagramları, ERD, API, auth/akış sequence diyagramları, ADR'ler) → **[`docs/`](docs/README.md)**. Alan sözlüğü → **[`CONTEXT.md`](CONTEXT.md)**. Hızlı başlangıç aşağıda.
+
 ## Teknoloji yığını (Temmuz 2026)
 
 - **Backend:** .NET 10, ASP.NET Core Minimal API, EF Core 10 + SQLite, Google.Apis.Auth, Resend (raw HttpClient)
@@ -25,8 +29,9 @@ Google Cloud Console → APIs & Services → Credentials → **OAuth 2.0 Client 
 ```
 > Ücretsiz katta doğrulanmış domain yoksa Resend yalnızca **hesap sahibinin e-postasına** gönderir.
 > Anahtar yoksa uygulama yine çalışır; e-postalar sadece gönderilmez (loglanır).
+> repo'da artık **yer tutucu** (`re_BURAYA_KENDI_RESEND_ANAHTARINIZ`) — gerçek anahtarı ortam değişkeni `Resend__ApiKey` olarak verin. Rotasyon adımları: [`docs/ekler/guvenlik-notlari.md`](docs/ekler/guvenlik-notlari.md).
 
-Admin e-postası `backend/appsettings.json` → `Admin:Email` = `tahakeskin5306@gmail.com`.
+Admin e-postası `backend/appsettings.json` → `Admin:Email` = `tahakeskin06@hotmail.com`.
 Bu adresle ilk Google girişi otomatik **Admin + Active** olur.
 
 ## Çalıştırma (iki süreç)
@@ -35,7 +40,7 @@ Bu adresle ilk Google girişi otomatik **Admin + Active** olur.
 # 1) Backend — http://localhost:5080 (API + Scalar belgeleri)
 cd backend
 dotnet run --urls http://localhost:5080
-#   İlk açılışta doctick.db oluşturulur ve seed (5 bölüm, 6 doktor, 300 saat) atılır.
+#   İlk açılışta doctick.db oluşturulur ve seed (5 bölüm, 6 doktor, 420 haftalık slot) atılır.
 
 # 2) Frontend — http://localhost:5173
 cd frontend
@@ -67,7 +72,7 @@ DocTick Design System/  kaynak tasarım (referans)
 ## Testler
 
 ```bash
-dotnet test backend.Tests/DocTick.Api.Tests.csproj   # 6 test
+dotnet test backend.Tests/DocTick.Api.Tests.csproj   # 7 test
 ```
 
 ## Üretime (tek origin)
@@ -81,5 +86,7 @@ cd ../backend && dotnet publish -c Release   # SPA + API aynı origin'den servis
 
 ## Belgeler
 
+- **Teknik dökümantasyon:** [`docs/`](docs/README.md) — mimari, ERD, API, auth/akış diyagramları, ADR'ler.
+- **Alan sözlüğü:** [`CONTEXT.md`](CONTEXT.md).
 - API: çalışırken `http://localhost:5080/scalar` (Scalar UI) ve `/openapi/v1.json`.
 - Tasarım sistemi: `DocTick Design System/readme.md`.

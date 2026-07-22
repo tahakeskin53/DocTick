@@ -75,8 +75,10 @@ public static class Slots
 {
     public static readonly string[] All =
         ["09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "13:30", "14:00", "14:30", "15:00"];
-    // hafta içi günler (Pzt=1 .. Cuma=5)
-    public static readonly int[] Weekdays = [1, 2, 3, 4, 5];
+    // Izgarada gösterilen tüm günler, sıralı: Pzt=1..Cmt=6, Paz=0 (.NET DayOfWeek).
+    public static readonly int[] Days = [1, 2, 3, 4, 5, 6, 0];
+    // Varsayılan açık günler (hafta içi). Hafta sonu (Cmt/Paz) slotları oluşturulur ama kapalı gelir.
+    public static readonly int[] DefaultOpenDays = [1, 2, 3, 4, 5];
 }
 
 public class AppDb(DbContextOptions<AppDb> options) : DbContext(options)
@@ -149,10 +151,10 @@ public static class DbSeeder
             var doc = new Doctor { Name = name, DepartmentId = deptByName[dept].Id, IsActive = true };
             db.Doctors.Add(doc);
             await db.SaveChangesAsync();
-            // Varsayılan haftalık plan: tüm hafta içi günler, tüm saatler açık.
-            foreach (var dow in Slots.Weekdays)
+            // Varsayılan plan: tüm günler oluşturulur; hafta içi açık, hafta sonu (Cmt/Paz) kapalı gelir.
+            foreach (var dow in Slots.Days)
                 foreach (var t in Slots.All)
-                    db.ScheduleSlots.Add(new ScheduleSlot { DoctorId = doc.Id, DayOfWeek = dow, Time = t, IsOpen = true });
+                    db.ScheduleSlots.Add(new ScheduleSlot { DoctorId = doc.Id, DayOfWeek = dow, Time = t, IsOpen = Slots.DefaultOpenDays.Contains(dow) });
         }
         await db.SaveChangesAsync();
 

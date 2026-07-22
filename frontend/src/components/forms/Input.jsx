@@ -19,3 +19,12 @@ export function Input({label,hint,error,style,...rest}){
     {error?<span className="dt-field-err">{error}</span>:hint?<span className="dt-field-hint">{hint}</span>:null}
   </label>;
 }
+
+export function Textarea({label,hint,error,style,rows=5,...rest}){
+  dtInject('dt-input-css',css);
+  return <label className="dt-field" style={style}>
+    {label&&<span className="dt-field-label">{label}</span>}
+    <textarea className={`dt-input ${error?'dt-input-error':''}`} rows={rows} style={{resize:'vertical',fontFamily:'inherit'}} {...rest}/>
+    {error?<span className="dt-field-err">{error}</span>:hint?<span className="dt-field-hint">{hint}</span>:null}
+  </label>;
+}

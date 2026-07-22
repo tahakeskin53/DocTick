@@ -64,6 +64,8 @@ export const Api = {
   doctors: (deptId?: number) => api<Doctor[]>(`/api/doctors${deptId ? `?deptId=${deptId}` : ''}`),
   availability: (doctorId: number, date: string) => api<string[]>(`/api/availability?doctorId=${doctorId}&date=${date}`),
 
+  contact: (subject: string, message: string) => api('/api/contact', { method: 'POST', body: JSON.stringify({ subject, message }) }),
+
   myAppointments: () => api<Appointment[]>('/api/appointments'),
   createAppointment: (doctorId: number, date: string, time: string) =>
     api<Appointment>('/api/appointments', { method: 'POST', body: JSON.stringify({ doctorId, date, time }) }),
@@ -75,6 +77,7 @@ export const Api = {
   adminUsers: () => api<UserRow[]>('/api/admin/users'),
   approveUser: (id: number) => api(`/api/admin/users/${id}/approve`, { method: 'POST' }),
   rejectUser: (id: number) => api(`/api/admin/users/${id}/reject`, { method: 'POST' }),
+  deleteUser: (id: number) => api(`/api/admin/users/${id}`, { method: 'DELETE' }),
   adminDepartments: () => api<(Department & { doctors: number })[]>('/api/admin/departments'),
   addDepartment: (name: string) => api('/api/admin/departments', { method: 'POST', body: JSON.stringify({ name, isActive: true }) }),
   updateDepartment: (id: number, name: string, isActive: boolean) => api(`/api/admin/departments/${id}`, { method: 'PUT', body: JSON.stringify({ name, isActive }) }),

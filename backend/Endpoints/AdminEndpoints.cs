@@ -66,10 +66,10 @@ public static class AdminEndpoints
             var doc = new Doctor { Name = req.Name.Trim(), DepartmentId = req.DepartmentId, IsActive = req.IsActive };
             db.Doctors.Add(doc);
             await db.SaveChangesAsync(ct);
-            // Yeni doktor için varsayılan haftalık plan.
-            foreach (var dow in Slots.Weekdays)
+            // Yeni doktor için varsayılan plan: tüm günler; hafta içi açık, hafta sonu kapalı.
+            foreach (var dow in Slots.Days)
                 foreach (var t in Slots.All)
-                    db.ScheduleSlots.Add(new ScheduleSlot { DoctorId = doc.Id, DayOfWeek = dow, Time = t, IsOpen = true });
+                    db.ScheduleSlots.Add(new ScheduleSlot { DoctorId = doc.Id, DayOfWeek = dow, Time = t, IsOpen = Slots.DefaultOpenDays.Contains(dow) });
             await db.SaveChangesAsync(ct);
             return Results.Created($"/api/admin/doctors/{doc.Id}", new { doc.Id, doc.Name, doc.DepartmentId, doc.IsActive });
         });
@@ -100,7 +100,7 @@ public static class AdminEndpoints
             var rows = await db.ScheduleSlots.AsNoTracking()
                 .Where(s => s.DoctorId == doctorId).ToListAsync(ct);
             var map = rows.ToDictionary(s => (s.DayOfWeek, s.Time), s => s.IsOpen);
-            var cells = from dow in Slots.Weekdays
+            var cells = from dow in Slots.Days
                         from t in Slots.All
                         select new ScheduleCell(dow, t, map.TryGetValue((dow, t), out var o) && o);
             return Results.Ok(new ScheduleGrid(doctorId, cells.ToList()));
@@ -110,7 +110,7 @@ public static class AdminEndpoints
         {
             var existing = await db.ScheduleSlots.Where(s => s.DoctorId == doctorId).ToListAsync(ct);
             db.ScheduleSlots.RemoveRange(existing);
-            foreach (var c in req.Slots.Where(c => Slots.Weekdays.Contains(c.DayOfWeek) && Slots.All.Contains(c.Time)))
+            foreach (var c in req.Slots.Where(c => Slots.Days.Contains(c.DayOfWeek) && Slots.All.Contains(c.Time)))
                 db.ScheduleSlots.Add(new ScheduleSlot { DoctorId = doctorId, DayOfWeek = c.DayOfWeek, Time = c.Time, IsOpen = c.IsOpen });
             await db.SaveChangesAsync(ct);
             return Results.Ok();
@@ -127,7 +127,9 @@ public static class AdminEndpoints
             if (u is null) return Results.NotFound();
             u.Status = UserStatus.Active;
             await db.SaveChangesAsync(ct);
-            await email.SendAsync(u.Email, "DocTick — Hesabınız onaylandı", EmailTemplates.Approved(u.Name));
+            // Best-effort: e-posta başarısız olsa da onay geri alınmaz (ör. Resend test modu 403).
+            try { await email.SendAsync(u.Email, "DocTick — Hesabınız onaylandı", EmailTemplates.Approved(u.Name)); }
+            catch { /* onay tamamlandı; bildirim gönderilemedi */ }
             return Results.Ok(new UserDto(u.Id, u.Email, u.Name, u.Role.ToString(), u.Status.ToString(), u.CreatedAt));
         });
 
@@ -137,8 +139,25 @@ public static class AdminEndpoints
             if (u is null) return Results.NotFound();
             u.Status = UserStatus.Rejected;
             await db.SaveChangesAsync(ct);
-            await email.SendAsync(u.Email, "DocTick — Hesap başvurunuz", EmailTemplates.Rejected(u.Name));
+            // Best-effort: e-posta başarısız olsa da red geri alınmaz.
+            try { await email.SendAsync(u.Email, "DocTick — Hesap başvurunuz", EmailTemplates.Rejected(u.Name)); }
+            catch { /* red tamamlandı; bildirim gönderilemedi */ }
             return Results.Ok(new UserDto(u.Id, u.Email, u.Name, u.Role.ToString(), u.Status.ToString(), u.CreatedAt));
+        });
+
+        grp.MapDelete("/users/{id}", async (int id, AppDb db, ClaimsPrincipal me, CancellationToken ct) =>
+        {
+            var u = await db.Users.FindAsync([id], ct);
+            if (u is null) return Results.NotFound();
+            // Admin kendini silemez — paneli kilitlemeyi önler.
+            if (u.Id == CurrentUser.Uid(me)) return Results.BadRequest("Kendi hesabınızı silemezsiniz.");
+            // Kullanıcının randevuları da silinir (FK ihlali olmasın). Doktor silmedeki gibi engellemek yerine
+            // "tamamen sil" istendiği için randevu geçmişi de temizlenir.
+            var appts = await db.Appointments.Where(a => a.UserId == id).ToListAsync(ct);
+            db.Appointments.RemoveRange(appts);
+            db.Users.Remove(u);
+            await db.SaveChangesAsync(ct);
+            return Results.NoContent();
         });
 
         // ---- Genel bakış ----

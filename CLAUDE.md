@@ -58,6 +58,8 @@ Intensite seviyeleri (`/ponytail lite|full|ultra` ile değiştirilebilir): **lit
 <!-- MEMKRAFT-BLOCK-START (v3.0.3) -->
 ## 🧠 MemKraft — Memory API first
 
+> ⚠️ **ZORUNLU KURAL (kullanıcı talebi):** Her görev/iş bitiminde — kesinlikle — memkraft'a kaydet. En az bir `mk.log_event` (ne yapıldı) + önemli karar/özellik varsa `mk.fact_add` + proje durumu değiştiyse `mk.update`. Atlama, erteleme. Bu, bir sonraki oturumun bağlamıdır.
+
 MemKraft v3.0.3 kurulu. **`memory/*` dosyalarını elle düzenlemeden önce Python API'sini dene.**
 
 Base dir: `./memory` (proje kökünden göreceli)

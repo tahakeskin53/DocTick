@@ -5,7 +5,7 @@ const css=`
 .dt-slot:hover{border-color:var(--blue-500);background:var(--brand-soft)}
 .dt-slot:focus-visible{outline:none;box-shadow:var(--focus-ring)}
 .dt-slot.sel{background:var(--brand);border-color:var(--brand);color:#fff}
-.dt-slot.full{background:var(--surface-sunken);color:var(--ink-300);border-color:var(--border-soft);cursor:not-allowed;text-decoration:line-through}
+.dt-slot.full{background:var(--surface-sunken);color:var(--ink-400);border-color:var(--border-soft);cursor:not-allowed;text-decoration:line-through}
 `;
 export function TimeSlot({time,state='available',onClick,style,...rest}){
   dtInject('dt-slot-css',css);

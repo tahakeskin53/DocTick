@@ -69,3 +69,6 @@ memory/graph.db
 .impeccable/live/deferred-svelte-component-accepts.json
 .impeccable/live/*.png
 # impeccable-ignore-end
+
+# Lokal OAuth kimlik dosyasi - asla commitleme
+DockTick Google auth client id.txt

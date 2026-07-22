@@ -100,6 +100,23 @@ public class DbTests
     }
 }
 
+public class SlotsTests
+{
+    [Fact]
+    public void Days_IncludeWeekend_ButDefaultOpenDoesNot()
+    {
+        // Izgara Cmt(6) ve Paz(0) dahil tüm günleri gösterir.
+        Assert.Contains(6, Slots.Days);
+        Assert.Contains(0, Slots.Days);
+        // Ama hafta sonu varsayılan olarak KAPALI gelir (admin açana dek).
+        Assert.DoesNotContain(6, Slots.DefaultOpenDays);
+        Assert.DoesNotContain(0, Slots.DefaultOpenDays);
+        // Hafta içi varsayılan açık.
+        foreach (var d in new[] { 1, 2, 3, 4, 5 })
+            Assert.Contains(d, Slots.DefaultOpenDays);
+    }
+}
+
 public class ReminderWindowTests
 {
     [Fact]

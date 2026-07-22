@@ -6,6 +6,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
+    strictPort: true, // 5173 doluysa 5174'e kayma — hata ver. Google OAuth origin'i sadece 5173.
     proxy: {
       '/api': {
         target: 'http://localhost:5080',

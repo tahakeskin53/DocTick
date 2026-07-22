@@ -1,5 +1,6 @@
 import { NavLink, Outlet, useNavigate } from 'react-router';
 import { Icon } from '../../components/display/Icon.jsx';
+import { Logo } from '../../components/display/Logo.jsx';
 import { useAuth } from '../../auth/Auth';
 
 const ITEMS = [
@@ -30,8 +31,9 @@ export function AdminLayout() {
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--surface-page)' }}>
       <aside style={{ width: 220, flex: 'none', background: 'var(--surface-brand)', color: '#fff', display: 'flex', flexDirection: 'column', padding: '20px 12px', gap: 4, minHeight: '100vh', position: 'sticky', top: 0 }}>
-        <div style={{ font: '800 20px var(--font-display)', letterSpacing: '-.02em', padding: '0 14px 6px' }}>
-          DocTick <span style={{ font: 'var(--text-overline)', letterSpacing: 'var(--overline-tracking)', opacity: .7, verticalAlign: 'middle' }}>ADMİN</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0 14px 6px' }}>
+          <Logo size={28} onDark wordSize={19} />
+          <span style={{ font: 'var(--text-overline)', letterSpacing: 'var(--overline-tracking)', opacity: .7 }}>ADMİN</span>
         </div>
         {ITEMS.map(i => item(i.to, i.icon, i.label, i.end))}
         <button onClick={async () => { await logout(); nav('/login', { replace: true }); }} style={{ marginTop: 'auto', padding: '0 14px', display: 'flex', alignItems: 'center', gap: 8, font: 'var(--text-body-sm)', color: 'rgba(255,255,255,.7)', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>

@@ -1,3 +1,5 @@
 {"ts": "2026-07-21T14:57:43.504698", "event": "memkraft setup done", "tags": ["setup"], "importance": "high", "entity": "", "task": "", "decision": ""}
 {"ts": "2026-07-21T14:59:06.051899", "event": "memkraft memory layer seeded for DocTick (entities, facts, decisions)", "tags": ["setup"], "importance": "high", "entity": "DocTick", "task": "", "decision": ""}
 {"ts": "2026-07-21T15:21:00.397774", "event": "mattpocock/skills installed (41 skills, local-files tracker)", "tags": ["setup"], "importance": "medium", "entity": "", "task": "", "decision": ""}
+{"ts": "2026-07-21T17:41:59.129772", "event": "DocTick uygulama gelistirildi (.NET10+React19) ve private GitHub repo tahakeskin53/DockTick'e pushlandi (commit 3aaf655)", "tags": ["build", "deploy"], "importance": "high", "entity": "", "task": "", "decision": ""}
+{"ts": "2026-07-21T17:43:43.964139", "event": "Kullanici talimati: her is sonunda memkraft'a kaydetmek ZORUNLU — CLAUDE.md'ye kural olarak eklendi", "tags": ["kural", "workflow"], "importance": "high", "entity": "", "task": "", "decision": ""}
