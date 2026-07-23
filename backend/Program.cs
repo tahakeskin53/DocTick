@@ -38,6 +38,19 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
+// --- SPA statik servis (üretim: frontend/dist → wwwroot; dev'de Vite 5173 kullanılır) ---
+// Statik dosyalar auth boru hattından önce — uygulama kabuğu herkese açık.
+app.UseDefaultFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = ctx =>
+    {
+        // SW, giriş HTML'i ve manifest asla önbelleklenmesin — PWA güncellemeleri gecikmesin.
+        if (ctx.File.Name is "sw.js" or "index.html" or "manifest.webmanifest" or "registerSW.js")
+            ctx.Context.Response.Headers.CacheControl = "no-cache";
+    }
+});
+
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -54,6 +67,11 @@ app.MapPatientEndpoints();
 app.MapAdminEndpoints();
 
 app.MapGet("/", () => "DocTick API çalışıyor. /scalar üzerinden belgelere bakın.");
+
+// SPA derin linkleri (ör. /randevularim) index.html'e düşer. wwwroot boşken (dev) devreye girmez.
+var spaIndex = Path.Combine(app.Environment.ContentRootPath, "wwwroot", "index.html");
+if (File.Exists(spaIndex))
+    app.MapFallbackToFile("index.html");
 
 // --- Başlangıçta şema + seed ---
 var adminEmail = builder.Configuration["Admin:Email"] ?? "";

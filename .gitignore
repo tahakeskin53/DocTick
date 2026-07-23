@@ -19,6 +19,7 @@ backend/obj/
 backend/doctick.db
 backend/doctick.db-*
 backend/logs/
+backend/wwwroot/   # üretim SPA kopyası (frontend/dist → buraya), commitlenmez
 backend.Tests/bin/
 backend.Tests/obj/
 *.user
