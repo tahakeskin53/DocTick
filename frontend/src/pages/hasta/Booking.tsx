@@ -6,7 +6,7 @@ import { Button, dtInject } from '../../components/forms/Button.jsx';
 import { Select } from '../../components/forms/Select.jsx';
 import { TimeSlot } from '../../components/display/TimeSlot.jsx';
 import { Icon } from '../../components/display/Icon.jsx';
-import { Api, type Doctor } from '../../api/client';
+import { Api, ApiError, type Doctor } from '../../api/client';
 import { useToast } from '../../components/ToastProvider';
 
 const TIMES = ['09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '13:30', '14:00', '14:30', '15:00'];
@@ -90,7 +90,11 @@ export function Booking() {
       toast('success', 'Randevunuz oluşturuldu. Onay e-postası adresinize gönderildi.');
       nav('/randevularim');
     },
-    onError: (e: Error) => toast('error', e.message.includes('409') ? 'Bu saat az önce doldu.' : 'Randevu oluşturulamadı.'),
+    onError: (e: Error) => {
+      // 400/409 → backend'in spesifik nedeni ("Bu saatte zaten bir randevunuz var." vb.); diğerleri genel mesaj.
+      const msg = e instanceof ApiError && (e.status === 400 || e.status === 409) ? e.message : 'Randevu oluşturulamadı.';
+      toast('error', msg);
+    },
   });
 
   const scrollDates = (dir: number) => {

@@ -50,6 +50,10 @@ public static class PatientEndpoints
             var conflict = await db.Appointments.AnyAsync(a => a.DoctorId == req.DoctorId && a.Date == req.Date && a.Time == req.Time && a.Status == ApptStatus.Confirmed, ct);
             if (conflict) return Results.Conflict("Bu saat az önce doldu.");
 
+            // Aynı kullanıcı aynı tarih+saatte ikinci bir randevu alamaz — farklı doktor/bölüm olsa bile.
+            var userConflict = await db.Appointments.AnyAsync(a => a.UserId == uid && a.Date == req.Date && a.Time == req.Time && a.Status == ApptStatus.Confirmed, ct);
+            if (userConflict) return Results.Conflict("Bu saatte zaten bir randevunuz var.");
+
             var doctor = await db.Doctors.Include(d => d.Department).FirstOrDefaultAsync(d => d.Id == req.DoctorId, ct);
             if (doctor is null || !doctor.IsActive) return Results.BadRequest("Doktor bulunamadı.");
 

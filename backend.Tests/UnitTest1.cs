@@ -98,6 +98,29 @@ public class DbTests
         await AddApptAsync(conn, doctorId, userId, d2, "11:00", ApptStatus.Cancelled, "C1");
         await AddApptAsync(conn, doctorId, userId, d2, "11:00", ApptStatus.Confirmed, "A3");
     }
+
+    [Fact]
+    public async Task UniqueIndex_PreventsUserDoubleBooking_AcrossDoctors()
+    {
+        var (conn, doctorId, date, userId) = await SeedAsync();
+        var d = DateTime.Today.AddDays(2).ToString("yyyy-MM-dd");
+
+        // İkinci doktor (farklı bölüm) — aynı kullanıcı, aynı tarih+saat, farklı doktor senaryosu için.
+        var db0 = NewDb(conn);
+        var dept2 = new Department { Name = "Dermatoloji", IsActive = true };
+        db0.Departments.Add(dept2);
+        await db0.SaveChangesAsync();
+        var doc2 = new Doctor { Name = "Dr. Zeynep Arslan", DepartmentId = dept2.Id, IsActive = true };
+        db0.Doctors.Add(doc2);
+        await db0.SaveChangesAsync();
+        await db0.DisposeAsync();
+
+        // Kullanıcı 1. doktora 10:00 alır.
+        await AddApptAsync(conn, doctorId, userId, d, "10:00", ApptStatus.Confirmed, "A1");
+        // Aynı kullanıcı, aynı tarih+saat, FARKLI doktor → unique ihlali beklenir (kullanıcı ekseni).
+        await Assert.ThrowsAsync<DbUpdateException>(() =>
+            AddApptAsync(conn, doc2.Id, userId, d, "10:00", ApptStatus.Confirmed, "A2"));
+    }
 }
 
 public class SlotsTests

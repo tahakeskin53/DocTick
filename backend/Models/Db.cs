@@ -107,6 +107,12 @@ public class AppDb(DbContextOptions<AppDb> options) : DbContext(options)
             .IsUnique()
             .HasFilter("\"Status\" = 'Confirmed'");
 
+        // Kullanıcı ekseni sert garanti: aynı kişi aynı tarih+saatte iki Confirmed tutamaz (farklı doktor olsa bile).
+        b.Entity<Appointment>()
+            .HasIndex(a => new { a.UserId, a.Date, a.Time })
+            .IsUnique()
+            .HasFilter("\"Status\" = 'Confirmed'");
+
         b.Entity<Setting>().HasData(new Setting
         {
             Id = 1,
