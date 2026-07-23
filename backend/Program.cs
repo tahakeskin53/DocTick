@@ -66,12 +66,19 @@ app.MapPublicEndpoints();
 app.MapPatientEndpoints();
 app.MapAdminEndpoints();
 
-app.MapGet("/", () => "DocTick API çalışıyor. /scalar üzerinden belgelere bakın.");
-
-// SPA derin linkleri (ör. /randevularim) index.html'e düşer. wwwroot boşken (dev) devreye girmez.
+// Kök yol: prod'da SPA (wwwroot/index.html → UseDefaultFiles servis eder);
+// dev'de wwwroot yoksa API sağlık mesajı. MapGet("/") UseDefaultFiles ile çakıştığı için
+// yalnızca SPA yoksa kaydedilir — aksi halde kök yol index.html yerine bu mesajı döndürürdü.
 var spaIndex = Path.Combine(app.Environment.ContentRootPath, "wwwroot", "index.html");
 if (File.Exists(spaIndex))
+{
+    // SPA derin linkleri (ör. /randevularim) ve kök yol index.html'e düşer.
     app.MapFallbackToFile("index.html");
+}
+else
+{
+    app.MapGet("/", () => "DocTick API çalışıyor. /scalar üzerinden belgelere bakın.");
+}
 
 // --- Başlangıçta şema + seed ---
 var adminEmail = builder.Configuration["Admin:Email"] ?? "";
