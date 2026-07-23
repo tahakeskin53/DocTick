@@ -1,5 +1,8 @@
+using System.Text.Json;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using DocTick.Api.Auth;
 using DocTick.Api.Models;
 using DocTick.Api.Services;
 
@@ -120,6 +123,25 @@ public class DbTests
         // Aynı kullanıcı, aynı tarih+saat, FARKLI doktor → unique ihlali beklenir (kullanıcı ekseni).
         await Assert.ThrowsAsync<DbUpdateException>(() =>
             AddApptAsync(conn, doc2.Id, userId, d, "10:00", ApptStatus.Confirmed, "A2"));
+    }
+}
+
+public class AuthAuditTests
+{
+    // AuthAudit.Write bugünkü auth-*.log dosyasına geçerli JSON bir satır eklemeli.
+    [Fact]
+    public void Write_AppendsParsableJsonLine()
+    {
+        var ctx = new DefaultHttpContext();
+        var marker = "test-" + Guid.NewGuid().ToString("N");
+        AuthAudit.Write(ctx, marker, "a@b.c", "sebep-x");
+
+        var path = Path.Combine(Directory.GetCurrentDirectory(), "logs", $"auth-{DateTime.UtcNow:yyyy-MM-dd}.log");
+        var last = File.ReadLines(path).Last(l => l.Contains(marker));
+        using var doc = JsonDocument.Parse(last); // parse edilemezse fırlatır → test kırılır
+        Assert.Equal(marker, doc.RootElement.GetProperty("evt").GetString());
+        Assert.Equal("a@b.c", doc.RootElement.GetProperty("email").GetString());
+        Assert.Equal("sebep-x", doc.RootElement.GetProperty("reason").GetString());
     }
 }
 

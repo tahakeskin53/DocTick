@@ -114,7 +114,7 @@ export function Login() {
       const me = await Api.loginGoogle(res.credential);
       setUser(me);
       route(me.role, me.status);
-    } catch { toast('error', 'Giriş başarısız. Tekrar deneyin.'); }
+    } catch (e) { console.error('[auth] Google girişi başarısız:', e); toast('error', 'Giriş başarısız. Tekrar deneyin.'); }
   };
 
   // Sinematik animasyonlar + bölüm senkronu + ilerleme + başa dön.
@@ -200,7 +200,7 @@ export function Login() {
         <section className="dt-ch" id="dt-ch-giris" data-align="left">
           <div className="dt-ch__inner"><div className="dt-panel">
             <p className="dt-eyebrow dt-fade">DocTick · Online Randevu</p>
-            <h1 className="dt-h">{splitWords('Bakıma giden yol, birkaç dokunuş uzağınızda.')}</h1>
+            <h1 className="dt-h">{splitWords('Doktorunuza giden yol, birkaç dokunuş uzağınızda.')}</h1>
             <p className="dt-lead dt-fade">Bölümü seçin, doktorunuzu ve saatinizi ayırın. Onay ve hatırlatma e-postaları otomatik gelir — telefon beklemeden, kuyruk olmadan.</p>
             <div className="dt-cue dt-fade" aria-hidden="true"><span /> Kaydırın</div>
           </div></div>

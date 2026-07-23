@@ -20,7 +20,10 @@ public static class AuthEndpoints
         {
             var clientId = cfg["Google:ClientId"];
             if (string.IsNullOrWhiteSpace(clientId))
+            {
+                AuthAudit.Write(ctx, "config_error", reason: "Google:ClientId missing");
                 return Results.Problem("Google Client ID yapılandırılmamış.", statusCode: 500);
+            }
 
             // ID token'ı Google'da doğrula — imza + audience (bizim ClientId) kontrol edilir.
             GoogleJsonWebSignature.Payload payload;
@@ -29,25 +32,30 @@ public static class AuthEndpoints
                 payload = await GoogleJsonWebSignature.ValidateAsync(req.Credential,
                     new GoogleJsonWebSignature.ValidationSettings { Audience = new[] { clientId } });
             }
-            catch
+            catch (Exception ex)
             {
+                AuthAudit.Write(ctx, "token_invalid", reason: ex.Message);
                 return Results.Unauthorized();
             }
 
             var adminEmail = (cfg["Admin:Email"] ?? "").Trim().ToLowerInvariant();
+            // Admin onayı beklemeden Active gelecek e-postalar (config: Approved:Emails).
+            var approvedEmails = cfg.GetSection("Approved:Emails").Get<string[]>() ?? Array.Empty<string>();
+            var loginEmail = (payload.Email ?? "").Trim().ToLowerInvariant();
+            var isPreApproved = approvedEmails.Any(e => e.Trim().ToLowerInvariant() == loginEmail) && loginEmail.Length > 0;
 
             // Varlığı bul veya oluştur.
             var user = await db.Users.FirstOrDefaultAsync(u => u.GoogleSub == payload.Subject);
             if (user is null)
             {
-                var isAdmin = (payload.Email ?? "").Trim().ToLowerInvariant() == adminEmail && adminEmail.Length > 0;
+                var isAdmin = loginEmail == adminEmail && adminEmail.Length > 0;
                 user = new User
                 {
                     GoogleSub = payload.Subject,
                     Email = payload.Email ?? "",
                     Name = string.IsNullOrWhiteSpace(payload.Name) ? (payload.Email ?? "Kullanıcı") : payload.Name,
                     Role = isAdmin ? UserRole.Admin : UserRole.Patient,
-                    Status = isAdmin ? UserStatus.Active : UserStatus.Pending,
+                    Status = (isAdmin || isPreApproved) ? UserStatus.Active : UserStatus.Pending,
                     CreatedAt = DateTime.UtcNow
                 };
                 db.Users.Add(user);
@@ -57,6 +65,12 @@ public static class AuthEndpoints
             {
                 // İlk kurulumdan sonra admin e-postası eşleşirse yükselt.
                 user.Role = UserRole.Admin;
+                user.Status = UserStatus.Active;
+                await db.SaveChangesAsync();
+            }
+            else if (isPreApproved && user.Status != UserStatus.Active)
+            {
+                // Önceden Pending kaldıysa, onaylı listeye eklenince otomatik Active yap.
                 user.Status = UserStatus.Active;
                 await db.SaveChangesAsync();
             }
@@ -74,6 +88,7 @@ public static class AuthEndpoints
                 new ClaimsPrincipal(identity),
                 new AuthenticationProperties { IsPersistent = true, ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7) });
 
+            AuthAudit.Write(ctx, "login_success", user.Email);
             return Results.Ok(ToDto(user));
         });
 

@@ -18,6 +18,7 @@ backend/bin/
 backend/obj/
 backend/doctick.db
 backend/doctick.db-*
+backend/logs/
 backend.Tests/bin/
 backend.Tests/obj/
 *.user

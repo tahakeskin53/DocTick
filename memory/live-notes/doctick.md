@@ -10,15 +10,19 @@ tier: core
 ## Tracking Config
 - **Type:** project
 - **Started:** 2026-07-21
-- **Last Update:** 2026-07-22
+- **Last Update:** 2026-07-23
 - **Last Accessed:** 2026-07-21 14:59:18
-- **Update Count:** 8
+- **Update Count:** 12
 - **Source:** setup
 
 ## Current State
 (Latest information accumulates here)
 
 ## Recent Activity
+- **2026-07-23** | Giris hatasinin kok nedeni: baslatWINDOWS.bat tarayiciyi backend hazir olmadan aciyordu (Vite --open) -> frontend acik/backend yok -> Giris basarisiz. Duzeltildi: scriptler artik backend saglik kontrolunu (GET localhost:5080/ 200) bekleyip ondan sonra tarayiciyi aciyor. Kullanici sadece baslatWINDOWS.bat calistirmali, elle backend baslatmaya gerek yok. [Source: startup-scripts-fix]
+- **2026-07-23** | Giris hatalari artik backend/logs/auth-*.log JSONL dosyasina yaziliyor (login_success/token_invalid/config_error, sebep+ip+ua). Giris teskisinde ONCE bu dosyaya bak. Frontend Login.tsx artik gercek hatayi console.error ile basiyor (backend kapali gibi network hatalari icin). [Source: auth-audit-feature]
+- **2026-07-23** | Cift randevu (ayni hasta+saat) bugi tespit ve cozum: koruma kodu hazir, lokal doctick.db silindi. Commitleme bekliyor. [Source: bugfix]
+- **2026-07-23** | GitHub repo public yapildi (github.com/tahakeskin53/DockTick), secret taramasi temiz [Source: session]
 - **2026-07-22** | Sinematik landing (/login) + Booking (/randevu-al) redesign tamamlandi; gsap 3.15.0 + lenis 1.3.25 dependency eklendi; ScrollVideo/SmoothScroll/AutoTour infra (components/scroll/) + lib/gsap.ts. Branch feat/landing-booking-redesign commit 3cb5d5e, main den dallandi (ff-merge bekliyor). npm run build yesil (tsc+vite, 164 modul). [Source: session]
 - **2026-07-22** | Teknik teslim dokumantasyon katmani eklendi (Temmuz 2026): docs/ + kok CONTEXT.md + 7 ADR. README docs/ isaretcisi + olgusal duzeltmeler (admin email hotmail, 7 test, 420 haftalik slot). Resend anahtari yer tutucu. ERD/mimari Db.cs+Program.cs birebir dogrulandi. [Source: docs]
 - **2026-07-21** | Hastane online randevu sistemi uygulamasi TAMAMLANDI ve GitHub'a pushlandi. Stack: backend ASP.NET Core 10 minimal API + EF Core/SQLite; frontend Vite 8 + React 19 + TS. Google OAuth (cookie), Resend e-posta (raw HttpClient), 5dk hatirlatma BackgroundService. Tasarim sistemi ('DocTick Design System/') frontend'e tasindi. 6 xunit testi geciyor. Calisma: backend localhost:5080, frontend 5173 (Vite /api proxy). BEKLEYEN: Google Client ID (frontend/.env.local + backend/appsettings.json aynisi) ve Resend API key (backend/appsettings.json) eklenmeli — gercek login/e-posta icin. [Source: agent]
@@ -40,6 +44,14 @@ tier: core
 ---
 
 ## Timeline (Full Record)
+
+- **2026-07-23** | Giris hatasinin kok nedeni: baslatWINDOWS.bat tarayiciyi backend hazir olmadan aciyordu (Vite --open) -> frontend acik/backend yok -> Giris basarisiz. Duzeltildi: scriptler artik backend saglik kontrolunu (GET localhost:5080/ 200) bekleyip ondan sonra tarayiciyi aciyor. Kullanici sadece baslatWINDOWS.bat calistirmali, elle backend baslatmaya gerek yok. [Source: startup-scripts-fix]
+
+- **2026-07-23** | Giris hatalari artik backend/logs/auth-*.log JSONL dosyasina yaziliyor (login_success/token_invalid/config_error, sebep+ip+ua). Giris teskisinde ONCE bu dosyaya bak. Frontend Login.tsx artik gercek hatayi console.error ile basiyor (backend kapali gibi network hatalari icin). [Source: auth-audit-feature]
+
+- **2026-07-23** | Cift randevu (ayni hasta+saat) bugi tespit ve cozum: koruma kodu hazir, lokal doctick.db silindi. Commitleme bekliyor. [Source: bugfix]
+
+- **2026-07-23** | GitHub repo public yapildi (github.com/tahakeskin53/DockTick), secret taramasi temiz [Source: session]
 
 - **2026-07-22** | Sinematik landing (/login) + Booking (/randevu-al) redesign tamamlandi; gsap 3.15.0 + lenis 1.3.25 dependency eklendi; ScrollVideo/SmoothScroll/AutoTour infra (components/scroll/) + lib/gsap.ts. Branch feat/landing-booking-redesign commit 3cb5d5e, main den dallandi (ff-merge bekliyor). npm run build yesil (tsc+vite, 164 modul). [Source: session]
 

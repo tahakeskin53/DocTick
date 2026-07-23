@@ -1,17 +1,28 @@
 #!/bin/bash
 # DocTick — macOS baslatici + otomatik kurulum (YONETICI YETKISI GEREKTIRMEZ)
 #
-# Ilk calistirmada eksik olan her seyi ev dizinine kurar:  Node.js, .NET 10 SDK.
-# Homebrew KULLANMAZ, sudo/administrator GEREKTIRMEZ. Standart hesapta calisir.
-# Sonraki her calistirmada kurulu olanlari ATLAR, sadece sunuculari baslatir
-# ve siteyi tarayicida acar.
+# ============================ NASIL ACILIR ============================
+#  Terminal'e HICBIR SEY yazmana gerek yok. Sadece fare ile:
+#   1) Indirdigin ZIP'i cift tiklayip klasore cikar.
+#   2) Bu dosyaya  (baslatMAC.command)  SAG TIKLA -> "Ac" (Open)
+#      -> cikan guvenlik uyarisinda tekrar "Ac".
+#      * Bu adim SADECE ILK SEFER gerekir (Apple imzasiz uygulama uyarisi).
+#        Sonraki acilislarda dogrudan CIFT TIKLAMAK yeter.
+#   * sudo / yonetici sifresi ISTEMEZ.
+# =====================================================================
 #
-# Calistirma:  Terminal'i ac ->  bash <bu dosyayi surukle-birak> -> Enter
-#              (sudo YAZMA. Sadece bash.)
+# Ne yapar: eksik olani (Node.js + .NET 10 SDK) ev dizinine yoneticisiz kurar,
+# backend + frontend'i baslatir, backend HAZIR OLUNCA tarayiciyi acar.
+# Kurulu olani atlar; ikinci calistirmada sadece sunuculari baslatir.
 
 set -e
 cd "$(dirname "$0")" || exit 1
 ROOT="$(pwd)"
+
+# Internetten inen dosyalara macOS "karantina" bayragi koyar; bu, ic dosyalarin
+# tekrar tekrar guvenlik uyarisi vermesine yol acar. Proje klasorunden (bu dosya
+# dahil) karantinayi kaldiriyoruz -> boylece BUNDAN SONRA duz CIFT TIKLA yeter.
+xattr -dr com.apple.quarantine "$ROOT" 2>/dev/null || true
 
 # --- Kurulum dizinleri (hepsi ev dizininde, sudo gerektirmez) ------------------
 DOTNET_DIR="$HOME/.dotnet"
@@ -65,13 +76,32 @@ echo "Kurulum tamam. Sunucular baslatiliyor..."
 # PATH'i acikca gecirdik ki yeni pencereler node/dotnet'i mutlaka bulsun.
 ENV_EXPORT="export DOTNET_ROOT='$DOTNET_DIR'; export PATH='$NODE_DIR/bin:$DOTNET_DIR:\$PATH';"
 
-# Backend (API + DB) — http://localhost:5080
-osascript -e "tell application \"Terminal\" to do script \"$ENV_EXPORT cd '$ROOT/backend' && dotnet run --urls http://localhost:5080\""
+# Backend (API + DB) — http://localhost:5080  (zaten ayaktaysa yeniden baslatma)
+if curl -fsS http://localhost:5080/ >/dev/null 2>&1; then
+  echo "Backend zaten calisiyor (5080), yeniden baslatilmadi."
+else
+  osascript -e "tell application \"Terminal\" to do script \"$ENV_EXPORT cd '$ROOT/backend' && dotnet run --urls http://localhost:5080\""
+fi
 
-# Frontend (Vite) — http://localhost:5173 , tarayiciyi otomatik acar
-osascript -e "tell application \"Terminal\" to do script \"$ENV_EXPORT cd '$ROOT/frontend' && npm run dev -- --open\""
+# Frontend (Vite) — http://localhost:5173  (tarayiciyi BIZ acacagiz, backend hazir olunca)
+if curl -fsS http://localhost:5173/ >/dev/null 2>&1; then
+  echo "Frontend zaten calisiyor (5173)."
+else
+  osascript -e "tell application \"Terminal\" to do script \"$ENV_EXPORT cd '$ROOT/frontend' && npm run dev\""
+fi
+
+# Backend GERCEKTEN yanit verene kadar bekle, tarayiciyi ondan sonra ac.
+# Boylece "arka uc yok -> Giris basarisiz" durumu olusamaz (ilk derleme uzun surebilir).
+printf "Backend hazir olmasi bekleniyor"
+until curl -fsS http://localhost:5080/ >/dev/null 2>&1; do printf "."; sleep 2; done
+echo " -> hazir (5080)."
+
+# Frontend hazir olana kadar bekle
+until curl -fsS http://localhost:5173/ >/dev/null 2>&1; do sleep 1; done
+
+echo "Tarayici aciliyor: http://localhost:5173"
+open "http://localhost:5173"
 
 echo
-echo "Iki Terminal penceresi acildi: Backend (5080) + Frontend (5173)."
-echo "Tarayici otomatik http://localhost:5173 acar. Acilmazsa elle git."
-echo "Durdurmak icin: her iki pencerede Ctrl+C ya da pencereyi kapat."
+echo "Backend (5080) + Frontend (5173) calisiyor."
+echo "Durdurmak icin: her iki Terminal penceresinde Ctrl+C ya da pencereyi kapat."
