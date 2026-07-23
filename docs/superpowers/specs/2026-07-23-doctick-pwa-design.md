@@ -55,11 +55,12 @@ Kaynak dokümantasyon: [docs.pwabuilder.com](https://docs.pwabuilder.com/) — P
 - `<meta name="theme-color">` eklenir.
 - `apple-touch-icon` (180×180 PNG) eklenir — iOS Safari "Ana ekrana ekle" için.
 - Standalone modda çentikli ekranlar için safe-area (`env(safe-area-inset-*)`) kontrolü; gerekirse yalnızca layout kapsayıcılarına padding.
+- **Üretim düzeltmesi:** README "dist'i `backend/wwwroot`'a kopyala" dese de `Program.cs`'te statik dosya servisi henüz yok. Plana küçük bir görev eklendi: `UseDefaultFiles` + `UseStaticFiles` + SPA fallback + `sw.js`/`index.html`/`manifest.webmanifest` için `Cache-Control: no-cache`.
 - Android/Chrome'da kurulu PWA aynı tarayıcı profilini paylaşır → mevcut cookie (`SameSite=Lax`, tek origin) ve Google OAuth popup akışı çalışır; uçtan uca test senaryosuna eklenir (§8).
 
 ## 8. Doğrulama (ponytail çalışır-kontrolü dahil)
 
-1. **Lighthouse PWA denetimi** (localhost'ta geçerli — SW için HTTPS muafiyeti) + Edge/Chrome DevTools → Application sekmesi (manifest, SW, cache içeriği).
+1. **Chrome/Edge DevTools → Application sekmesi** ile kurulabilirlik denetimi: Manifest bölümündeki hata/uyarılar, Service Worker durumu, Cache Storage içeriği. (Not: Lighthouse v12+ ayrı PWA kategorisini kaldırdı; DevTools Application paneli güncel doğrulama yolu. Localhost SW için güvenli bağlam sayılır, HTTPS gerekmez.)
 2. **Kurulum testi:** masaüstü Edge/Chrome "Uygulamayı yükle"; Android'de `chrome://inspect` port yönlendirme ile gerçek cihazda kurulum.
 3. **Uçtan uca:** kurulu PWA'dan Google girişi → randevu al → uçak modu → uygulamayı aç → kabuk açılır + Randevularım son haliyle görünür + banner çıkar.
 4. **Otomatik kontrol (tek script):** build sonrası `dist/` içindeki manifest'i assert eden küçük Node script'i (`name`, `short_name` ≥ 3, 512 ikon var, maskable ayrı girdi, `start_url`) — kırılırsa build pipeline'da yakalanır.
