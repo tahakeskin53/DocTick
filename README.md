@@ -17,7 +17,9 @@ Detaylı teknik el kitabı (mimari diyagramları, ERD, API, auth/akış sequence
 
 ### 1. Google OAuth Client ID
 Google Cloud Console → APIs & Services → Credentials → **OAuth 2.0 Client ID** (Web application).
-- Authorized JavaScript origins: `http://localhost:5173`
+- **Authorized JavaScript origins** (ikisi de — akışa göre farklı origin servis eder):
+  - `http://localhost:5173` → dev (`baslatWINDOWS.bat`: Vite tek başına)
+  - `http://localhost:5080` → **PWA / tek-origin** (`DocTick_App.bat`: SPA + API aynı origin'den). Bu eklenmezse kurulu uygulamada Google "yetkilendirme hatası" verir.
 - **Aynı Client ID'yi iki yere** koyun (backend audience doğrulaması için birebir aynı olmalı):
   - `frontend/.env.local` → `VITE_GOOGLE_CLIENT_ID=<client_id>`
   - `backend/appsettings.json` → `"Google": { "ClientId": "<client_id>" }`
