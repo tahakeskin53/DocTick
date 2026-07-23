@@ -8,10 +8,12 @@ import { Dialog } from '../../components/feedback/Dialog.jsx';
 import { Rating } from '../../components/display/Rating.jsx';
 import { Api, type Appointment } from '../../api/client';
 import { useToast } from '../../components/ToastProvider';
+import { useOnline } from '../../lib/useOnline';
 
 const LABELS: Record<string, string> = { confirmed: 'Onaylandı', cancelled: 'İptal edildi', done: 'Tamamlandı' };
 
 export function Appointments() {
+  const online = useOnline();
   const qc = useQueryClient();
   const { toast } = useToast();
   const { data: appts } = useQuery({ queryKey: ['appts'], queryFn: Api.myAppointments });
@@ -42,10 +44,10 @@ export function Appointments() {
         </div>
       </div>
       <Badge status={a.status}>{LABELS[a.status]}</Badge>
-      {a.status === 'confirmed' && <Button variant="danger" size="sm" onClick={() => setAsk(a)}>İptal et</Button>}
+      {a.status === 'confirmed' && <Button variant="danger" size="sm" disabled={!online} onClick={() => setAsk(a)}>İptal et</Button>}
       {a.status === 'done' && (a.rating
         ? <Rating value={a.rating} readOnly size={15} />
-        : <Button variant="secondary" size="sm" onClick={() => { setRate(a); setStars(0); }}>Değerlendir</Button>)}
+        : <Button variant="secondary" size="sm" disabled={!online} onClick={() => { setRate(a); setStars(0); }}>Değerlendir</Button>)}
     </div>
   );
 
@@ -65,7 +67,7 @@ export function Appointments() {
       <Dialog open={!!ask} title="Randevuyu iptal et" onClose={() => setAsk(null)}
         footer={<>
           <Button variant="secondary" onClick={() => setAsk(null)}>Vazgeç</Button>
-          <Button variant="danger" disabled={cancel.isPending} onClick={() => { if (ask) { cancel.mutate(ask.id); setAsk(null); } }}>İptal et</Button>
+          <Button variant="danger" disabled={cancel.isPending || !online} onClick={() => { if (ask) { cancel.mutate(ask.id); setAsk(null); } }}>İptal et</Button>
         </>}>
         {ask && <span>{ask.dateLabel}, <span style={{ font: 'var(--text-time)' }}>{ask.time}</span> — {ask.doctorName} randevunuz iptal edilecek. İptal bilgisi e-posta ile gönderilir.</span>}
       </Dialog>
@@ -73,7 +75,7 @@ export function Appointments() {
       <Dialog open={!!rate} title="Hizmeti değerlendirin" onClose={() => setRate(null)}
         footer={<>
           <Button variant="secondary" onClick={() => setRate(null)}>Vazgeç</Button>
-          <Button disabled={!stars || rateM.isPending} onClick={() => { if (rate) { rateM.mutate({ id: rate.id, s: stars }); setRate(null); } }}>Gönder</Button>
+          <Button disabled={!stars || rateM.isPending || !online} onClick={() => { if (rate) { rateM.mutate({ id: rate.id, s: stars }); setRate(null); } }}>Gönder</Button>
         </>}>
         {rate && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
