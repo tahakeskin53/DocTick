@@ -48,7 +48,7 @@ AI agent (Claude Code) bir görev bitiminde öğrendiklerini buraya yazar; bir s
 
 Eğer jüri yalnızca **ürünü** değerlendirecekse, bu araç katmanını teslimden ayırmak temiz bir paket verir:
 
-- Tut: `backend/`, `backend.Tests/`, `frontend/`, `docs/`, `CONTEXT.md`, `baslat.bat`, `.gitignore`, `README.md`.
+- Tut: `backend/`, `backend.Tests/`, `frontend/`, `docs/`, `CONTEXT.md`, `baslatWINDOWS.bat`, `baslatMAC.command`, `.gitignore`, `README.md`.
 - Ayır (opsiyonel): `.claude/`, `.agents/`, `data/`, `skills/`, `memory/`, `.venv/`, `scripts/`, `CLAUDE.md`, `*.md` kılavuzlar.
 
 Bu dökümantasyon (bu belge dahil) ürünün parçasıdır ve teslimde kalır.

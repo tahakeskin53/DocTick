@@ -17,7 +17,7 @@ npm install        # ilk kurulum
 npm run dev
 ```
 
-Windows için tek tıkla: repo kökündeki `baslat.bat`. Çalışma öncesi gerekli anahtarlar için → [`09-altyapi-calisma.md`](09-altyapi-calisma.md).
+Tek tıkla başlatma: Windows'ta `baslatWINDOWS.bat`, macOS'ta `baslatMAC.command` (repo kökünde). Çalışma öncesi gerekli anahtarlar için → [`09-altyapi-calisma.md`](09-altyapi-calisma.md).
 
 ## Döküman indeksi
 
@@ -31,7 +31,7 @@ Windows için tek tıkla: repo kökündeki `baslat.bat`. Çalışma öncesi gere
 | 06 | [Kimlik Doğrulama & Yetki](06-kimlik-dogrulama.md) | **Google OAuth sequence**, cookie, ActiveGuard |
 | 07 | [Randevu Akışı](07-randevu-akisi.md) | **Randevu oluşturma sequence**, 409/çift-rezervasyon |
 | 08 | [Frontend](08-frontend.md) | Rota haritası, guard'lar, sayfalar, tasarım sistemi |
-| 09 | [Altyapı & Çalışma](09-altyapi-calisma.md) | Portlar, proxy, `baslat.bat`, yapılandırma, deployment |
+| 09 | [Altyapı & Çalışma](09-altyapi-calisma.md) | Portlar, proxy, başlatıcılar (`baslatWINDOWS.bat` / `baslatMAC.command`), yapılandırma, deployment |
 | 10 | [Testler](10-testler.md) | Senaryolar, in-memory SQLite gerekçesi |
 | 11 | [Geliştirme Araçları](11-gelistirme-araclari.md) | Claude Code + memkraft + skills katmanı |
 | — | [Ek: Güvenlik Notları](ekler/guvenlik-notlari.md) | Gizli anahtar rotasyonu, prod-ready maddeleri |

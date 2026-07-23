@@ -23,14 +23,18 @@ flowchart LR
 
 > **5173 zorunludur**: Google OAuth yetkili JS kaynağı yalnız `http://localhost:5173`'tür. Port kayarsa Google giriş çalışmaz (`vite.config.ts:9`).
 
-## Tek tıkla başlatma — `baslat.bat`
+## Tek tıkla başlatma — `baslatWINDOWS.bat` / `baslatMAC.command`
 
-Repo kökünde. İki ayrı komut penceresi açar (UTF-8 kod sayfası `chcp 65001` ile), frontend tarayıcıyı otomatik açar:
+Repo kökünde. İki ayrı komut penceresi açar, frontend tarayıcıyı otomatik açar.
+
+**Windows** (`baslatWINDOWS.bat`, UTF-8 kod sayfası `chcp 65001` ile):
 
 ```bat
 start "DocTick Backend (5080)" cmd /k "cd /d backend && dotnet run --urls http://localhost:5080"
 start "DocTick Frontend (5173)" cmd /k "cd /d frontend && npm run dev -- --open"
 ```
+
+**macOS** (`baslatMAC.command`, `osascript` ile iki Terminal penceresi açar). İlk kullanımdan önce bir kez `chmod +x baslatMAC.command`.
 
 Durdurmak için pencereleri kapatmak (veya `Ctrl+C`) yeterli.
 

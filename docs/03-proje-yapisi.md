@@ -60,7 +60,8 @@ DocTick/
 │   └── adr/                            mimari karar kayıtları
 │
 ├── 🟦 CONTEXT.md                       ⭐ alan sözlüğü (ubiquitous language)
-├── 🟦 baslat.bat                        tek tıkla backend + frontend başlatma
+├── 🟦 baslatWINDOWS.bat                 tek tıkla backend + frontend başlatma (Windows)
+├── 🍎 baslatMAC.command                 tek tıkla backend + frontend başlatma (macOS)
 ├── 🟦 admin.url, kullanici.url          tarayıcı kısayolları
 │
 ├── 🛠️ CLAUDE.md                        Claude Code proje rehberi (ponytail kuralları + notlar)
