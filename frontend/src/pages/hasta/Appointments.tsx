@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card } from '../../components/display/Card.jsx';
 import { Button } from '../../components/forms/Button.jsx';
@@ -17,7 +18,10 @@ export function Appointments() {
   const qc = useQueryClient();
   const { toast } = useToast();
   const { data: appts } = useQuery({ queryKey: ['appts'], queryFn: Api.myAppointments });
-  const [tab, setTab] = useState('yaklasan');
+  // Initial tab URL'den (?tab=gecmis|iptal) — "Geçmişe git" butonu gibi derin linkler için.
+  const [sp] = useSearchParams();
+  const t0 = sp.get('tab');
+  const [tab, setTab] = useState(t0 === 'gecmis' || t0 === 'iptal' ? t0 : 'yaklasan');
   const [ask, setAsk] = useState<Appointment | null>(null);
   const [rate, setRate] = useState<Appointment | null>(null);
   const [stars, setStars] = useState(0);

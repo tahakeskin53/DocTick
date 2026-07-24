@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router';
 import { Card } from '../../components/display/Card.jsx';
 import { Button } from '../../components/forms/Button.jsx';
 import { Badge } from '../../components/display/Badge.jsx';
+import { Rating } from '../../components/display/Rating.jsx';
 import { Icon } from '../../components/display/Icon.jsx';
 import { useAuth } from '../../auth/Auth';
 import { Api, type Appointment } from '../../api/client';
@@ -15,6 +16,9 @@ export function Home() {
   const firstName = (user?.name || 'Misafir').split(' ')[0];
   const next = (appts || []).filter(a => a.status === 'confirmed')
     .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time))[0] as Appointment | undefined;
+  // En son tamamlanan randevu — Değerlendirme kartında sergilenir.
+  const lastDone = (appts || []).filter(a => a.status === 'done')
+    .sort((a, b) => (b.date + b.time).localeCompare(a.date + a.time))[0] as Appointment | undefined;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--stack-gap)' }}>
@@ -57,7 +61,14 @@ export function Home() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'flex-start' }}>
             <span style={{ color: 'var(--brand)' }}><Icon name="bell" size={22} /></span>
             <b style={{ font: 'var(--text-h3)' }}>Hatırlatmalar</b>
-            <span style={{ font: 'var(--text-body-sm)', color: 'var(--text-secondary)' }}>Randevunuzdan 24 saat önce e-posta alırsınız.</span>
+            {next ? (
+              <>
+                <span style={{ font: 'var(--text-time)', color: 'var(--brand)' }}>{next.time}</span>
+                <span style={{ font: 'var(--text-body-sm)', color: 'var(--text-secondary)' }}>{next.doctorName} · {next.dateLabel}</span>
+              </>
+            ) : (
+              <span style={{ font: 'var(--text-body-sm)', color: 'var(--text-secondary)' }}>Randevunuzdan 24 saat önce e-posta alırsınız.</span>
+            )}
             <Button variant="ghost" size="sm" onClick={() => nav('/randevularim')}>Randevularım</Button>
           </div>
         </Card>
@@ -65,8 +76,17 @@ export function Home() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'flex-start' }}>
             <span style={{ color: 'var(--brand)' }}><Icon name="star" size={22} /></span>
             <b style={{ font: 'var(--text-h3)' }}>Değerlendirme</b>
-            <span style={{ font: 'var(--text-body-sm)', color: 'var(--text-secondary)' }}>Geçmiş randevularınız için hizmeti puanlayın.</span>
-            <Button variant="ghost" size="sm" onClick={() => nav('/randevularim')}>Geçmişe git</Button>
+            {lastDone ? (
+              <>
+                <span style={{ font: 'var(--text-body-sm)', color: 'var(--text-secondary)' }}>{lastDone.doctorName} · {lastDone.dateLabel} · <span style={{ font: 'var(--text-time)' }}>{lastDone.time}</span></span>
+                {lastDone.rating
+                  ? <Rating value={lastDone.rating} readOnly size={14} />
+                  : <span style={{ font: 'var(--text-caption)', color: 'var(--text-muted)' }}>Henüz değerlendirilmedi</span>}
+              </>
+            ) : (
+              <span style={{ font: 'var(--text-body-sm)', color: 'var(--text-secondary)' }}>Geçmiş randevularınız için hizmeti puanlayın.</span>
+            )}
+            <Button variant="ghost" size="sm" onClick={() => nav('/randevularim?tab=gecmis')}>Geçmişe git</Button>
           </div>
         </Card>
       </div>
