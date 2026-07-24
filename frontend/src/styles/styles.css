@@ -16,6 +16,11 @@ body { min-height: 100vh; }
 /* flex:1 verilen alan (textarea) kalan yüksekliği doldurur. */
 .dt-card[data-fill] .dt-field textarea { flex: 1; min-height: 120px; }
 
+/* İletişim: form | harita iki kolon zorunlu (1fr 1fr); yalnız dar telefonda alt alta.
+   auto-fit + minmax dar pencerede tek kolona çöküyordu, bu yüzden sabit iki kolon. */
+.iletisim-split { display: grid; grid-template-columns: 1fr 1fr; gap: var(--stack-gap); align-items: stretch; }
+@media (max-width: 480px) { .iletisim-split { grid-template-columns: 1fr; } }
+
 /* Yatay taşmayı engelle (clip, sticky bozmaz). */
 body { overflow-x: clip; }
 

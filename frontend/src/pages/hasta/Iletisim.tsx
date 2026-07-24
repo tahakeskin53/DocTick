@@ -6,17 +6,7 @@ import { Input, Textarea } from '../../components/forms/Input.jsx';
 import { Icon } from '../../components/display/Icon.jsx';
 import { Api } from '../../api/client';
 import { useToast } from '../../components/ToastProvider';
-
-// Hastane konumu — tek yerden yönetilir. Gerçek adrese göre güncellenebilir.
-const HOSPITAL = {
-  name: 'DocTick Hastanesi',
-  address: 'Kızılay Mah. Atatürk Bulvarı No:1, Çankaya / Ankara',
-  phone: '+90 (312) 000 00 00',
-  email: 'iletisim@doctick.example',
-  hours: 'Hafta içi 09:00 – 17:00',
-  lat: 39.92077,
-  lng: 32.85411,
-};
+import { HOSPITAL } from '../../lib/hospital';
 
 // ponytail: Google Maps JS API yerine anahtar gerektirmeyen embed iframe — aynı harita, sıfır maliyet.
 const mapSrc = `https://www.google.com/maps?q=${HOSPITAL.lat},${HOSPITAL.lng}&hl=tr&z=16&output=embed`;
@@ -65,9 +55,19 @@ export function Iletisim() {
         </p>
       </div>
 
-      {/* alignItems verilmez → stretch: iki kolon aynı yükseklikte biter. */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: 'var(--stack-gap)' }}>
-        {/* Sol kolon: form — kartı dikeyde doldurur, textarea kalan alanı kaplar */}
+      {/* İletişim bilgileri — tam genişlik, üstte. */}
+      <Card title={HOSPITAL.name}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
+          {infoRow('map-pin', 'Adres', HOSPITAL.address)}
+          {infoRow('clock', 'Çalışma saatleri', HOSPITAL.hours)}
+          {infoRow('phone', 'Telefon', HOSPITAL.phone, `tel:${HOSPITAL.phone.replace(/[^+\d]/g, '')}`)}
+          {infoRow('mail', 'E-posta', HOSPITAL.email, `mailto:${HOSPITAL.email}`)}
+        </div>
+      </Card>
+
+      {/* Form ve harita yan yana — .iletisim-split iki kolonu zorunlu kılar. */}
+      <div className="iletisim-split">
+        {/* Sol kolon: form — data-fill kartı dikeyde doldurur, textarea kalan alanı kaplar */}
         <Card title="Bize yazın" data-fill="">
           {sent ? (
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', gap: 12, padding: '26px 8px' }}>
@@ -99,39 +99,28 @@ export function Iletisim() {
           )}
         </Card>
 
-        {/* Sağ kolon: bilgiler + harita. Harita kartı kalan yüksekliği doldurur → iki kolon aynı hizada biter. */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--stack-gap)', minHeight: 0 }}>
-          <Card title={HOSPITAL.name}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
-              {infoRow('map-pin', 'Adres', HOSPITAL.address)}
-              {infoRow('clock', 'Çalışma saatleri', HOSPITAL.hours)}
-              {infoRow('phone', 'Telefon', HOSPITAL.phone, `tel:${HOSPITAL.phone.replace(/[^+\d]/g, '')}`)}
-              {infoRow('mail', 'E-posta', HOSPITAL.email, `mailto:${HOSPITAL.email}`)}
-            </div>
-          </Card>
-
-          <Card padded={false} data-fill="" style={{ flex: 1, minHeight: 320 }}>
-            <iframe
-              title="Hastane konumu — Google Maps"
-              src={mapSrc}
-              width="100%"
-              style={{ border: 0, display: 'block', flex: 1, minHeight: 240 }}
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              allowFullScreen
-            />
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '12px 16px', borderTop: '1px solid var(--border-soft)', flex: 'none' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 8, font: 'var(--text-caption)', color: 'var(--text-secondary)', minWidth: 0 }}>
-                <Icon name="map-pin" size={14} style={{ flex: 'none', color: 'var(--brand)' }} />
-                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{HOSPITAL.address}</span>
-              </span>
-              <a href={directionsUrl} target="_blank" rel="noreferrer"
-                style={{ font: 'var(--text-label)', color: 'var(--text-link)', textDecoration: 'none', whiteSpace: 'nowrap' }}>
-                Yol tarifi al →
-              </a>
-            </div>
-          </Card>
-        </div>
+        {/* Sağ kolon: harita — formun hizasında, eşit yükseklikte */}
+        <Card padded={false} data-fill="" style={{ minHeight: 320 }}>
+          <iframe
+            title="Hastane konumu — Google Maps"
+            src={mapSrc}
+            width="100%"
+            style={{ border: 0, display: 'block', flex: 1, minHeight: 240 }}
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            allowFullScreen
+          />
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '12px 16px', borderTop: '1px solid var(--border-soft)', flex: 'none' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 8, font: 'var(--text-caption)', color: 'var(--text-secondary)', minWidth: 0 }}>
+              <Icon name="map-pin" size={14} style={{ flex: 'none', color: 'var(--brand)' }} />
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{HOSPITAL.address}</span>
+            </span>
+            <a href={directionsUrl} target="_blank" rel="noreferrer"
+              style={{ font: 'var(--text-label)', color: 'var(--text-link)', textDecoration: 'none', whiteSpace: 'nowrap' }}>
+              Yol tarifi al →
+            </a>
+          </div>
+        </Card>
       </div>
     </div>
   );

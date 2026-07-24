@@ -2,6 +2,7 @@ import { Outlet, NavLink, useNavigate } from 'react-router';
 import { Icon } from '../../components/display/Icon.jsx';
 import { Logo } from '../../components/display/Logo.jsx';
 import { IconButton } from '../../components/forms/IconButton.jsx';
+import { Footer } from '../../components/display/Footer.jsx';
 import { useAuth } from '../../auth/Auth';
 
 export function HastaLayout() {
@@ -26,7 +27,7 @@ export function HastaLayout() {
   const doLogout = async () => { await logout(); nav('/login', { replace: true }); };
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--surface-page)' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--surface-page)' }}>
       <header style={{ position: 'sticky', top: 0, zIndex: 20, background: 'var(--surface-brand)', color: '#fff' }}>
         <div style={{ maxWidth: 'var(--page-max)', margin: '0 auto', padding: '0 var(--page-pad)', height: 58, display: 'flex', alignItems: 'center', gap: 24 }}>
           <Logo size={30} onDark onClick={() => nav('/')} />
@@ -45,9 +46,10 @@ export function HastaLayout() {
           </span>
         </div>
       </header>
-      <main style={{ maxWidth: 'var(--page-max)', margin: '0 auto', padding: '0 var(--page-pad) 56px' }}>
+      <main style={{ flex: 1, maxWidth: 'var(--page-max)', margin: '0 auto', padding: '0 var(--page-pad) 56px' }}>
         <Outlet />
       </main>
+      <Footer />
     </div>
   );
 }
