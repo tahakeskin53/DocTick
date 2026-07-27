@@ -26,8 +26,9 @@ Google Cloud Console → APIs & Services → Credentials → **OAuth 2.0 Client 
 > Ücretsiz katta doğrulanmış domain yoksa Resend yalnızca **hesap sahibinin e-postasına** gönderir.
 > Anahtar yoksa uygulama yine çalışır; e-postalar sadece gönderilmez (loglanır).
 
-Admin e-postası `backend/appsettings.json` → `Admin:Email` = `tahakeskin5306@gmail.com`.
-Bu adresle ilk Google girişi otomatik **Admin + Active** olur.
+Admin e-postası `backend/appsettings.json` → `Admin:Email` alanına yazılır (varsayılan boş).
+Kendi Google hesabının adresini gir; o adresle ilk giriş otomatik **Admin + Active** olur.
+Alan boş bırakılırsa hiç kimse admin'e yükseltilmez.
 
 ## Çalıştırma (iki süreç)
 
