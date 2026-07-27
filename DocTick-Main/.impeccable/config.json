@@ -1,0 +1,10 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [
+      ".venv/**",
+      ".claude/skills/impeccable/scripts/**"
+    ],
+    "ignoreValues": []
+  }
+}

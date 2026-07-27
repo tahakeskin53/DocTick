@@ -1,0 +1,31 @@
+@import url('tokens/fonts.css');
+@import url('tokens/colors.css');
+@import url('tokens/typography.css');
+@import url('tokens/spacing.css');
+@import url('tokens/effects.css');
+
+/* Global reset — tarayıcı varsayılan body margin'i etrafta beyaz boşluk bırakıyordu. */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body { min-height: 100vh; }
+#root { min-height: 100vh; }
+
+/* Card'ı dikeyde dolduran varyant: eşit yükseklikli kolonlarda içerik kalan alanı kaplar. */
+.dt-card[data-fill] { display: flex; flex-direction: column; }
+.dt-card[data-fill] > div { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+/* flex:1 verilen alan (textarea) kalan yüksekliği doldurur. */
+.dt-card[data-fill] .dt-field textarea { flex: 1; min-height: 120px; }
+
+/* İletişim: form | harita iki kolon zorunlu (1fr 1fr); yalnız dar telefonda alt alta.
+   auto-fit + minmax dar pencerede tek kolona çöküyordu, bu yüzden sabit iki kolon. */
+.iletisim-split { display: grid; grid-template-columns: 1fr 1fr; gap: var(--stack-gap); align-items: stretch; }
+@media (max-width: 480px) { .iletisim-split { grid-template-columns: 1fr; } }
+
+/* Yatay taşmayı engelle (clip, sticky bozmaz). */
+body { overflow-x: clip; }
+
+/* Lenis önerilen temel stiller (global yumuşak scroll). */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }

@@ -1,0 +1,7 @@
+# Kabuk/macOS baslaticilari DAIMA LF olmali; CRLF olursa macOS
+# "bad interpreter: /bin/bash^M" verir ve script hic calismaz.
+*.command text eol=lf
+*.sh      text eol=lf
+
+# Windows batch CRLF ister
+*.bat     text eol=crlf
