@@ -16,7 +16,8 @@ export interface Appointment {
   date: string; dateLabel: string; time: string; status: 'confirmed' | 'done' | 'cancelled'; rating: number | null;
 }
 export interface AdminAppt {
-  id: number; code: string; time: string; doctorName: string; departmentName: string;
+  id: number; code: string; date: string; time: string; doctorId: number;
+  doctorName: string; departmentName: string;
   userEmail: string; status: 'confirmed' | 'cancelled';
 }
 export interface Overview {

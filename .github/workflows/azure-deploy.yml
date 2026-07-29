@@ -1,0 +1,65 @@
+# DocTick → Azure App Service (doctick.me)
+#
+# Akış: frontend build → backend/wwwroot (SPA, backend içinde servis edilir) → dotnet publish → zip deploy.
+# Tek origin: CORS/cookie derdi yok (bkz. docs/09, docs/12).
+#
+# GEREKLİ GitHub ayarları (repo → Settings):
+#   - Secret  AZURE_WEBAPP_PUBLISH_PROFILE  ← `az webapp deployment list-publishing-profiles -g doctick-rg -n doctick --xml` çıktısının TAMAMI
+# VITE_GOOGLE_CLIENT_ID gerekmez: frontend/.env commit'li (değer public OAuth Web Client ID).
+#
+# .NET 10 runtime App Service'te yoksa (az webapp list-runtimes --os linux ile teyit et):
+# dotnet publish satırına  -r linux-x64 --self-contained true  ekle → runtime uygulamayla birlikte gider.
+name: Deploy to Azure
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Aynı branch için eski deploy'u iptal et (yarım kalan eşzamanlı çalışmayı önler).
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Build SPA
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+
+      # SPA derlemesini backend'in servis ettiği wwwroot'a taşı (gitignored; Program.cs UseDefaultFiles buradan okur).
+      - name: Stage SPA into backend/wwwroot
+        run: |
+          rm -rf backend/wwwroot
+          cp -r frontend/dist backend/wwwroot
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.x'
+
+      - name: Publish backend
+        run: dotnet publish backend/DocTick.Api.csproj -c Release -o publish
+
+      - name: Deploy to Azure App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: doctick
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: publish

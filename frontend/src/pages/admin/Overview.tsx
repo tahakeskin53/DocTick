@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Card } from '../../components/display/Card.jsx';
 import { Badge } from '../../components/display/Badge.jsx';
 import { Api } from '../../api/client';
+import { trDate } from './periodRange';
 
 export function Overview() {
   const { data } = useQuery({ queryKey: ['overview'], queryFn: Api.adminOverview });
@@ -23,9 +24,10 @@ export function Overview() {
         {stat(data?.activeDoctors ?? '–', 'Aktif doktor')}
         {stat(data?.pendingUsers ?? '–', 'Onay bekleyen kullanıcı')}
       </div>
-      <Card title="Bugünün randevuları" padded={false}>
+      <Card title="Yaklaşan randevular" padded={false}>
         {(data?.today || []).length ? data!.today.map(r => (
           <div key={r.id} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '12px 20px', borderBottom: '1px solid var(--border-soft)' }}>
+            <span style={{ font: 'var(--text-body-sm)', color: 'var(--text-secondary)', width: 110 }}>{trDate(r.date)}</span>
             <span style={{ font: 'var(--text-time)', color: 'var(--brand)', width: 50 }}>{r.time}</span>
             <span style={{ flex: 1 }}>
               <b style={{ font: 'var(--text-h3)', display: 'block' }}>{r.doctorName}</b>
@@ -33,7 +35,7 @@ export function Overview() {
             </span>
             <Badge status={r.status}>{r.status === 'confirmed' ? 'Onaylandı' : 'İptal edildi'}</Badge>
           </div>
-        )) : <div style={{ padding: 26, textAlign: 'center', color: 'var(--text-muted)', font: 'var(--text-body-sm)' }}>Bugün için randevu yok.</div>}
+        )) : <div style={{ padding: 26, textAlign: 'center', color: 'var(--text-muted)', font: 'var(--text-body-sm)' }}>Yaklaşan randevu yok.</div>}
       </Card>
     </div>
   );

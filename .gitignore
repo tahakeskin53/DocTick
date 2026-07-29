@@ -74,3 +74,19 @@ memory/graph.db
 
 # Lokal OAuth kimlik dosyasi - asla commitleme
 DockTick Google auth client id.txt
+
+# Azure deploy kimlik bilgisi (deploy/azure-bootstrap.sh üretir; GitHub secret'a koyup sil)
+doctick-publish-profile.xml
+
+# Deploy build ciktilari - workflow uretir, repoya girmez
+publish/
+publish-*/
+publish*.zip
+backend/wwwroot/
+
+# Gecici / arac ciktilari
+.scratch/
+repomix-output.txt
+deploy-resp.txt
+dep-latest.json
+nul

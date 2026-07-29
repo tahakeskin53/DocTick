@@ -1,0 +1,2 @@
+{"ts": "2026-07-29T11:37:09.229523", "event": "Admin panele doktor bazli Randevular sekmesi eklendi (gun/hafta/ay donem filtresi); Genel bakis karti bugun-only yerine yaklasan randevulara cevrildi", "tags": ["admin", "randevu", "frontend", "backend"], "importance": "high", "entity": "", "task": "", "decision": ""}
+{"ts": "2026-07-29T11:41:19.813551", "event": "giris->ana sayfa performans plani yazildi: docs/superpowers/plans/2026-07-29-login-to-home-perf.md (6 gorev)", "tags": ["performance", "plan"], "importance": "high", "entity": "", "task": "", "decision": ""}

@@ -9,6 +9,7 @@ import { Appointments } from './pages/hasta/Appointments';
 import { Iletisim } from './pages/hasta/Iletisim';
 import { AdminLayout } from './pages/admin/AdminLayout';
 import { Overview } from './pages/admin/Overview';
+import { Appointments as AdminAppointments } from './pages/admin/Appointments';
 import { Departments } from './pages/admin/Departments';
 import { Doctors } from './pages/admin/Doctors';
 import { Schedule } from './pages/admin/Schedule';
@@ -69,6 +70,7 @@ export const router = createBrowserRouter([
         element: <AdminLayout />,
         children: [
           { index: true, element: <Overview /> },
+          { path: 'randevular', element: <AdminAppointments /> },
           { path: 'bolumler', element: <Departments /> },
           { path: 'doktorlar', element: <Doctors /> },
           { path: 'saatler', element: <Schedule /> },

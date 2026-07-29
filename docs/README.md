@@ -34,6 +34,7 @@ Tek tıkla başlatma: Windows'ta `baslatWINDOWS.bat`, macOS'ta `baslatMAC.comman
 | 09 | [Altyapı & Çalışma](09-altyapi-calisma.md) | Portlar, proxy, başlatıcılar (`baslatWINDOWS.bat` / `baslatMAC.command`), yapılandırma, deployment |
 | 10 | [Testler](10-testler.md) | Senaryolar, in-memory SQLite gerekçesi |
 | 11 | [Geliştirme Araçları](11-gelistirme-araclari.md) | Claude Code + memkraft + skills katmanı |
+| 12 | [Azure Deployment](12-azure-deployment.md) | **doctick.me yayın planı**, App Service, SSL, CI/CD |
 | — | [Ek: Güvenlik Notları](ekler/guvenlik-notlari.md) | Gizli anahtar rotasyonu, prod-ready maddeleri |
 
 ## Karar kayıtları (ADR)

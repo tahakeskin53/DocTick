@@ -19,7 +19,9 @@ public static class AuthAudit
             ip = ctx.Connection.RemoteIpAddress?.ToString(),
             ua = ctx.Request.Headers.UserAgent.ToString(),
         });
-        var dir = Path.Combine(Directory.GetCurrentDirectory(), "logs"); // `dotnet run --project backend` → backend/logs
+        // Prod'da AUTH_AUDIT_DIR=/home/LogFiles/auth verilirse her deploy'da silinen wwwroot yerine kalıcı Azure Files'a yazar.
+        // `dotnet run --project backend` → backend/logs (dev varsayılanı değişmez).
+        var dir = Environment.GetEnvironmentVariable("AUTH_AUDIT_DIR") ?? Path.Combine(Directory.GetCurrentDirectory(), "logs");
         lock (_gate)
         {
             Directory.CreateDirectory(dir);

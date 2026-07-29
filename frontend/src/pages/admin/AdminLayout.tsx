@@ -5,9 +5,10 @@ import { useAuth } from '../../auth/Auth';
 
 const ITEMS = [
   { to: '/admin', icon: 'grid', label: 'Genel bakış', end: true },
+  { to: '/admin/randevular', icon: 'calendar', label: 'Randevular' },
   { to: '/admin/bolumler', icon: 'plus', label: 'Bölümler' },
   { to: '/admin/doktorlar', icon: 'user', label: 'Doktorlar' },
-  { to: '/admin/saatler', icon: 'clock', label: 'Randevu saatleri' },
+  { to: '/admin/saatler', icon: 'clock', label: 'Çalışma saatleri' },
   { to: '/admin/eposta', icon: 'mail', label: 'E-posta ayarları' },
   { to: '/admin/kullanicilar', icon: 'bell', label: 'Kullanıcılar' },
 ];

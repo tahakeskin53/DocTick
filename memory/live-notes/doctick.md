@@ -10,15 +10,30 @@ tier: core
 ## Tracking Config
 - **Type:** project
 - **Started:** 2026-07-21
-- **Last Update:** 2026-07-23
+- **Last Update:** 2026-07-29
 - **Last Accessed:** 2026-07-21 14:59:18
-- **Update Count:** 12
+- **Update Count:** 27
 - **Source:** setup
 
 ## Current State
 (Latest information accumulates here)
 
 ## Recent Activity
+- **2026-07-29** | AdminApptDto artik Date + DoctorId tasiyor. GET /api/admin/appointments (date parametresiz) tum randevulari doner; donem filtresi ve doktor gruplamasi frontend tarafinda (frontend/src/pages/admin/periodRange.ts + Appointments.tsx). Admin menusunde eski "Randevu saatleri" etiketi "Calisma saatleri" oldu; kafa karisikliginin kaynagi oydu. Overview /overview artik bugun ve sonrasi ilk 10 randevuyu doner (string CompareTo, SQLite native cevriliyor - testle dogrulandi). [Source: implementation]
+- **2026-07-28** | Hosting kararı: GitHub Pages elendi (statik-only, .NET+SQLite+BackgroundService çalıştıramaz). Azure App Service Linux B1 seçildi — Free F1 özel domain ve Always On desteklemiyor, Always On ReminderService BackgroundService icin zorunlu. Iki prod-blocker tespit edildi: (1) DateTime.Now her yerde kullanılıyor, Azure UTC calisir, TZ=Europe/Istanbul app setting ile cozulur (kod degisikligi yok); (2) SQLite doctick.db calisma dizininde, her deploy silinir, ConnectionStrings__Default=/home/data/doctick.db ile kalici alana tasinir. Plan: docs/12-azure-deployment.md [Source: planning]
+- **2026-07-24** | Yeni repo DocTick-VercellApp (staj projeler altinda, orijinal DocTick dokunulmadi): sadece frontend + mock veri, Vercel-ready. Karar: frontend demo (hibrit degil). [Source: vercel-demo]
+- **2026-07-24** | Vercel demo karari: .NET backend Vercel de calismadigi icin yalnizca frontend + localStorage mock. Kullanici hibrit yerine demo secti. [Source: plan]
+- **2026-07-24** | DocTick-Test (ayri repo) cift-tikla-calisir sekilde yeniden yapildi: pre-build wwwroot -> build asamasi yok; .NET-only launcher; her OS klasorunde TEK baslatici; baslatWINDOWS.bat/_kurulum.bat/BASLA.md/CONTEXT.md/.slnx silindi. Auth:AutoApprove=true (herkes aninda onayli). Ana DocTick etkilenmedi (test ayarlari yalnizca DocTick-Test'te). [Source: release]
+- **2026-07-24** | DocTick-Test push tamam (2026-07-24): https://github.com/tahakeskin53/DocTick-Test (private, main). Ana proje revert edildi ve dogrulandi; test ayarlari yalnizca bu repoda. [Source: test-repo-push]
+- **2026-07-24** | DocTick-Test test deposu kuruldu (2026-07-24): juri icin mac/windows ayrilmis, test=otomatik onay+self-bootstrap. Ana proje revert edildi ve 4-ajanli workflow ile dogrulandi (test ayarlari ana projede YOK). Yerel commit 9227e83; push gh auth bekliyor. [Source: test-repo-setup]
+- **2026-07-24** | Onboarding/juri teslimi tamam (2026-07-24): Windows launcher'lar artik _kurulum.bat ile yoneticisiz Node+.NET kuruyor; Auth:AutoApprove=true (her giris aktif Hasta); BASLA.md eklendi, README '2 anahtar' bolumu 'anahtar gerekmez' olarak duzeltildi; temiz ZIP icin git archive allowlist BASLA.md'de. Backend derlemesi TAMAM (kod hatasi yok; MSB3027 yalnizca calisan DocTick.Api.exe dosya kilidinden). [Source: onboarding-setup]
+- **2026-07-23** | Stitch mockup asamasi: birkac ekran uretildi ve kabuk sapmasi cozuldu. Kullanici deliverable/fonksiyonellik sorusuna geldi. Onemli: gercek DocTick zaten calisan uygulama (React+.NET); Stitch mockup'lari 'tasarim asamasi' artefakti, fonksiyonel olmasi gerekmez. Fonksiyonellik ya tiklanabilir Figma prototip (kodsuz) ya da mevcut gercek app. [Source: mockup]
+- **2026-07-23** | E-POSTA COZUMU (2026-07-23): Resend__ApiKey User env var olarak set edildi (appsettings.json yer tutucu kaldi). Anahtar gecerli (Resend probe HTTP 422). Backend restart sonrasi iletim formu + tum e-posta ozellikleri calisir. Domain dogrulanmadigi icin posta tahakeskin06@hotmail.com'a yonlenir (RedirectTo). Teslimden once anahtar rotate edilmeli (git gecmisinde vardi). [Source: debug-session]
+- **2026-07-23** | Google Stitch mockup brief hazirlandi (20 ekran, hasta+admin). Yaklasim: guclu global stil blogu + birebir Turkce icerikli per-ekran promptlar; gerekirse vitrin ekranlar icin screenshot referansi eklenir. Auth engeli: ic ekranlar /me'ye bagli, Google OAuth bekleyen config -> canli screenshot zor. [Source: mockup]
+- **2026-07-23** | BILINEN DURUM (2026-07-23): E-posta alt sistemi calismiyor — Resend:ApiKey appsettings.json'da yer tutucu 're_BURAYA_KENDI_RESEND_ANAHTARINIZ', runtime env var Resend__ApiKey set degil. Iletisim formu + randevu onay/iptal/hatirlatma + hesap onay postalari 502 doner. Cozum: Resend'den yeni anahtar + [Environment]::SetEnvironmentVariable('Resend__ApiKey','re_...','User') + backend restart. Kod dogru, sadece config eksik. [Source: debug-session]
+- **2026-07-23** | PWA TAMAM ve kullanici tarafindan dogrulandi: DocTick_App.bat ile kurulabilir PWA calisiyor (build+wwwroot+5080 tek origin), offline Randevularim, autoUpdate, Google auth 5080 ile calisir. Kalan opsiyonel: HTTPS deploy + magaza paketleme (spec 9). [Source: dogrulama]
+- **2026-07-23** | PWA implementasyonu TAMAMLANDI (frontend/ icine uygulandi, ayri DocTick-App klasoru YAPILMADI). build -> dist -> backend/wwwroot kopyasi -> dotnet publish ile tek origin. Kalan: kullici elle kurulum/offline test (browser) + public HTTPS deploy sonrasi magaza paketleme. [Source: implementasyon]
+- **2026-07-23** | PWA plani hazir (6 gorev): ikonlar, check_pwa.mjs, vite-plugin-pwa config, offline banner/buton kilidi, backend statik servis + SPA fallback (Program.cs'te henuz yok!), e2e dogrulama. Uygulama beklemede. [Source: planning]
 - **2026-07-23** | Giris hatasinin kok nedeni: baslatWINDOWS.bat tarayiciyi backend hazir olmadan aciyordu (Vite --open) -> frontend acik/backend yok -> Giris basarisiz. Duzeltildi: scriptler artik backend saglik kontrolunu (GET localhost:5080/ 200) bekleyip ondan sonra tarayiciyi aciyor. Kullanici sadece baslatWINDOWS.bat calistirmali, elle backend baslatmaya gerek yok. [Source: startup-scripts-fix]
 - **2026-07-23** | Giris hatalari artik backend/logs/auth-*.log JSONL dosyasina yaziliyor (login_success/token_invalid/config_error, sebep+ip+ua). Giris teskisinde ONCE bu dosyaya bak. Frontend Login.tsx artik gercek hatayi console.error ile basiyor (backend kapali gibi network hatalari icin). [Source: auth-audit-feature]
 - **2026-07-23** | Cift randevu (ayni hasta+saat) bugi tespit ve cozum: koruma kodu hazir, lokal doctick.db silindi. Commitleme bekliyor. [Source: bugfix]
@@ -44,6 +59,36 @@ tier: core
 ---
 
 ## Timeline (Full Record)
+
+- **2026-07-29** | AdminApptDto artik Date + DoctorId tasiyor. GET /api/admin/appointments (date parametresiz) tum randevulari doner; donem filtresi ve doktor gruplamasi frontend tarafinda (frontend/src/pages/admin/periodRange.ts + Appointments.tsx). Admin menusunde eski "Randevu saatleri" etiketi "Calisma saatleri" oldu; kafa karisikliginin kaynagi oydu. Overview /overview artik bugun ve sonrasi ilk 10 randevuyu doner (string CompareTo, SQLite native cevriliyor - testle dogrulandi). [Source: implementation]
+
+- **2026-07-28** | Hosting kararı: GitHub Pages elendi (statik-only, .NET+SQLite+BackgroundService çalıştıramaz). Azure App Service Linux B1 seçildi — Free F1 özel domain ve Always On desteklemiyor, Always On ReminderService BackgroundService icin zorunlu. Iki prod-blocker tespit edildi: (1) DateTime.Now her yerde kullanılıyor, Azure UTC calisir, TZ=Europe/Istanbul app setting ile cozulur (kod degisikligi yok); (2) SQLite doctick.db calisma dizininde, her deploy silinir, ConnectionStrings__Default=/home/data/doctick.db ile kalici alana tasinir. Plan: docs/12-azure-deployment.md [Source: planning]
+
+- **2026-07-24** | Yeni repo DocTick-VercellApp (staj projeler altinda, orijinal DocTick dokunulmadi): sadece frontend + mock veri, Vercel-ready. Karar: frontend demo (hibrit degil). [Source: vercel-demo]
+
+- **2026-07-24** | Vercel demo karari: .NET backend Vercel de calismadigi icin yalnizca frontend + localStorage mock. Kullanici hibrit yerine demo secti. [Source: plan]
+
+- **2026-07-24** | DocTick-Test (ayri repo) cift-tikla-calisir sekilde yeniden yapildi: pre-build wwwroot -> build asamasi yok; .NET-only launcher; her OS klasorunde TEK baslatici; baslatWINDOWS.bat/_kurulum.bat/BASLA.md/CONTEXT.md/.slnx silindi. Auth:AutoApprove=true (herkes aninda onayli). Ana DocTick etkilenmedi (test ayarlari yalnizca DocTick-Test'te). [Source: release]
+
+- **2026-07-24** | DocTick-Test push tamam (2026-07-24): https://github.com/tahakeskin53/DocTick-Test (private, main). Ana proje revert edildi ve dogrulandi; test ayarlari yalnizca bu repoda. [Source: test-repo-push]
+
+- **2026-07-24** | DocTick-Test test deposu kuruldu (2026-07-24): juri icin mac/windows ayrilmis, test=otomatik onay+self-bootstrap. Ana proje revert edildi ve 4-ajanli workflow ile dogrulandi (test ayarlari ana projede YOK). Yerel commit 9227e83; push gh auth bekliyor. [Source: test-repo-setup]
+
+- **2026-07-24** | Onboarding/juri teslimi tamam (2026-07-24): Windows launcher'lar artik _kurulum.bat ile yoneticisiz Node+.NET kuruyor; Auth:AutoApprove=true (her giris aktif Hasta); BASLA.md eklendi, README '2 anahtar' bolumu 'anahtar gerekmez' olarak duzeltildi; temiz ZIP icin git archive allowlist BASLA.md'de. Backend derlemesi TAMAM (kod hatasi yok; MSB3027 yalnizca calisan DocTick.Api.exe dosya kilidinden). [Source: onboarding-setup]
+
+- **2026-07-23** | Stitch mockup asamasi: birkac ekran uretildi ve kabuk sapmasi cozuldu. Kullanici deliverable/fonksiyonellik sorusuna geldi. Onemli: gercek DocTick zaten calisan uygulama (React+.NET); Stitch mockup'lari 'tasarim asamasi' artefakti, fonksiyonel olmasi gerekmez. Fonksiyonellik ya tiklanabilir Figma prototip (kodsuz) ya da mevcut gercek app. [Source: mockup]
+
+- **2026-07-23** | E-POSTA COZUMU (2026-07-23): Resend__ApiKey User env var olarak set edildi (appsettings.json yer tutucu kaldi). Anahtar gecerli (Resend probe HTTP 422). Backend restart sonrasi iletim formu + tum e-posta ozellikleri calisir. Domain dogrulanmadigi icin posta tahakeskin06@hotmail.com'a yonlenir (RedirectTo). Teslimden once anahtar rotate edilmeli (git gecmisinde vardi). [Source: debug-session]
+
+- **2026-07-23** | Google Stitch mockup brief hazirlandi (20 ekran, hasta+admin). Yaklasim: guclu global stil blogu + birebir Turkce icerikli per-ekran promptlar; gerekirse vitrin ekranlar icin screenshot referansi eklenir. Auth engeli: ic ekranlar /me'ye bagli, Google OAuth bekleyen config -> canli screenshot zor. [Source: mockup]
+
+- **2026-07-23** | BILINEN DURUM (2026-07-23): E-posta alt sistemi calismiyor — Resend:ApiKey appsettings.json'da yer tutucu 're_BURAYA_KENDI_RESEND_ANAHTARINIZ', runtime env var Resend__ApiKey set degil. Iletisim formu + randevu onay/iptal/hatirlatma + hesap onay postalari 502 doner. Cozum: Resend'den yeni anahtar + [Environment]::SetEnvironmentVariable('Resend__ApiKey','re_...','User') + backend restart. Kod dogru, sadece config eksik. [Source: debug-session]
+
+- **2026-07-23** | PWA TAMAM ve kullanici tarafindan dogrulandi: DocTick_App.bat ile kurulabilir PWA calisiyor (build+wwwroot+5080 tek origin), offline Randevularim, autoUpdate, Google auth 5080 ile calisir. Kalan opsiyonel: HTTPS deploy + magaza paketleme (spec 9). [Source: dogrulama]
+
+- **2026-07-23** | PWA implementasyonu TAMAMLANDI (frontend/ icine uygulandi, ayri DocTick-App klasoru YAPILMADI). build -> dist -> backend/wwwroot kopyasi -> dotnet publish ile tek origin. Kalan: kullici elle kurulum/offline test (browser) + public HTTPS deploy sonrasi magaza paketleme. [Source: implementasyon]
+
+- **2026-07-23** | PWA plani hazir (6 gorev): ikonlar, check_pwa.mjs, vite-plugin-pwa config, offline banner/buton kilidi, backend statik servis + SPA fallback (Program.cs'te henuz yok!), e2e dogrulama. Uygulama beklemede. [Source: planning]
 
 - **2026-07-23** | Giris hatasinin kok nedeni: baslatWINDOWS.bat tarayiciyi backend hazir olmadan aciyordu (Vite --open) -> frontend acik/backend yok -> Giris basarisiz. Duzeltildi: scriptler artik backend saglik kontrolunu (GET localhost:5080/ 200) bekleyip ondan sonra tarayiciyi aciyor. Kullanici sadece baslatWINDOWS.bat calistirmali, elle backend baslatmaya gerek yok. [Source: startup-scripts-fix]
 

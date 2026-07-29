@@ -11,7 +11,8 @@ public record DoctorUpsertRequest(string Name, int DepartmentId, bool IsActive);
 public record ScheduleCell(int DayOfWeek, string Time, bool IsOpen);
 public record ScheduleGrid(int DoctorId, List<ScheduleCell> Slots);
 public record SettingsDto(bool ReminderEnabled, int ReminderHoursBefore);
-public record AdminApptDto(int Id, string Code, string Time, string DoctorName, string DepartmentName, string UserEmail, string Status);
+public record AdminApptDto(int Id, string Code, string Date, string Time,
+    int DoctorId, string DoctorName, string DepartmentName, string UserEmail, string Status);
 public record OverviewDto(int WeekAppointments, int OpenDepartments, int ActiveDoctors, int PendingUsers, List<AdminApptDto> Today);
 public record UserDto(int Id, string Email, string Name, string Role, string Status, DateTime CreatedAt);
 
@@ -175,11 +176,12 @@ public static class AdminEndpoints
             var activeDocs = await db.Doctors.AsNoTracking().CountAsync(d => d.IsActive, ct);
             var pending = await db.Users.AsNoTracking().CountAsync(u => u.Status == UserStatus.Pending, ct);
 
+            // Kart "yaklaşan" randevuları gösterir: bugün ve sonrası, ilk 10.
             var todayList = await (from a in db.Appointments.AsNoTracking().Include(x => x.Doctor!).ThenInclude(d => d!.Department).Include(x => x.User)
-                                   where a.Date == isoToday
-                                   orderby a.Time
-                                   select new AdminApptDto(a.Id, a.Code, a.Time, a.Doctor!.Name, a.Doctor!.Department!.Name,
-                                       a.User!.Email, a.Status == ApptStatus.Confirmed ? "confirmed" : "cancelled")).ToListAsync(ct);
+                                   where a.Date.CompareTo(isoToday) >= 0
+                                   orderby a.Date, a.Time
+                                   select new AdminApptDto(a.Id, a.Code, a.Date, a.Time, a.DoctorId, a.Doctor!.Name, a.Doctor!.Department!.Name,
+                                       a.User!.Email, a.Status == ApptStatus.Confirmed ? "confirmed" : "cancelled")).Take(10).ToListAsync(ct);
 
             return Results.Ok(new OverviewDto(week, openDepts, activeDocs, pending, todayList));
         });
@@ -190,7 +192,7 @@ public static class AdminEndpoints
             var list = date is null
                 ? await q.OrderByDescending(a => a.Date + " " + a.Time).ToListAsync(ct)
                 : await q.Where(a => a.Date == date).OrderBy(a => a.Time).ToListAsync(ct);
-            return Results.Ok(list.Select(a => new AdminApptDto(a.Id, a.Code, a.Time, a.Doctor!.Name, a.Doctor!.Department!.Name,
+            return Results.Ok(list.Select(a => new AdminApptDto(a.Id, a.Code, a.Date, a.Time, a.DoctorId, a.Doctor!.Name, a.Doctor!.Department!.Name,
                 a.User!.Email, a.Status == ApptStatus.Confirmed ? "confirmed" : "cancelled")).ToList());
         });
 
