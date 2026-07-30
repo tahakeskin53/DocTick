@@ -21,7 +21,7 @@ public static class PublicEndpoints
             if (active == true) q = q.Where(d => d.IsActive);
             var list = await q.OrderBy(d => d.Name).Select(d => new DepartmentDto(d.Id, d.Name, d.IsActive)).ToListAsync(ct);
             return Results.Ok(list);
-        });
+        }).AllowAnonymous();
 
         grp.MapGet("/doctors", async (AppDb db, int? deptId, bool? active, CancellationToken ct) =>
         {
@@ -32,7 +32,7 @@ public static class PublicEndpoints
                                       orderby d.Name
                                       select new DoctorDto(d.Id, d.Name, d.DepartmentId, d.Department!.Name, d.IsActive, d.PhotoUrl)).ToListAsync(ct);
             return Results.Ok(list);
-        });
+        }).AllowAnonymous();
 
         // Belirli doktor + tarih için uygun saatler.
         grp.MapGet("/availability", async (AppDb db, int doctorId, string date, CancellationToken ct) =>

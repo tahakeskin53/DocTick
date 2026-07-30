@@ -1,9 +1,9 @@
 # Entity: DocTick
 
 - memory_tool: memkraft <!-- valid:[2026-07-21..2026-07-21] recorded:2026-07-21T14:59 -->
-- memory_tool: memkraft <!-- valid:[2026-07-21..) recorded:2026-07-21T14:59 -->
-- install_scope: project-venv <!-- valid:[2026-07-21..) recorded:2026-07-21T14:59 -->
-- python_version: 3.14.4 <!-- valid:[2026-07-21..) recorded:2026-07-21T14:59 -->
+- memory_tool: memkraft <!-- valid:[2026-07-21..2026-07-21] recorded:2026-07-30T13:41 -->
+- install_scope: project-venv <!-- valid:[2026-07-21..2026-07-21] recorded:2026-07-30T13:41 -->
+- python_version: 3.14.4 <!-- valid:[2026-07-21..2026-07-21] recorded:2026-07-30T13:41 -->
 - skills_layer: mattpocock-skills via skills.sh --copy <!-- valid:[2026-07-21..) recorded:2026-07-21T15:21 -->
 - github_repo: tahakeskin53/DockTick (private) <!-- valid:[2026-07-21..) recorded:2026-07-21T17:41 -->
 - cifte_rezervasyon_engeli: kismi unique indeks WHERE Status='Confirmed' (Db.cs OnModelCreating) — iptal edilen slot yeniden rezerve edilebilir <!-- valid:[2026-07-21..) recorded:2026-07-21T17:41 -->
@@ -58,3 +58,9 @@
 - audit_log_prod_yeri: /home/LogFiles/auth/auth-YYYY-MM-DD.log (AUTH_AUDIT_DIR app setting). Canlida CALISIYOR; App Service Log stream de GORUNMEZ cunku dosyaya yazilir, stdout a degil. Repo/proje klasorunde de yok. <!-- valid:[2026-07-30..) recorded:2026-07-30T11:10 -->
 - kudu_erisim_yontemi: SCM basic auth publishing KAPALI (401). Kudu VFS icin AAD bearer: TOKEN=$(az account get-access-token --resource https://management.azure.com --query accessToken -o tsv); curl -H "Authorization: Bearer $TOKEN" https://doctick.scm.azurewebsites.net/api/vfs/LogFiles/auth/ <!-- valid:[2026-07-30..) recorded:2026-07-30T11:10 -->
 - deploy_yontemi: az webapp deploy -g doctick-rg -n doctick --type zip (GitHub Actions calismiyor: secret yok) <!-- valid:[2026-07-30..) recorded:2026-07-30T11:20 -->
+- user_profile_modal: enabled <!-- valid:[2026-07-30..) recorded:2026-07-30T11:29 -->
+- admin_doctor_photos: Doktor profil fotoğrafları sekmesi (/admin/fotograflar) eklendi. <!-- valid:[2026-07-30..) recorded:2026-07-30T12:23 -->
+- memory_tool: memkraft <!-- valid:[2026-07-21..) recorded:2026-07-30T13:41 -->
+- install_scope: project-venv <!-- valid:[2026-07-21..) recorded:2026-07-30T13:41 -->
+- python_version: 3.14.4 <!-- valid:[2026-07-21..) recorded:2026-07-30T13:41 -->
+- eposta_kok_neden: Resend'de doctick.me domaini status=not_started - DKIM/SPF DNS kayitlari hic eklenmemis (resend._domainkey.doctick.me ve send.doctick.me NXDOMAIN). Azure app settings DOGRU: Resend__ApiKey dolu, Resend__RedirectTo BOS, Resend__FromEmail=randevu@doctick.me. Kod da dogru alicilara gonderiyor. Dogrulanmamis domainden gonderim Resend tarafindan reddediliyor, cagri yerlerindeki catch bloklari yutuyor. <!-- valid:[2026-07-30..) recorded:2026-07-30T15:17 -->

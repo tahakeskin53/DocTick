@@ -21,5 +21,7 @@
 
 ## Timeline
 
+- **2026-07-30** | the agent [Source: seed | Confidence: verified]
+- **2026-07-30** | Re-detected [Source: seed]
 - **2026-07-21** | the agent [Source: seed | Confidence: verified]
 - **2026-07-21** | Entity first detected [Source: seed]

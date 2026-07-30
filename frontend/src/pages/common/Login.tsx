@@ -89,8 +89,21 @@ export function Login() {
   const rootRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
   const [slot, setSlot] = useState<string | null>(null);
+  const [deptCount, setDeptCount] = useState(5);
+  const [docCount, setDocCount] = useState(6);
 
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
+
+  // Dinamik bölüm ve doktor sayısı çek
+  useEffect(() => {
+    Promise.all([
+      Api.departments(true).catch(() => null),
+      Api.doctors().catch(() => null)
+    ]).then(([depts, docs]) => {
+      if (depts) setDeptCount(depts.length);
+      if (docs) setDocCount(docs.filter(d => d.isActive).length);
+    });
+  }, []);
 
   // Zaten giriş yapılmışsa rol/duruma göre yönlendir (orijinal Login davranışı korundu).
   useEffect(() => {
@@ -212,8 +225,8 @@ export function Login() {
             <h2 className="dt-h">{splitWords('Doğru doktora, en kısa yol.')}</h2>
             <p className="dt-lead dt-fade">Klinik branşları ve uzman kadrosu tek ekranda. Aradığınız uzmanlık ve uygun saat yan yana; aynı saat iki hastaya verilmez.</p>
             <div className="dt-stats dt-fade">
-              <div className="dt-stat"><Counter value={5} /><div className="dt-stat__l">Branş</div></div>
-              <div className="dt-stat"><Counter value={6} /><div className="dt-stat__l">Uzman doktor</div></div>
+              <div className="dt-stat"><Counter value={deptCount} /><div className="dt-stat__l">Branş</div></div>
+              <div className="dt-stat"><Counter value={docCount} /><div className="dt-stat__l">Uzman doktor</div></div>
               <div className="dt-stat"><Counter value={300} suffix="+" /><div className="dt-stat__l">Müsait saat / hafta</div></div>
             </div>
             <dl className="dt-ann dt-fade">
