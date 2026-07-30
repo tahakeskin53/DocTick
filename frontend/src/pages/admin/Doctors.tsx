@@ -56,7 +56,7 @@ export function Doctors() {
       <Card padded={false}>
         {(docs || []).map(r => (
           <div key={r.id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 20px', borderBottom: '1px solid var(--border-soft)' }}>
-            <DoctorAvatar doctorId={r.id} name={r.name} size={42} />
+            <DoctorAvatar photoUrl={r.photoUrl} name={r.name} size={42} />
             <span style={{ flex: 1 }}>
               <b style={{ font: 'var(--text-h3)', display: 'block' }}>{r.name}</b>
               <span style={{ font: 'var(--text-caption)', color: 'var(--text-muted)' }}>{r.departmentName}</span>

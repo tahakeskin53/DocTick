@@ -46,7 +46,9 @@ public class Doctor
     public int DepartmentId { get; set; }
     public Department? Department { get; set; }
     public bool IsActive { get; set; } = true;
+    public string PhotoUrl { get; set; } = "";
 }
+#line 51 "C:\Users\tahak\OneDrive\Masaüstü\STAJ\staj projeler\DocTick\backend\Models\Db.cs"
 
 // Haftalık şablon: admin'in saat ızgarası. 0=Pazar..6=Cumartesi (.NET DayOfWeek ile uyumlu).
 public class ScheduleSlot
@@ -139,22 +141,23 @@ public static class DbSeeder
     {
         var cols = new[]
         {
-            ("FirstName", "TEXT NOT NULL DEFAULT ''"),
-            ("LastName", "TEXT NOT NULL DEFAULT ''"),
-            ("PhoneNumber", "TEXT NOT NULL DEFAULT ''"),
-            ("IdentityNumber", "TEXT NOT NULL DEFAULT ''"),
-            ("DateOfBirth", "TEXT NOT NULL DEFAULT ''"),
-            ("Gender", "TEXT NOT NULL DEFAULT ''"),
-            ("BloodType", "TEXT NOT NULL DEFAULT ''"),
-            ("EmergencyContactName", "TEXT NOT NULL DEFAULT ''"),
-            ("EmergencyContactPhone", "TEXT NOT NULL DEFAULT ''")
+            ("Users", "FirstName", "TEXT NOT NULL DEFAULT ''"),
+            ("Users", "LastName", "TEXT NOT NULL DEFAULT ''"),
+            ("Users", "PhoneNumber", "TEXT NOT NULL DEFAULT ''"),
+            ("Users", "IdentityNumber", "TEXT NOT NULL DEFAULT ''"),
+            ("Users", "DateOfBirth", "TEXT NOT NULL DEFAULT ''"),
+            ("Users", "Gender", "TEXT NOT NULL DEFAULT ''"),
+            ("Users", "BloodType", "TEXT NOT NULL DEFAULT ''"),
+            ("Users", "EmergencyContactName", "TEXT NOT NULL DEFAULT ''"),
+            ("Users", "EmergencyContactPhone", "TEXT NOT NULL DEFAULT ''"),
+            ("Doctors", "PhotoUrl", "TEXT NOT NULL DEFAULT ''")
         };
 
-        foreach (var (colName, colType) in cols)
+        foreach (var (table, colName, colType) in cols)
         {
             try
             {
-                await db.Database.ExecuteSqlRawAsync($"ALTER TABLE \"Users\" ADD COLUMN \"{colName}\" {colType};");
+                await db.Database.ExecuteSqlRawAsync($"ALTER TABLE \"{table}\" ADD COLUMN \"{colName}\" {colType};");
             }
             catch
             {

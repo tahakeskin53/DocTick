@@ -1,9 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Icon } from './Icon.jsx';
-import { useDoctorPhotos } from '../../lib/doctorPhotos';
 
 interface DoctorAvatarProps {
-  doctorId: number;
+  photoUrl?: string;
   name?: string;
   size?: number;
   showStatus?: boolean;
@@ -14,7 +13,7 @@ interface DoctorAvatarProps {
 }
 
 export function DoctorAvatar({
-  doctorId,
+  photoUrl,
   name = '',
   size = 40,
   showStatus = false,
@@ -23,9 +22,11 @@ export function DoctorAvatar({
   className = '',
   onClick,
 }: DoctorAvatarProps) {
-  const { getPhoto } = useDoctorPhotos();
-  const photoUrl = getPhoto(doctorId);
   const [imgError, setImgError] = useState(false);
+
+  useEffect(() => {
+    setImgError(false);
+  }, [photoUrl]);
 
   const initials = name
     .split(' ')

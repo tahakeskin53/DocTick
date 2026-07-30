@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Scalar.AspNetCore;
 using DocTick.Api.Auth;
 using DocTick.Api.Endpoints;
@@ -41,6 +42,11 @@ builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection("Resen
 builder.Services.AddHttpClient("resend");
 builder.Services.AddSingleton<EmailService>();
 builder.Services.AddHostedService<ReminderService>();
+
+// --- Doktor Fotoğrafları ---
+var photoDir = builder.Configuration["Photos:Dir"]
+    ?? Path.Combine(builder.Environment.ContentRootPath, "photos");
+builder.Services.AddSingleton(new PhotoStore(photoDir));
 
 // --- Kimlik doğrulama (cookie) ---
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -127,6 +133,17 @@ app.Use(async (ctx, next) =>
 
 app.UseDefaultFiles();
 app.UseStaticFiles(); // seçenekler DI'dan (yukarıdaki Configure<StaticFileOptions>)
+
+Directory.CreateDirectory(photoDir);
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(photoDir),
+    RequestPath = "/uploads/doctors",
+    ServeUnknownFileTypes = false, // yalnız bilinen MIME'ler — dizine ne düşerse düşsün
+    OnPrepareResponse = ctx =>
+        // Dosya adı sürüm damgası taşır (7-a3f1c9.webp): içerik değişirse ad değişir.
+        ctx.Context.Response.Headers.CacheControl = "public, max-age=31536000, immutable",
+});
 
 app.UseAuthentication();
 app.UseAuthorization();

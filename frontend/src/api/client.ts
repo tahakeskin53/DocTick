@@ -21,7 +21,7 @@ export interface Me {
 
 
 export interface Department { id: number; name: string; isActive: boolean; doctors?: number }
-export interface Doctor { id: number; name: string; departmentId: number; departmentName: string; isActive: boolean }
+export interface Doctor { id: number; name: string; departmentId: number; departmentName: string; isActive: boolean; photoUrl: string }
 export interface Appointment {
   id: number; code: string; doctorId: number; doctorName: string; departmentName: string;
   date: string; dateLabel: string; time: string; status: 'confirmed' | 'done' | 'cancelled'; rating: number | null;
@@ -127,6 +127,8 @@ export const Api = {
   addDoctor: (name: string, departmentId: number) => api('/api/admin/doctors', { method: 'POST', body: JSON.stringify({ name, departmentId, isActive: true }) }),
   updateDoctor: (id: number, name: string, departmentId: number, isActive: boolean) => api(`/api/admin/doctors/${id}`, { method: 'PUT', body: JSON.stringify({ name, departmentId, isActive }) }),
   deleteDoctor: (id: number) => api(`/api/admin/doctors/${id}`, { method: 'DELETE' }),
+  setDoctorPhoto: (id: number, body: { dataUrl?: string; url?: string }) => api<{ id: number; photoUrl: string }>(`/api/admin/doctors/${id}/photo`, { method: 'PUT', body: JSON.stringify(body) }),
+  resetDoctorPhoto: (id: number) => api<{ id: number; photoUrl: string }>(`/api/admin/doctors/${id}/photo`, { method: 'DELETE' }),
   getSchedule: (doctorId: number) => api<Schedule>(`/api/admin/schedule?doctorId=${doctorId}`),
   saveSchedule: (doctorId: number, slots: ScheduleCell[]) => api(`/api/admin/schedule?doctorId=${doctorId}`, { method: 'PUT', body: JSON.stringify({ doctorId, slots }) }),
   getSettings: () => api<Settings>('/api/admin/settings'),

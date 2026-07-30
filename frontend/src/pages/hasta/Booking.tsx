@@ -156,9 +156,9 @@ export function Booking() {
             {deptId !== '' && (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 10 }}>
                 {(docs || []).map(d => (
-                  <button key={d.id} className="dt-doc" data-sel={doctor?.id === d.id} onClick={() => setDoctor(d)}>
-                    <DoctorAvatar doctorId={d.id} name={d.name} size={42} />
-                    <span>
+                   <button key={d.id} className="dt-doc" data-sel={doctor?.id === d.id} onClick={() => setDoctor(d)}>
+                     <DoctorAvatar photoUrl={d.photoUrl} name={d.name} size={42} />
+                     <span>
                       <b style={{ font: 'var(--text-h3)', display: 'block' }}>{d.name}</b>
                       <span style={{ font: 'var(--text-caption)', color: 'var(--text-muted)' }}>{d.departmentName}</span>
                     </span>

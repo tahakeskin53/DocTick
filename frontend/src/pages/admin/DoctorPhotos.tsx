@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card } from '../../components/display/Card.jsx';
 import { Button } from '../../components/forms/Button.jsx';
 import { Badge } from '../../components/display/Badge.jsx';
@@ -8,17 +8,12 @@ import { Icon } from '../../components/display/Icon.jsx';
 import { DoctorAvatar } from '../../components/display/DoctorAvatar';
 import { Api, type Doctor } from '../../api/client';
 import { useToast } from '../../components/ToastProvider';
-import {
-  DEMO_PRESET_PHOTOS,
-  setDoctorPhoto,
-  resetDoctorPhoto,
-  getStoredDoctorPhotos,
-} from '../../lib/doctorPhotos';
+import { DEMO_PRESET_PHOTOS } from '../../lib/presetPhotos';
 
 export function DoctorPhotos() {
   const { toast } = useToast();
+  const qc = useQueryClient();
   const { data: docs, isLoading } = useQuery({ queryKey: ['admin', 'doctors'], queryFn: Api.adminDoctors });
-  const storedPhotos = getStoredDoctorPhotos();
 
   const [selectedDoc, setSelectedDoc] = useState<Doctor | null>(null);
   const [activeTab, setActiveTab] = useState<'upload' | 'preset'>('upload');
@@ -29,12 +24,33 @@ export function DoctorPhotos() {
   const [fileSize, setFileSize] = useState<string>('');
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
 
-  // Simüle edilmiş yükleme ilerlemesi
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [uploadStatusText, setUploadStatusText] = useState('');
-
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const save = useMutation({
+    mutationFn: (v: { id: number; dataUrl?: string; url?: string }) =>
+      Api.setDoctorPhoto(v.id, { dataUrl: v.dataUrl, url: v.url }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['admin', 'doctors'] });
+      qc.invalidateQueries({ queryKey: ['doctors'] });
+      toast('success', `${selectedDoc!.name} için profil fotoğrafı güncellendi.`);
+      setSelectedDoc(null);
+      setPreviewUrl(null);
+      setSelectedPreset(null);
+    },
+    onError: (e) => toast('error', e instanceof Error ? e.message : 'Fotoğraf yüklenemedi.'),
+  });
+
+  const reset = useMutation({
+    mutationFn: (id: number) => Api.resetDoctorPhoto(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['admin', 'doctors'] });
+      qc.invalidateQueries({ queryKey: ['doctors'] });
+      toast('info', 'Profil fotoğrafı sıfırlandı.');
+    },
+    onError: (e) => toast('error', e instanceof Error ? e.message : 'Fotoğraf sıfırlanamadı.'),
+  });
+
+  const isUploading = save.isPending;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -42,6 +58,11 @@ export function DoctorPhotos() {
 
     if (!file.type.startsWith('image/')) {
       toast('error', 'Lütfen geçerli bir resim dosyası seçin (PNG, JPG, WEBP).');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast('error', 'Dosya boyutu 5 MB\'tan büyük olamaz.');
       return;
     }
 
@@ -58,42 +79,24 @@ export function DoctorPhotos() {
 
   const handleSavePhoto = () => {
     if (!selectedDoc) return;
-    const photoToSave = activeTab === 'upload' ? previewUrl : selectedPreset;
-
-    if (!photoToSave) {
-      toast('error', 'Lütfen bir fotoğraf seçin veya yeni dosya yükleyin.');
-      return;
+    
+    if (activeTab === 'upload') {
+      if (!previewUrl) {
+        toast('error', 'Lütfen bir fotoğraf seçin veya yeni dosya yükleyin.');
+        return;
+      }
+      save.mutate({ id: selectedDoc.id, dataUrl: previewUrl });
+    } else {
+      if (!selectedPreset) {
+        toast('error', 'Lütfen bir fotoğraf seçin.');
+        return;
+      }
+      save.mutate({ id: selectedDoc.id, url: selectedPreset });
     }
-
-    setIsUploading(true);
-    setUploadProgress(20);
-    setUploadStatusText('Görüntü işleniyor...');
-
-    setTimeout(() => {
-      setUploadProgress(60);
-      setUploadStatusText('Önizleme hazırlanıyor...');
-    }, 250);
-
-    setTimeout(() => {
-      setUploadProgress(95);
-      setUploadStatusText('Profil fotoğrafı güncelleniyor...');
-    }, 450);
-
-    setTimeout(() => {
-      setUploadProgress(100);
-      setDoctorPhoto(selectedDoc.id, photoToSave);
-      toast('success', `${selectedDoc.name} için profil fotoğrafı güncellendi.`);
-      setIsUploading(false);
-      setSelectedDoc(null);
-      setPreviewUrl(null);
-      setSelectedPreset(null);
-      setUploadProgress(0);
-    }, 650);
   };
 
   const handleResetPhoto = (doc: Doctor) => {
-    resetDoctorPhoto(doc.id);
-    toast('info', `${doc.name} profil fotoğrafı sıfırlandı.`);
+    reset.mutate(doc.id);
   };
 
   const totalDoctors = docs?.length || 0;
@@ -125,7 +128,7 @@ export function DoctorPhotos() {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             {(docs || []).map((doc, idx) => {
-              const isCustom = !!storedPhotos[doc.id];
+              const isCustom = !!doc.photoUrl;
               return (
                 <div
                   key={doc.id}
@@ -149,7 +152,7 @@ export function DoctorPhotos() {
                       }}
                       title="Fotoğrafı Değiştir"
                     >
-                      <DoctorAvatar doctorId={doc.id} name={doc.name} size={54} showStatus isActive={doc.isActive} />
+                      <DoctorAvatar photoUrl={doc.photoUrl} name={doc.name} size={54} showStatus isActive={doc.isActive} />
                       <div
                         style={{
                           position: 'absolute',
@@ -184,6 +187,7 @@ export function DoctorPhotos() {
                       <Button
                         variant="secondary"
                         size="sm"
+                        disabled={reset.isPending}
                         onClick={() => handleResetPhoto(doc)}
                         title="Varsayılan fotoğrafa dön"
                       >
@@ -292,7 +296,7 @@ export function DoctorPhotos() {
               </button>
             </div>
 
-            {/* Yükleme İlerleme Çubuğu */}
+            {/* Yükleme İlerleme Durumu */}
             {isUploading && (
               <div
                 style={{
@@ -300,25 +304,12 @@ export function DoctorPhotos() {
                   background: 'var(--brand-soft, #eff6ff)',
                   borderRadius: 'var(--radius-md, 8px)',
                   border: '1px solid var(--blue-200, #bfdbfe)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 6,
+                  color: 'var(--brand)',
+                  fontSize: 13,
+                  fontWeight: 500,
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, fontWeight: 500 }}>
-                  <span style={{ color: 'var(--brand)' }}>{uploadStatusText}</span>
-                  <span style={{ color: 'var(--brand)' }}>%{uploadProgress}</span>
-                </div>
-                <div style={{ width: '100%', height: 6, background: '#dbeafe', borderRadius: 3, overflow: 'hidden' }}>
-                  <div
-                    style={{
-                      width: `${uploadProgress}%`,
-                      height: '100%',
-                      background: 'var(--brand)',
-                      transition: 'width 0.2s ease',
-                    }}
-                  />
-                </div>
+                Fotoğraf yükleniyor...
               </div>
             )}
 

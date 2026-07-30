@@ -8,6 +8,7 @@ namespace DocTick.Api.Endpoints;
 
 public record DeptUpsertRequest(string Name, bool IsActive);
 public record DoctorUpsertRequest(string Name, int DepartmentId, bool IsActive);
+public record DoctorPhotoRequest(string? DataUrl, string? Url);
 public record ScheduleCell(int DayOfWeek, string Time, bool IsOpen);
 public record ScheduleGrid(int DoctorId, List<ScheduleCell> Slots);
 public record SettingsDto(bool ReminderEnabled, int ReminderHoursBefore);
@@ -60,7 +61,7 @@ public static class AdminEndpoints
         grp.MapGet("/doctors", async (AppDb db, CancellationToken ct) =>
             Results.Ok(await (from d in db.Doctors.AsNoTracking().Include(x => x.Department)
                               orderby d.Name
-                              select new { d.Id, d.Name, d.DepartmentId, DepartmentName = d.Department!.Name, d.IsActive }).ToListAsync(ct)));
+                              select new { d.Id, d.Name, d.DepartmentId, DepartmentName = d.Department!.Name, d.IsActive, d.PhotoUrl }).ToListAsync(ct)));
 
         grp.MapPost("/doctors", async (DoctorUpsertRequest req, AppDb db, CancellationToken ct) =>
         {
@@ -72,7 +73,7 @@ public static class AdminEndpoints
                 foreach (var t in Slots.All)
                     db.ScheduleSlots.Add(new ScheduleSlot { DoctorId = doc.Id, DayOfWeek = dow, Time = t, IsOpen = Slots.DefaultOpenDays.Contains(dow) });
             await db.SaveChangesAsync(ct);
-            return Results.Created($"/api/admin/doctors/{doc.Id}", new { doc.Id, doc.Name, doc.DepartmentId, doc.IsActive });
+            return Results.Created($"/api/admin/doctors/{doc.Id}", new { doc.Id, doc.Name, doc.DepartmentId, doc.IsActive, doc.PhotoUrl });
         });
 
         grp.MapPut("/doctors/{id}", async (int id, DoctorUpsertRequest req, AppDb db, CancellationToken ct) =>
@@ -81,7 +82,7 @@ public static class AdminEndpoints
             if (doc is null) return Results.NotFound();
             doc.Name = req.Name.Trim(); doc.DepartmentId = req.DepartmentId; doc.IsActive = req.IsActive;
             await db.SaveChangesAsync(ct);
-            return Results.Ok(new { doc.Id, doc.Name, doc.DepartmentId, doc.IsActive });
+            return Results.Ok(new { doc.Id, doc.Name, doc.DepartmentId, doc.IsActive, doc.PhotoUrl });
         });
 
         grp.MapDelete("/doctors/{id}", async (int id, AppDb db, CancellationToken ct) =>
@@ -93,6 +94,45 @@ public static class AdminEndpoints
             db.Doctors.Remove(doc);
             await db.SaveChangesAsync(ct);
             return Results.NoContent();
+        });
+
+        grp.MapPut("/doctors/{id}/photo", async (int id, DoctorPhotoRequest req, AppDb db, PhotoStore store, CancellationToken ct) =>
+        {
+            var doc = await db.Doctors.FindAsync([id], ct);
+            if (doc is null) return Results.NotFound();
+
+            string newUrl;
+            if (!string.IsNullOrWhiteSpace(req.DataUrl))
+            {
+                var bytes = PhotoStore.DecodeDataUrl(req.DataUrl);
+                if (bytes is null) return Results.BadRequest("Geçersiz veya 5 MB'tan büyük görüntü.");
+                var ext = PhotoStore.SniffExt(bytes);
+                if (ext is null) return Results.BadRequest("Yalnız PNG, JPEG, WebP veya GIF kabul edilir.");
+                newUrl = store.Save(id, bytes, ext, doc.PhotoUrl);
+            }
+            else if (!string.IsNullOrWhiteSpace(req.Url)
+                     && req.Url.Length <= 500
+                     && Uri.TryCreate(req.Url, UriKind.Absolute, out var u) && u.Scheme == "https")
+            {
+                store.Delete(doc.PhotoUrl);
+                newUrl = req.Url;
+            }
+            else return Results.BadRequest("dataUrl veya https url gerekli.");
+
+            doc.PhotoUrl = newUrl;
+            await db.SaveChangesAsync(ct);
+            return Results.Ok(new { doc.Id, doc.PhotoUrl });
+        });
+
+        grp.MapDelete("/doctors/{id}/photo", async (int id, AppDb db, PhotoStore store, CancellationToken ct) =>
+        {
+            var doc = await db.Doctors.FindAsync([id], ct);
+            if (doc is null) return Results.NotFound();
+
+            store.Delete(doc.PhotoUrl);
+            doc.PhotoUrl = "";
+            await db.SaveChangesAsync(ct);
+            return Results.Ok(new { doc.Id, doc.PhotoUrl });
         });
 
         // ---- Haftalık saat ızgarası ----
