@@ -6,6 +6,7 @@ import { Button, dtInject } from '../../components/forms/Button.jsx';
 import { Select } from '../../components/forms/Select.jsx';
 import { TimeSlot } from '../../components/display/TimeSlot.jsx';
 import { Icon } from '../../components/display/Icon.jsx';
+import { DoctorAvatar } from '../../components/display/DoctorAvatar';
 import { Api, ApiError, type Doctor } from '../../api/client';
 import { useToast } from '../../components/ToastProvider';
 
@@ -156,7 +157,7 @@ export function Booking() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 10 }}>
                 {(docs || []).map(d => (
                   <button key={d.id} className="dt-doc" data-sel={doctor?.id === d.id} onClick={() => setDoctor(d)}>
-                    <span style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--blue-100)', color: 'var(--blue-700)', display: 'grid', placeContent: 'center', flex: 'none' }}><Icon name="user" size={17} /></span>
+                    <DoctorAvatar doctorId={d.id} name={d.name} size={42} />
                     <span>
                       <b style={{ font: 'var(--text-h3)', display: 'block' }}>{d.name}</b>
                       <span style={{ font: 'var(--text-caption)', color: 'var(--text-muted)' }}>{d.departmentName}</span>

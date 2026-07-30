@@ -1,7 +1,7 @@
 // Admin "Randevular" sayfasının dönem hesabı. Tek saf fonksiyon — takvim mantığı
 // (Pazartesi başlangıcı, ay sonu, yıl sınırı) burada, testi periodRange.test.ts'te.
 
-export type Mode = 'gun' | 'hafta' | 'ay';
+export type Mode = 'tumu' | 'gun' | 'hafta' | 'ay';
 
 // Yerel ISO — toISOString() UTC'ye kaydırır, kullanma (Booking.tsx:50 ile aynı kalıp).
 const iso = (d: Date) =>
@@ -15,6 +15,11 @@ export function trDate(isoDate: string, opts: Intl.DateTimeFormatOptions = { day
 
 /** offset 0 = içinde bulunulan dönem, -1 = önceki, +1 = sonraki. */
 export function periodRange(mode: Mode, offset: number, today = new Date()) {
+  // Randevular ileri tarihli alınır; takvim ayına kilitli bir varsayılan sonraki ayı gizler.
+  // Bu yüzden varsayılan kip "Tümü": ISO tarih dizeleri sıralı karşılaştırıldığı için
+  // sınırları açık bırakmak yeterli, ayrı bir "süzme yok" dalı gerekmiyor.
+  if (mode === 'tumu') return { start: '0000-01-01', end: '9999-12-31', label: 'Tüm randevular' };
+
   const y = today.getFullYear(), m = today.getMonth(), d = today.getDate();
 
   if (mode === 'gun') {

@@ -8,6 +8,17 @@ interface AuthCtx {
   loading: boolean;
   refresh: () => Promise<Me | null>;
   setUser: (u: Me | null) => void;
+  updateProfile: (data: {
+    firstName: string;
+    lastName: string;
+    phoneNumber?: string;
+    identityNumber?: string;
+    dateOfBirth?: string;
+    gender?: string;
+    bloodType?: string;
+    emergencyContactName?: string;
+    emergencyContactPhone?: string;
+  }) => Promise<Me>;
   logout: () => Promise<void>;
 }
 
@@ -44,9 +55,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     lastUid.current = uid;
   }, [user?.id, qc]);
 
+  const updateProfile = async (data: {
+    firstName: string;
+    lastName: string;
+    phoneNumber?: string;
+    identityNumber?: string;
+    dateOfBirth?: string;
+    gender?: string;
+    bloodType?: string;
+    emergencyContactName?: string;
+    emergencyContactPhone?: string;
+  }) => {
+    const updated = await Api.updateProfile(data);
+    setUser(updated);
+    return updated;
+  };
+
+
+
   const logout = async () => { await Api.logout(); setUser(null); };
 
-  return <Ctx.Provider value={{ user, loading, refresh, setUser, logout }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ user, loading, refresh, setUser, updateProfile, logout }}>{children}</Ctx.Provider>;
 }
+
 
 export const useAuth = () => useContext(Ctx);

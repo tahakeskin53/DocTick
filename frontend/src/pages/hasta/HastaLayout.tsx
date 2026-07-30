@@ -1,13 +1,16 @@
+import { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router';
 import { Icon } from '../../components/display/Icon.jsx';
 import { Logo } from '../../components/display/Logo.jsx';
 import { IconButton } from '../../components/forms/IconButton.jsx';
 import { Footer } from '../../components/display/Footer.jsx';
+import { ProfileModal } from '../../components/feedback/ProfileModal';
 import { useAuth } from '../../auth/Auth';
 
 export function HastaLayout() {
   const { user, logout } = useAuth();
   const nav = useNavigate();
+  const [profileOpen, setProfileOpen] = useState(false);
 
   const tab = (to: string, label: string, end = false) => (
     <NavLink
@@ -37,9 +40,29 @@ export function HastaLayout() {
             {tab('/randevularim', 'Randevularım')}
             {tab('/iletisim', 'İletişim')}
           </nav>
-          <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 10, font: 'var(--text-body-sm)', color: 'rgba(255,255,255,.85)' }}>
-            <Icon name="user" size={16} />
-            {user?.name}
+          <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+            <button
+              onClick={() => setProfileOpen(true)}
+              title="Profil bilgilerinizi düzenleyin"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 8,
+                font: 'var(--text-body-sm)',
+                color: '#fff',
+                background: 'rgba(255,255,255,.14)',
+                border: '1px solid rgba(255,255,255,.25)',
+                padding: '6px 14px',
+                borderRadius: 20,
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+              }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,.25)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,.14)')}
+            >
+              <Icon name="user" size={15} />
+              <span style={{ fontWeight: 500 }}>{user?.name}</span>
+            </button>
             <IconButton label="Çıkış yap" onClick={doLogout} variant="outline" size="sm">
               <Icon name="logout" size={15} />
             </IconButton>
@@ -50,6 +73,8 @@ export function HastaLayout() {
         <Outlet />
       </main>
       <Footer />
+      <ProfileModal open={profileOpen} onClose={() => setProfileOpen(false)} />
     </div>
   );
 }
+

@@ -8,7 +8,11 @@ using DocTick.Api.Models;
 
 namespace DocTick.Api.Endpoints;
 
-public record AuthResponse(int Id, string Email, string Name, string Role, string Status);
+public record AuthResponse(
+    int Id, string Email, string Name, string FirstName, string LastName, string PhoneNumber,
+    string IdentityNumber, string DateOfBirth, string Gender, string BloodType,
+    string EmergencyContactName, string EmergencyContactPhone,
+    string Role, string Status);
 
 public static class AuthEndpoints
 {
@@ -49,11 +53,16 @@ public static class AuthEndpoints
             if (user is null)
             {
                 var isAdmin = loginEmail == adminEmail && adminEmail.Length > 0;
+                var fullName = string.IsNullOrWhiteSpace(payload.Name) ? (payload.Email ?? "Kullanıcı") : payload.Name;
+                var nameParts = fullName.Trim().Split(' ', 2);
                 user = new User
                 {
                     GoogleSub = payload.Subject,
                     Email = payload.Email ?? "",
-                    Name = string.IsNullOrWhiteSpace(payload.Name) ? (payload.Email ?? "Kullanıcı") : payload.Name,
+                    Name = fullName,
+                    FirstName = nameParts[0],
+                    LastName = nameParts.Length > 1 ? nameParts[1] : "",
+                    PhoneNumber = "",
                     Role = isAdmin ? UserRole.Admin : UserRole.Patient,
                     Status = (isAdmin || isPreApproved) ? UserStatus.Active : UserStatus.Pending,
                     CreatedAt = DateTime.UtcNow
@@ -111,11 +120,84 @@ public static class AuthEndpoints
             return Results.Ok();
         });
 
+        grp.MapPut("/profile", async (UpdateProfileRequest req, ClaimsPrincipal p, AppDb db, HttpContext ctx, CancellationToken ct) =>
+        {
+            if (p.Identity?.IsAuthenticated != true) return Results.Unauthorized();
+
+            var firstName = (req.FirstName ?? "").Trim();
+            var lastName = (req.LastName ?? "").Trim();
+            var phone = (req.PhoneNumber ?? "").Trim();
+            var tcNo = (req.IdentityNumber ?? "").Trim();
+            var dob = (req.DateOfBirth ?? "").Trim();
+            var gender = (req.Gender ?? "").Trim();
+            var bloodType = (req.BloodType ?? "").Trim();
+            var emName = (req.EmergencyContactName ?? "").Trim();
+            var emPhone = (req.EmergencyContactPhone ?? "").Trim();
+
+            if (firstName.Length is 0 or > 50) return Results.BadRequest("Ad 1-50 karakter olmalı.");
+            if (lastName.Length is 0 or > 50) return Results.BadRequest("Soyad 1-50 karakter olmalı.");
+            if (phone.Length > 20) return Results.BadRequest("Telefon numarası en fazla 20 karakter olmalı.");
+            if (tcNo.Length > 11) return Results.BadRequest("T.C. Kimlik Numarası en fazla 11 hane olmalı.");
+            if (emPhone.Length > 20) return Results.BadRequest("Acil durum telefon numarası en fazla 20 karakter olmalı.");
+
+            var uid = CurrentUser.Uid(p);
+            var user = await db.Users.FirstOrDefaultAsync(u => u.Id == uid, ct);
+            if (user is null) return Results.Unauthorized();
+
+            user.FirstName = firstName;
+            user.LastName = lastName;
+            user.Name = $"{firstName} {lastName}".Trim();
+            user.PhoneNumber = phone;
+            user.IdentityNumber = tcNo;
+            user.DateOfBirth = dob;
+            user.Gender = gender;
+            user.BloodType = bloodType;
+            user.EmergencyContactName = emName;
+            user.EmergencyContactPhone = emPhone;
+            await db.SaveChangesAsync(ct);
+
+            var claims = new List<Claim>
+            {
+                new(ClaimTypes2.Uid, user.Id.ToString()),
+                new(ClaimTypes.Name, user.Name),
+                new(ClaimTypes.Email, user.Email),
+                new(ClaimTypes2.Role, user.Role.ToString()),
+                new(ClaimTypes2.Status, user.Status.ToString()),
+            };
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            await ctx.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(identity),
+                new AuthenticationProperties { IsPersistent = true, ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7) });
+
+            return Results.Ok(ToDto(user));
+        });
+
         return app;
     }
 
-    private static AuthResponse ToDto(User u) =>
-        new(u.Id, u.Email, u.Name, u.Role.ToString(), u.Status.ToString());
+    private static AuthResponse ToDto(User u)
+    {
+        var fn = u.FirstName;
+        var ln = u.LastName;
+        if (string.IsNullOrWhiteSpace(fn) && string.IsNullOrWhiteSpace(ln) && !string.IsNullOrWhiteSpace(u.Name))
+        {
+            var parts = u.Name.Trim().Split(' ', 2);
+            fn = parts[0];
+            ln = parts.Length > 1 ? parts[1] : "";
+        }
+        return new(
+            u.Id, u.Email, u.Name, fn, ln, u.PhoneNumber ?? "",
+            u.IdentityNumber ?? "", u.DateOfBirth ?? "", u.Gender ?? "", u.BloodType ?? "",
+            u.EmergencyContactName ?? "", u.EmergencyContactPhone ?? "",
+            u.Role.ToString(), u.Status.ToString());
+    }
 }
 
 public record GoogleLoginRequest(string Credential);
+public record UpdateProfileRequest(
+    string FirstName, string LastName, string? PhoneNumber,
+    string? IdentityNumber, string? DateOfBirth, string? Gender, string? BloodType,
+    string? EmergencyContactName, string? EmergencyContactPhone);
+
+
+

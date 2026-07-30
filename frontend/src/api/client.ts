@@ -5,9 +5,20 @@ export interface Me {
   id: number;
   email: string;
   name: string;
+  firstName?: string;
+  lastName?: string;
+  phoneNumber?: string;
+  identityNumber?: string;
+  dateOfBirth?: string;
+  gender?: string;
+  bloodType?: string;
+  emergencyContactName?: string;
+  emergencyContactPhone?: string;
   role: 'Admin' | 'Patient';
   status: 'Pending' | 'Active' | 'Rejected';
 }
+
+
 
 export interface Department { id: number; name: string; isActive: boolean; doctors?: number }
 export interface Doctor { id: number; name: string; departmentId: number; departmentName: string; isActive: boolean }
@@ -76,6 +87,19 @@ export const Api = {
   me: () => api<Me>('/api/auth/me', {}, takeBoot('me')),
   loginGoogle: (credential: string) => api<Me>('/api/auth/google', { method: 'POST', body: JSON.stringify({ credential }) }),
   logout: () => api('/api/auth/logout', { method: 'POST' }),
+  updateProfile: (data: {
+    firstName: string;
+    lastName: string;
+    phoneNumber?: string;
+    identityNumber?: string;
+    dateOfBirth?: string;
+    gender?: string;
+    bloodType?: string;
+    emergencyContactName?: string;
+    emergencyContactPhone?: string;
+  }) => api<Me>('/api/auth/profile', { method: 'PUT', body: JSON.stringify(data) }),
+
+
 
   departments: (activeOnly = false) => api<Department[]>(`/api/departments${activeOnly ? '?active=true' : ''}`),
   doctors: (deptId?: number) => api<Doctor[]>(`/api/doctors${deptId ? `?deptId=${deptId}` : ''}`),

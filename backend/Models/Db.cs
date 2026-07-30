@@ -15,10 +15,21 @@ public class User
     public string GoogleSub { get; set; } = "";
     public string Email { get; set; } = "";
     public string Name { get; set; } = "";
+    public string FirstName { get; set; } = "";
+    public string LastName { get; set; } = "";
+    public string PhoneNumber { get; set; } = "";
+    public string IdentityNumber { get; set; } = "";
+    public string DateOfBirth { get; set; } = "";
+    public string Gender { get; set; } = "";
+    public string BloodType { get; set; } = "";
+    public string EmergencyContactName { get; set; } = "";
+    public string EmergencyContactPhone { get; set; } = "";
     public UserRole Role { get; set; } = UserRole.Patient;
     public UserStatus Status { get; set; } = UserStatus.Pending;
     public DateTime CreatedAt { get; set; }
 }
+
+
 
 public class Department
 {
@@ -124,10 +135,39 @@ public class AppDb(DbContextOptions<AppDb> options) : DbContext(options)
 
 public static class DbSeeder
 {
+    public static async Task EnsureSchemaAsync(AppDb db)
+    {
+        var cols = new[]
+        {
+            ("FirstName", "TEXT NOT NULL DEFAULT ''"),
+            ("LastName", "TEXT NOT NULL DEFAULT ''"),
+            ("PhoneNumber", "TEXT NOT NULL DEFAULT ''"),
+            ("IdentityNumber", "TEXT NOT NULL DEFAULT ''"),
+            ("DateOfBirth", "TEXT NOT NULL DEFAULT ''"),
+            ("Gender", "TEXT NOT NULL DEFAULT ''"),
+            ("BloodType", "TEXT NOT NULL DEFAULT ''"),
+            ("EmergencyContactName", "TEXT NOT NULL DEFAULT ''"),
+            ("EmergencyContactPhone", "TEXT NOT NULL DEFAULT ''")
+        };
+
+        foreach (var (colName, colType) in cols)
+        {
+            try
+            {
+                await db.Database.ExecuteSqlRawAsync($"ALTER TABLE \"Users\" ADD COLUMN \"{colName}\" {colType};");
+            }
+            catch
+            {
+                // Kolon zaten var, geç.
+            }
+        }
+    }
+
     // Seed verisi tasarım sisteminden (data.js) alındı.
     public static async Task SeedAsync(AppDb db, string adminEmail)
     {
         if (await db.Departments.AnyAsync()) return;
+
 
         var depts = new (string id, string name)[]
         {

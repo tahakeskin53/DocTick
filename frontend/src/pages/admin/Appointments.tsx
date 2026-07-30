@@ -7,6 +7,7 @@ import { Api, type AdminAppt } from '../../api/client';
 import { periodRange, trDate, type Mode } from './periodRange';
 
 const MODES: { key: Mode; label: string }[] = [
+  { key: 'tumu', label: 'Tümü' },
   { key: 'gun', label: 'Gün' },
   { key: 'hafta', label: 'Hafta' },
   { key: 'ay', label: 'Ay' },
@@ -22,7 +23,7 @@ const STATUSES: { key: StatusFilter; label: string }[] = [
 // ponytail: tüm randevular tek seferde çekilip client'ta gruplanıyor.
 // Tavan ~birkaç bin satır; aşılırsa endpoint'e ?from=&to= eklenip sunucuda filtrelenecek.
 export function Appointments() {
-  const [mode, setMode] = useState<Mode>('ay');
+  const [mode, setMode] = useState<Mode>('tumu');
   const [offset, setOffset] = useState(0);
   const [status, setStatus] = useState<StatusFilter>('hepsi');
   const { data } = useQuery({ queryKey: ['admin', 'appointments'], queryFn: () => Api.adminAppointments() });
@@ -57,9 +58,10 @@ export function Appointments() {
             onClick={() => { setMode(m.key); setOffset(0); }}>{m.label}</Button>
         ))}
         <span style={{ flex: 1 }} />
-        <Button size="sm" variant="secondary" aria-label="Önceki dönem" onClick={() => setOffset(o => o - 1)}>‹</Button>
+        {/* "Tümü" tek bir açık aralık — ileri/geri gezinmenin karşılığı yok. */}
+        {mode !== 'tumu' && <Button size="sm" variant="secondary" aria-label="Önceki dönem" onClick={() => setOffset(o => o - 1)}>‹</Button>}
         <span style={{ font: 'var(--text-h3)', minWidth: 180, textAlign: 'center' }}>{label}</span>
-        <Button size="sm" variant="secondary" aria-label="Sonraki dönem" onClick={() => setOffset(o => o + 1)}>›</Button>
+        {mode !== 'tumu' && <Button size="sm" variant="secondary" aria-label="Sonraki dönem" onClick={() => setOffset(o => o + 1)}>›</Button>}
         {offset !== 0 && <Button size="sm" variant="ghost" onClick={() => setOffset(0)}>Bugün</Button>}
       </div>
 

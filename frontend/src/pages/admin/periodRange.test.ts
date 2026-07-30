@@ -40,5 +40,11 @@ eq(day.start, day.end, 'Gün modunda başlangıç = bitiş');
 const nextWeek = periodRange('hafta', 1, sunday);
 eq(nextWeek.start, '2026-08-03', 'Hafta +1 → sonraki Pazartesi');
 
+// 7) "Tümü" hiçbir randevuyu elemez — asıl hata buydu: takvim ayı varsayılanı
+//    gelecek aya alınmış randevuları gizliyordu (6 randevudan 1'i görünüyordu).
+const all = periodRange('tumu', 0, new Date(2026, 6, 30));
+const dates = ['2026-07-31', '2026-08-03', '2026-08-05', '1999-01-01', '2099-12-31'];
+eq(dates.filter(d => d >= all.start && d <= all.end).length, dates.length, 'Tümü: her tarih aralıkta');
+
 if (fails) throw new Error(`${fails} kontrol başarısız`);
 console.log('periodRange: tüm kontroller geçti');

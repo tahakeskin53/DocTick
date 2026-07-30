@@ -12,6 +12,7 @@ import { Overview } from './pages/admin/Overview';
 import { Appointments as AdminAppointments } from './pages/admin/Appointments';
 import { Departments } from './pages/admin/Departments';
 import { Doctors } from './pages/admin/Doctors';
+import { DoctorPhotos } from './pages/admin/DoctorPhotos';
 import { Schedule } from './pages/admin/Schedule';
 import { EmailSettings } from './pages/admin/EmailSettings';
 import { Users } from './pages/admin/Users';
@@ -68,6 +69,7 @@ export const router = createBrowserRouter([
           { path: 'randevular', element: <AdminAppointments /> },
           { path: 'bolumler', element: <Departments /> },
           { path: 'doktorlar', element: <Doctors /> },
+          { path: 'fotograflar', element: <DoctorPhotos /> },
           { path: 'saatler', element: <Schedule /> },
           { path: 'eposta', element: <EmailSettings /> },
           { path: 'kullanicilar', element: <Users /> },
