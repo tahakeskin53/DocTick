@@ -1,5 +1,7 @@
 # Giriş → Ana Sayfa Süresi Optimizasyonu — Uygulama Planı
 
+> **Durum: TAMAMLANDI** (2026-07-30) — 6 görevin altısı da uygulandı, canlıya alındı ve `doctick.me` üzerinde ölçüldü. Sonuçlar ve iki uyarı için Task 6 sonundaki **"Sonuç"** bölümüne bak.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Oturumu açık bir kullanıcının siteyi açmasıyla ana sayfanın dolu görünmesi arasındaki süreyi ~1.2 sn'den ~0.7 sn'ye indirmek.
@@ -56,7 +58,7 @@ dotnet test backend.Tests/DocTick.Api.Tests.csproj
 - Modify: `frontend/index.html:9-10`
 - Modify: `frontend/src/api/client.ts:36-58` (`api()` imzası) ve `61-63` (`Api.me`, `Api.myAppointments`)
 
-- [ ] **Step 1: Önyükleme scriptini `index.html`'e ekle**
+- [x] **Step 1: Önyükleme scriptini `index.html`'e ekle**
 
 `frontend/index.html` içinde `<title>` satırından sonra, `</head>`'ten önce ekle:
 
@@ -82,7 +84,7 @@ dotnet test backend.Tests/DocTick.Api.Tests.csproj
 
 Script `type="module"` **değil** — modüller ertelenir (defer), klasik inline script ise anında çalışır. Vite'ın enjekte ettiği module script'ten önce çalışması bu yüzden garanti.
 
-- [ ] **Step 2a: `ApiError`'ı Node'un çalıştırabileceği hâle getir**
+- [x] **Step 2a: `ApiError`'ı Node'un çalıştırabileceği hâle getir**
 
 Projenin test deseni `.ts` dosyalarını Node ile **doğrudan** çalıştırıyor (tip-sıyırma modu). Bu mod TypeScript'in constructor parameter property kısayolunu desteklemiyor, dolayısıyla `client.ts`'i import eden hiçbir test çalışamaz:
 
@@ -109,7 +111,7 @@ export class ApiError extends Error {
 }
 ```
 
-- [ ] **Step 2: `api()` fonksiyonunu hazır `Response` kabul eder hâle getir**
+- [x] **Step 2: `api()` fonksiyonunu hazır `Response` kabul eder hâle getir**
 
 `frontend/src/api/client.ts` içinde `api` fonksiyonunun ilk satırlarını değiştir. Mevcut:
 
@@ -148,7 +150,7 @@ async function api<T>(path: string, opts: RequestInit = {}, pre?: Promise<Respon
 
 Fonksiyonun geri kalanı (401/403/`res.ok`/`204`/content-type kontrolleri) **değişmiyor**.
 
-- [ ] **Step 3: İki uç noktayı önyüklemeyi kullanacak şekilde bağla**
+- [x] **Step 3: İki uç noktayı önyüklemeyi kullanacak şekilde bağla**
 
 `frontend/src/api/client.ts` içinde `Api` nesnesinde iki satırı değiştir. Mevcut:
 
@@ -170,7 +172,7 @@ Yeni:
 
 İlk çağrı önyüklenmiş isteği devralır; sonraki çağrılar (`refresh()`, react-query refetch) `undefined` alıp normal `fetch` yapar. `Auth.tsx` ve `Home.tsx` **hiç değişmiyor**.
 
-- [ ] **Step 4: `takeBoot`'un tek seferlik olduğunu test et**
+- [x] **Step 4: `takeBoot`'un tek seferlik olduğunu test et**
 
 Projede yerleşik desen: framework yok, düz assert, Node doğrudan çalıştırır (bkz. `frontend/src/pages/admin/periodRange.test.ts`). Aynı deseni izleyerek `frontend/src/api/boot.test.ts` oluştur:
 
@@ -217,7 +219,7 @@ cd frontend && node src/api/boot.test.ts
 
 Beklenen: `OK: takeBoot tek seferlik`, çıkış kodu 0. `takeBoot` `export` edilmediyse import hatası verir — Step 2'deki `export` anahtar sözcüğünü unutma.
 
-- [ ] **Step 5: Derle ve önyüklemenin doğru yerde olduğunu doğrula**
+- [x] **Step 5: Derle ve önyüklemenin doğru yerde olduğunu doğrula**
 
 ```bash
 cd frontend && npm run build
@@ -233,7 +235,7 @@ node -e "const h=require('fs').readFileSync('dist/index.html','utf8');const b=h.
 
 Beklenen: `OK: onyukleme scripti module scriptinden once, offset ... < ...`
 
-- [ ] **Step 6: Tarayıcıda şelaleyi doğrula**
+- [x] **Step 6: Tarayıcıda şelaleyi doğrula**
 
 ```bash
 # 1. terminal
@@ -246,7 +248,7 @@ cd frontend && npm run preview
 
 Beklenen: `auth/me` ve `appointments` istekleri, `index-*.js` isteğiyle **aynı anda** başlar (waterfall'da yan yana, art arda değil). Öncesinde `me` bundle'dan sonra başlıyordu.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add frontend/index.html frontend/src/api/client.ts frontend/src/api/boot.test.ts
@@ -266,7 +268,7 @@ JSON API yanıtları bilerek listeye alınmıyor: zaten küçükler ve HTTPS üz
 **Files:**
 - Modify: `backend/Program.cs:36-38` (servis kaydı), `41-52` (middleware + cache başlıkları)
 
-- [ ] **Step 1: Sıkıştırma servisini kaydet**
+- [x] **Step 1: Sıkıştırma servisini kaydet**
 
 `backend/Program.cs` içinde `builder.Services.AddOpenApi();` satırından **önce** ekle:
 
@@ -282,7 +284,7 @@ builder.Services.AddResponseCompression(o =>
 });
 ```
 
-- [ ] **Step 2: Middleware'i statik dosyalardan önce devreye al ve cache başlıklarını ekle**
+- [x] **Step 2: Middleware'i statik dosyalardan önce devreye al ve cache başlıklarını ekle**
 
 `backend/Program.cs` içinde mevcut statik dosya bloğunu değiştir. Mevcut:
 
@@ -319,7 +321,7 @@ app.UseStaticFiles(new StaticFileOptions
 });
 ```
 
-- [ ] **Step 3: Derle**
+- [x] **Step 3: Derle**
 
 ```bash
 dotnet build backend/DocTick.Api.csproj
@@ -327,7 +329,7 @@ dotnet build backend/DocTick.Api.csproj
 
 Beklenen: `Build succeeded`, 0 hata.
 
-- [ ] **Step 4: Yerelde sıkıştırmayı ve cache başlığını doğrula**
+- [x] **Step 4: Yerelde sıkıştırmayı ve cache başlığını doğrula**
 
 SPA'nın `wwwroot`'ta olması gerekiyor (workflow'un yaptığının aynısı):
 
@@ -351,7 +353,7 @@ Cache-Control: public, max-age=31536000, immutable
 ```
 `Content-Length` ya yok (chunked) ya da ~150 KB civarı — **542642 olmamalı**. Hâlâ 542642 ve `Content-Encoding` yoksa, MIME türü listeyle eşleşmiyor demektir: `curl -I` ile `Content-Type`'ı kontrol et ve listeye o türü ekle.
 
-- [ ] **Step 5: `index.html`'in hâlâ `no-cache` olduğunu doğrula (regresyon kontrolü)**
+- [x] **Step 5: `index.html`'in hâlâ `no-cache` olduğunu doğrula (regresyon kontrolü)**
 
 ```bash
 curl -sS -o /dev/null -D - http://localhost:5080/ | grep -i "cache-control"
@@ -359,7 +361,7 @@ curl -sS -o /dev/null -D - http://localhost:5080/ | grep -i "cache-control"
 
 Beklenen: `Cache-Control: no-cache` — PWA güncellemelerinin takılmaması buna bağlı.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add backend/Program.cs
@@ -379,7 +381,7 @@ Hasta ve admin düzenleri tamamen farklı (`HastaLayout` üstte header, `AdminLa
 - Modify: `frontend/src/styles/styles.css` (dosya sonuna ekleme)
 - Modify: `frontend/src/router.tsx:18-24` (`Splash` kaldır), `29`, `40` (kullanım yerleri)
 
-- [ ] **Step 1: Nabız animasyonunu stillere ekle**
+- [x] **Step 1: Nabız animasyonunu stillere ekle**
 
 `frontend/src/styles/styles.css` dosyasının **sonuna** ekle:
 
@@ -390,7 +392,7 @@ Hasta ve admin düzenleri tamamen farklı (`HastaLayout` üstte header, `AdminLa
 @media (prefers-reduced-motion: reduce) { .dt-skel { animation: none; } }
 ```
 
-- [ ] **Step 2: İskelet bileşenlerini oluştur**
+- [x] **Step 2: İskelet bileşenlerini oluştur**
 
 `frontend/src/components/display/LayoutSkeleton.tsx` dosyasını oluştur:
 
@@ -447,7 +449,7 @@ export function AdminSkeleton() {
 }
 ```
 
-- [ ] **Step 3: `router.tsx`'te `Splash`'i iskeletlerle değiştir**
+- [x] **Step 3: `router.tsx`'te `Splash`'i iskeletlerle değiştir**
 
 `frontend/src/router.tsx` başındaki import'a ekle (mevcut import bloğunun sonuna):
 
@@ -487,7 +489,7 @@ function Splash() {
   if (loading) return <AdminSkeleton />;
 ```
 
-- [ ] **Step 4: Derle ve lint'le**
+- [x] **Step 4: Derle ve lint'le**
 
 ```bash
 cd frontend && npm run build && npm run lint
@@ -495,7 +497,7 @@ cd frontend && npm run build && npm run lint
 
 Beklenen: `tsc -b` hatasız (kullanılmayan `Splash` kalırsa TypeScript/oxlint uyarır — kaldırıldığını bu doğrular), oxlint temiz.
 
-- [ ] **Step 5: Gözle doğrula**
+- [x] **Step 5: Gözle doğrula**
 
 ```bash
 cd frontend && npm run preview
@@ -505,7 +507,7 @@ DevTools → Network → Throttling: **Slow 4G** → `http://localhost:5173/` ye
 
 Beklenen: Yükleme sırasında "DocTick yükleniyor…" yazısı yerine mavi header + logo + nabız atan gri kart blokları görünür; `/me` dönünce içerik yerine oturur, **düzen sıçraması olmaz** (header yüksekliği 58 px her iki durumda da aynı).
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add frontend/src/components/display/LayoutSkeleton.tsx frontend/src/styles/styles.css frontend/src/router.tsx
@@ -526,7 +528,7 @@ Bu değişiklik mevcut `AuthAuditTests.Write_AppendsParsableJsonLine` testini bo
 - Modify: `backend/Auth/AuthAudit.cs`
 - Modify: `backend.Tests/UnitTest1.cs` (`AuthAuditTests` sınıfı)
 
-- [ ] **Step 1: Testi yeni davranışa göre güncelle (önce test)**
+- [x] **Step 1: Testi yeni davranışa göre güncelle (önce test)**
 
 `backend.Tests/UnitTest1.cs` içindeki `AuthAuditTests` sınıfını tamamen değiştir:
 
@@ -572,7 +574,7 @@ public class AuthAuditTests
 }
 ```
 
-- [ ] **Step 2: Testi çalıştır — hâlâ geçmeli**
+- [x] **Step 2: Testi çalıştır — hâlâ geçmeli**
 
 ```bash
 dotnet test backend.Tests/DocTick.Api.Tests.csproj --filter "FullyQualifiedName~AuthAuditTests"
@@ -580,7 +582,7 @@ dotnet test backend.Tests/DocTick.Api.Tests.csproj --filter "FullyQualifiedName~
 
 Beklenen: PASS. (Yazım hâlâ senkron olduğu için `WaitForLine` ilk denemede bulur. Bu adım, testin yeni hâlinin doğru olduğunu üretim kodunu değiştirmeden kanıtlar.)
 
-- [ ] **Step 3: `AuthAudit.Write`'i arka plana taşı**
+- [x] **Step 3: `AuthAudit.Write`'i arka plana taşı**
 
 `backend/Auth/AuthAudit.cs` dosyasını tamamen değiştir:
 
@@ -637,7 +639,7 @@ public static class AuthAudit
 
 `Directory.GetCurrentDirectory()` çağrısının `Write` içinde (senkron tarafta) kalması önemli: arka plan görevi başladığında çalışma dizini değişmiş olabilir.
 
-- [ ] **Step 4: Tüm testleri çalıştır**
+- [x] **Step 4: Tüm testleri çalıştır**
 
 ```bash
 dotnet test backend.Tests/DocTick.Api.Tests.csproj
@@ -645,7 +647,7 @@ dotnet test backend.Tests/DocTick.Api.Tests.csproj
 
 Beklenen: `Passed! - Failed: 0`. `Write_AppendsParsableJsonLine` artık arka plan yazımını bekleyerek geçiyor.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add backend/Auth/AuthAudit.cs backend.Tests/UnitTest1.cs
@@ -669,7 +671,7 @@ Filtre kaldırılmayacak — dosyadaki `ponytail:` yorumundaki gerekçe gerçek:
 - Modify: `backend/Endpoints/AdminEndpoints.cs:125-161` (approve / reject / delete)
 - Test: `backend.Tests/UnitTest1.cs` (yeni `UserGateTests` sınıfı)
 
-- [ ] **Step 1: Başarısız testi yaz**
+- [x] **Step 1: Başarısız testi yaz**
 
 `backend.Tests/UnitTest1.cs` dosyasının **sonuna** ekle:
 
@@ -730,7 +732,7 @@ Dosyanın başındaki using'lere ekle (yoksa):
 using Microsoft.Extensions.Caching.Memory;
 ```
 
-- [ ] **Step 2: Testi çalıştır, DERLENMEDİĞİNİ doğrula**
+- [x] **Step 2: Testi çalıştır, DERLENMEDİĞİNİ doğrula**
 
 ```bash
 dotnet test backend.Tests/DocTick.Api.Tests.csproj --filter "FullyQualifiedName~UserGateTests"
@@ -738,7 +740,7 @@ dotnet test backend.Tests/DocTick.Api.Tests.csproj --filter "FullyQualifiedName~
 
 Beklenen: FAIL — `error CS0246: The type or namespace name 'UserGate' could not be found`. `UserGate` henüz yok.
 
-- [ ] **Step 3: `UserGate`'i yaz**
+- [x] **Step 3: `UserGate`'i yaz**
 
 `backend/Auth/UserGate.cs` dosyasını oluştur:
 
@@ -772,7 +774,7 @@ public sealed class UserGate(AppDb db, IMemoryCache cache)
 }
 ```
 
-- [ ] **Step 4: Testi çalıştır, GEÇTİĞİNİ doğrula**
+- [x] **Step 4: Testi çalıştır, GEÇTİĞİNİ doğrula**
 
 ```bash
 dotnet test backend.Tests/DocTick.Api.Tests.csproj --filter "FullyQualifiedName~UserGateTests"
@@ -780,7 +782,7 @@ dotnet test backend.Tests/DocTick.Api.Tests.csproj --filter "FullyQualifiedName~
 
 Beklenen: PASS.
 
-- [ ] **Step 5: `ActiveGuard`'ı `UserGate` kullanacak şekilde değiştir**
+- [x] **Step 5: `ActiveGuard`'ı `UserGate` kullanacak şekilde değiştir**
 
 `backend/Auth/Authz.cs` içindeki `ActiveGuard` sınıfının gövdesini değiştir. Mevcut iki metodun ilk iki satırı:
 
@@ -799,7 +801,7 @@ Her iki metotta da bunu şununla değiştir:
 
 Metotların geri kalanı (`if (u is null || u.Status != ...) return Results.Forbid();` ve `return await next(ctx);`) aynen kalır. `Microsoft.EntityFrameworkCore` using'i dosyada başka kullanılmıyorsa oxlint/derleyici uyarır; uyarı gelirse kaldır.
 
-- [ ] **Step 6: Servisleri kaydet**
+- [x] **Step 6: Servisleri kaydet**
 
 `backend/Program.cs` içinde `builder.Services.AddAuthorization();` satırından **sonra** ekle:
 
@@ -815,7 +817,7 @@ builder.Services.AddScoped<UserGate>();
 using DocTick.Api.Auth;
 ```
 
-- [ ] **Step 7: Onay/red/silme uçlarında önbelleği geçersiz kıl**
+- [x] **Step 7: Onay/red/silme uçlarında önbelleği geçersiz kıl**
 
 `backend/Endpoints/AdminEndpoints.cs` içinde üç ucu değiştir.
 
@@ -857,7 +859,7 @@ using DocTick.Api.Auth;
 
 Dosyanın başında `using DocTick.Api.Auth;` zaten var (`CurrentUser` kullanılıyor), ek using gerekmez.
 
-- [ ] **Step 8: Derle ve tüm testleri çalıştır**
+- [x] **Step 8: Derle ve tüm testleri çalıştır**
 
 ```bash
 dotnet build backend/DocTick.Api.csproj && dotnet test backend.Tests/DocTick.Api.Tests.csproj
@@ -865,7 +867,7 @@ dotnet build backend/DocTick.Api.csproj && dotnet test backend.Tests/DocTick.Api
 
 Beklenen: `Build succeeded` ve `Passed! - Failed: 0`.
 
-- [ ] **Step 9: Onay akışını elle doğrula (davranış regresyonu kontrolü)**
+- [x] **Step 9: Onay akışını elle doğrula (davranış regresyonu kontrolü)**
 
 Bu, planın bozabileceği tek gerçek davranış. `dotnet run --project backend` ile ayağa kaldır, iki tarayıcı profiliyle:
 
@@ -875,7 +877,7 @@ Bu, planın bozabileceği tek gerçek davranış. `dotnet run --project backend`
 
 Beklenen: Kullanıcı **anında** ana sayfaya girer (15 sn beklemeden). Girmiyorsa `gate.Invalidate` çağrısı eksik veya yanlış id ile çağrılmış demektir.
 
-- [ ] **Step 10: Commit**
+- [x] **Step 10: Commit**
 
 ```bash
 git add backend/Auth/UserGate.cs backend/Auth/Authz.cs backend/Program.cs backend/Endpoints/AdminEndpoints.cs backend.Tests/UnitTest1.cs
@@ -886,7 +888,7 @@ git commit -m "perf: yetki denetimine kisa omurlu onbellek + anlik invalidasyon"
 
 ## Task 6: Uçtan uca ölç ve doğrula
 
-- [ ] **Step 1: Deploy öncesi son kontrol**
+- [x] **Step 1: Deploy öncesi son kontrol**
 
 ```bash
 cd frontend && npm run build && npm run lint && cd ..
@@ -897,7 +899,7 @@ dotnet test backend.Tests/DocTick.Api.Tests.csproj
 
 Beklenen: dördü de hatasız, `Failed: 0`.
 
-- [ ] **Step 2: Deploy**
+- [x] **Step 2: Deploy**
 
 ```bash
 git push -u origin perf/login-to-home
@@ -905,7 +907,7 @@ git push -u origin perf/login-to-home
 
 Deploy `main`'e push ile tetikleniyor (`.github/workflows/azure-deploy.yml`). PR açıp merge et, ardından Actions sekmesinden "Deploy to Azure" işinin yeşil bittiğini gör.
 
-- [ ] **Step 3: Canlıda sıkıştırma ve cache'i doğrula**
+- [x] **Step 3: Canlıda sıkıştırma ve cache'i doğrula**
 
 ```bash
 JS=$(curl -sS https://doctick.azurewebsites.net/ | grep -o '/assets/index-[^"]*\.js')
@@ -914,7 +916,7 @@ curl -sS -o /dev/null -D - -H "Accept-Encoding: br, gzip" "https://doctick.azure
 
 Beklenen: `Content-Encoding: br` **ve** `Cache-Control: public, max-age=31536000, immutable`. Boyut 542642 değil, ~150 KB civarı.
 
-- [ ] **Step 4: Şelaleyi ölç**
+- [x] **Step 4: Şelaleyi ölç**
 
 Gerçek bir oturumla (giriş yapılmış tarayıcıda) `https://doctick.azurewebsites.net/` → DevTools → Network → "Disable cache" **kapalı** → yenile.
 
@@ -926,11 +928,47 @@ Kontrol listesi:
 
 Hedef: DOMContentLoaded → ana sayfa dolu arası **~0.7 sn** (öncesi ~1.2 sn).
 
-- [ ] **Step 5: Sonucu memkraft'a yaz**
+- [x] **Step 5: Sonucu memkraft'a yaz**
 
 ```bash
 PYTHONUTF8=1 .venv/Scripts/python.exe -c "from memkraft import MemKraft; mk=MemKraft(base_dir='memory'); mk.log_event('giris->ana sayfa optimizasyonu uygulandi: onyukleme fetch, brotli+immutable cache, iskelet, async audit, UserGate onbellek', tags='performance,deploy', importance='high'); mk.update('DocTick','Giris sonrasi ana sayfa suresi ~1.2sn -> ~0.7sn; statik varliklar brotli + immutable cache ile servis ediliyor', source='perf')"
 ```
+
+### Sonuç (ölçüm: 2026-07-30, canlı `doctick.me`, Chrome, oturumu açık hesap)
+
+**Plandan sapan iki nokta:**
+
+- **Step 2 — deploy `main`'e push ile değil, elle zip-deploy (OneDeploy) ile yapıldı**, doğrudan `perf/login-to-home` dalından. `main` hâlâ `75134e0` (27 Tem) ve `.github/workflows/azure-deploy.yml` orada yok, yani Actions hattı hiç çalışmadı. Yayındaki paket: `DocTick.Api.dll` mtime `2026-07-30T07:26:24Z`, frontend varlıklarıyla aynı deploy.
+- **Step 3–4 `doctick.azurewebsites.net` üzerinde değil `doctick.me` üzerinde doğrulandı** — default hostname `AllowedHosts` ile pasife çekildiği için artık 400 dönüyor.
+
+**A. Geri dönen kullanıcı (service worker precache sıcak), 3 tur:**
+
+| Tur | Bundle | `/api/auth/me` | `/api/appointments` | DCL | Kritik yol |
+|---|---|---|---|---|---|
+| 1 | 24 ms (cache) | 37 → 155 | **37** → 422 | 55 | 422 ms |
+| 2 | 10 ms (cache) | 22 → 187 | **22** → 162 | 47 | 187 ms |
+| 3 | 9 ms (cache) | 25 → 182 | **25** → 182 | 49 | 182 ms |
+
+Medyan **~187 ms**. 1. turdaki 422 ms aykırı değer — ilk isteğin `UserGate` önbelleğini doldurması.
+
+**B. Task 1 doğrulandı:** her turda `auth/me` ve `appointments` **aynı ms'de** başlıyor (22–37 ms), bundle parse ve React mount'tan önce. Seri şelale kırılmış.
+
+**C. Ağ maliyetleri (`cache: 'reload'`, 3'er tur medyan):**
+
+| Kaynak | Süre | Boyut | Başlıklar |
+|---|---|---|---|
+| `index.html` | 240 ms | 1.561 B | `br` · `no-cache` ✅ (Step 5 regresyon kontrolü geçti) |
+| `index-*.js` | 254 ms | 548.785 B → **223.528 B** tel üstünde | `br` · `max-age=31536000, immutable` ✅ |
+| `/api/auth/me` | 101 ms | 106 B | — |
+| `/api/appointments` | 112 ms | 2 B | — |
+
+Soğuk yol ≈ HTML (240) + max(bundle 254, API 112) + parse ≈ **~575 ms** — modelleme, ölçüm değil.
+
+**Hedefe göre:** geri dönen kullanıcı ~187 ms, soğuk ~575 ms — ikisi de `~0.7 sn` hedefinin altında.
+
+> ⚠️ **Bu gerçek bir A/B değil.** Plandaki `~1.2 sn` başlangıç değeri yeniden ölçülemez; eski build artık yayında değil. Doğrulanan şey "bugünkü hal hedefin altında", "1.2 → 0.7 iyileşmesi kanıtlandı" değil. Kesin öncesi/sonrası isteniyorsa `6c1bd56` geçici olarak deploy edilmeli.
+>
+> Ayrıca varyans yüksek: aynı `index.html` üç ölçümde 99 / 240 / 432 ms geldi. Tek sayılar değil medyanlar anlamlı.
 
 ---
 
