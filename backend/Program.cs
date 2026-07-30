@@ -43,6 +43,22 @@ builder.Services.AddResponseCompression(o =>
     o.MimeTypes = new[] { "text/javascript", "text/css", "text/html", "image/svg+xml", "application/manifest+json" };
 });
 
+// --- Statik dosya önbellek politikası ---
+// DI'a kaydediliyor, UseStaticFiles'a inline verilmiyor: MapFallbackToFile (SPA derin linkleri)
+// ayarı DI'dan okur. Inline verildiğinde /login, /randevularim ve kök yol fallback üzerinden
+// gelip no-cache'siz kalıyordu — bayat index.html, immutable /assets ile birlikte kullanıcıyı
+// eski hash'lere kilitler ve deploy'lar ulaşmaz.
+builder.Services.Configure<StaticFileOptions>(o => o.OnPrepareResponse = ctx =>
+{
+    // SW, giriş HTML'i ve manifest asla önbelleklenmesin — PWA güncellemeleri gecikmesin.
+    if (ctx.File.Name is "sw.js" or "index.html" or "manifest.webmanifest" or "registerSW.js")
+        ctx.Context.Response.Headers.CacheControl = "no-cache";
+    // /assets/* dosya adı içerik hash'i taşır (Vite) — içerik değişirse ad değişir.
+    // Sonsuza dek önbelleklenebilir; aksi hâlde her ziyarette boşuna 304 turu atılıyordu.
+    else if (ctx.Context.Request.Path.StartsWithSegments("/assets"))
+        ctx.Context.Response.Headers.CacheControl = "public, max-age=31536000, immutable";
+});
+
 // --- OpenAPI + Scalar ---
 builder.Services.AddOpenApi();
 
@@ -52,19 +68,7 @@ var app = builder.Build();
 // Statik dosyalar auth boru hattından önce — uygulama kabuğu herkese açık.
 app.UseResponseCompression(); // UseStaticFiles'tan ÖNCE olmalı — sonra gelirse yanıt çoktan yazılmış olur
 app.UseDefaultFiles();
-app.UseStaticFiles(new StaticFileOptions
-{
-    OnPrepareResponse = ctx =>
-    {
-        // SW, giriş HTML'i ve manifest asla önbelleklenmesin — PWA güncellemeleri gecikmesin.
-        if (ctx.File.Name is "sw.js" or "index.html" or "manifest.webmanifest" or "registerSW.js")
-            ctx.Context.Response.Headers.CacheControl = "no-cache";
-        // /assets/* dosya adı içerik hash'i taşır (Vite) — içerik değişirse ad değişir.
-        // Sonsuza dek önbelleklenebilir; aksi hâlde her ziyarette boşuna 304 turu atılıyordu.
-        else if (ctx.Context.Request.Path.StartsWithSegments("/assets"))
-            ctx.Context.Response.Headers.CacheControl = "public, max-age=31536000, immutable";
-    }
-});
+app.UseStaticFiles(); // seçenekler DI'dan (yukarıdaki Configure<StaticFileOptions>)
 
 app.UseAuthentication();
 app.UseAuthorization();
