@@ -49,6 +49,8 @@ export function takeBoot(key: 'me' | 'appts'): Promise<Response> | undefined {
 async function api<T>(path: string, opts: RequestInit = {}, pre?: Promise<Response>): Promise<T> {
   // ...opts önce; credentials/headers sonda — çağrıcı yanlışlıkla ezemez.
   // pre: index.html'de erken başlatılmış istek; geri kalan 401/403/JSON işleme aynen geçerli.
+  // ponytail: pre verilirse opts yok sayılır — bugün iki başlıksız GET var. Başlık/method
+  // gereken bir çağrı önyüklenecekse ayarı index.html'deki boot script'ine taşı.
   const res = await (pre ?? fetch(path, {
     ...opts,
     credentials: 'include',
