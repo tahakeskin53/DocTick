@@ -12,13 +12,23 @@ tier: core
 - **Started:** 2026-07-21
 - **Last Update:** 2026-07-30
 - **Last Accessed:** 2026-07-21 14:59:18
-- **Update Count:** 31
+- **Update Count:** 34
 - **Source:** setup
 
 ## Current State
 (Latest information accumulates here)
 
 ## Recent Activity
+- **2026-07-30** | DEPLOY REÇETESI + TUZAKLAR (2026-07-30, dogrulanmis):
+1) Temiz paket: `git archive HEAD | tar -x -C tmp` — calisma agacinda baska ajanlarin yarim isi olabilir, oradan build ETME.
+2) npm ci && npm run build; dist -> backend/wwwroot; `dotnet publish backend/DocTick.Api.csproj -c Release -r linux-x64 --self-contained false -o publish`. RID sart: portable publish zip'e bos dizin girdileri koyar, Kudu rsync duser.
+3) TUZAK (yeni): Windows'ta [IO.Compression.ZipFile]::CreateFromDirectory girdi adlarini TERS BOLU ile yazar. ZIP standardi duz bolu ister; Linux'ta ters bolu dosya adinin parcasi sayilir ve rsync 'failed to stat ... Invalid argument (22)' + exit 23 -> Kudu 400 verir. COZUM: ZipArchive'i elle ac, her dosya icin CreateEntryFromFile'a rel yolu `-replace '\\','/'` ile ver. Dogrulama: hicbir girdide ters bolu olmamali, 69 girdi.
+4) `az webapp deploy -g doctick-rg -n doctick --src-path app.zip --type zip` -> beklenen: status RuntimeSuccessful, numberOfInstancesFailed 0.
+5) Hata ayiklama: `az webapp log deployment show` JSON'unda \n'ler escape'li; PowerShell ile `-replace '\\n'` yapip 'failed to stat' satirlarini ara — dosya adi orada.
+NOT: `zip` komutu bu makinede YOK, PowerShell ZipArchive kullan.
+NOT: PublicEndpoints adina ragmen .RequireAuthorization() iceriyor — /api/departments'in 401 donmesi NORMAL, regresyon degil. [Source: deploy]
+- **2026-07-30** | Admin Randevular sayfasi varsayilan olarak Tumu kipinde acilir (eski varsayilan ay = gelecek aya alinan randevulari gizliyordu). Uretim doctick.me uzerinde calisiyor; local doctick.db ayri ve guncel degil. [Source: bugfix]
+- **2026-07-30** | Giris->ana sayfa perf plani tamamlandi ve canliya alindi. Olcum: geri donen kullanici ~187ms, soguk ~575ms; ikisi de 700ms hedefinin altinda. Statik varliklar brotli + immutable cache ile servis ediliyor. Deploy elle zip-deploy ile yapiliyor, main degil. [Source: perf]
 - **2026-07-30** | GIT/DEPLOY DURUMU (2026-07-30): TUZAK — origin/main ile perf/login-to-home ORTAK ATA 3aaf655'te ayrilmis ve FARKLI DIZIN DUZENINDE: main her seyi DocTick-Main/ altina almis (monorepo, eb6e068), dal duz duzende. `git merge-tree` SIFIR CAKISMA raporlar cunku yollar hic ortusmez — naif merge sessizce basarili olup projenin IKI kopyasini birakir. Fast-forward degildir, oyle sanip push etme. Uretime (doctick.me) deploy edilen DALDIR; main'deki monorepo 07-27'den kalma ayrik bir deneme. GitHub Actions deploy yolu CALISMIYOR: AZURE_WEBAPP_PUBLISH_PROFILE secret'i tanimsiz ve workflow hic basariyla kosmamis; deploy'lar elle zip/Kudu ile yapiliyor. Workflow dosyasi ayrica backend/DocTick.Api.csproj yollarini kullanir — main'in monorepo duzeninde o yollar yok. Not: .github/workflows/ iceren dal push'u icin gh token'inda `workflow` scope'u sart (`gh auth refresh -s workflow`). KACIRILAN KAZANC: deploy zip'i onceden sikistirilmis .br dosyalari iceriyor (js icin 150.564 bayt) ama Program.cs statik on-sikistirma pazarligi yapmadigi icin Kestrel calisma aninda uretiyor (223.528 bayt) — %33 daha kazanc masada duruyor. [Source: git]
 - **2026-07-30** | PERF (2026-07-30, dal perf/login-to-home): (1) index.html'de klasik script /api/auth/me + /api/appointments'i bundle inerken baslatir, client.ts takeBoot() ile tek seferlik devralir. Node 24 tip-siyirma modu parameter property kabul etmedigi icin ApiError duz atamaya cevrildi (yoksa client.ts hicbir Node testinden import edilemez). (2) AddResponseCompression: text/javascript ELLE eklenmeli — Kestrel .js'i text/javascript servis eder ama varsayilan MIME listesinde yalnizca application/javascript var, yoksa sikistirma sessizce calismaz. (3) TUZAK: StaticFileOptions UseStaticFiles'a inline verilirse MapFallbackToFile ayari DI'dan okudugu icin /, /login, /randevularim no-cache ALMAZ; yalnizca /index.html alir. Immutable /assets ile birlikte deploy'lari ulastirmaz. (4) AuthAudit dosya yazimi Task.Run'a alindi; HttpContext ve GetCurrentDirectory SENKRON okunmali. (5) UserGate 15 sn TTL; invalidasyon AdminEndpoints approve/reject/delete + AuthEndpoints /google (admin yukseltme ve on-onayli aktivasyon dallari — plan bunu atlamisti). (6) ActiveGuard filtresi KALDIRILMADI: claim tabanli policy Reject->Active ve Approve->Pending gecislerinde yanlis cevap veriyor. (7) Workbox /api/appointments NetworkFirst cache KALDIRILDI: kullanicidan bagimsiz ve kaliciydi, hesap degisince oncekinin listesini servis ediyordu. Offline liste istenirse cache adi kullanici kimligiyle anahtarlanmali. [Source: perf]
 - **2026-07-30** | SIZINTI SINIFI (tekrar etmesin): kullaniciya ozel veri, kullaniciya ozel OLMAYAN anahtarlarda onbellekleniyordu. Iki yer: (1) main.tsx'teki tek QueryClient sayfa omru boyunca yasiyor, ['appts'] anahtari herkeste ayni; cikis sadece setUser(null) yapiyordu, giris de Login.tsx'te setUser ile tam sayfa yenilemesiz oldugu icin yeni hesap oncekinin randevularini goruyordu (staleTime 30sn boyunca istek bile atmadan). (2) SW runtime cache 'appointments' NetworkFirst, kullanicidan bagimsiz ve diskte kalici. Backend suclu DEGILDI: PatientEndpoints.cs zaten .Where(a => a.UserId == uid) yapiyor. Duzeltme kimlik SINIRINA konuldu (AuthProvider), cagri yerlerine degil; ilk giriste (null -> A) bilerek temizlenmiyor cunku index.html boot istegini iptal edip perf kazancini geri goturuyor. [Source: bugfix]
@@ -63,6 +73,19 @@ tier: core
 ---
 
 ## Timeline (Full Record)
+
+- **2026-07-30** | DEPLOY REÇETESI + TUZAKLAR (2026-07-30, dogrulanmis):
+1) Temiz paket: `git archive HEAD | tar -x -C tmp` — calisma agacinda baska ajanlarin yarim isi olabilir, oradan build ETME.
+2) npm ci && npm run build; dist -> backend/wwwroot; `dotnet publish backend/DocTick.Api.csproj -c Release -r linux-x64 --self-contained false -o publish`. RID sart: portable publish zip'e bos dizin girdileri koyar, Kudu rsync duser.
+3) TUZAK (yeni): Windows'ta [IO.Compression.ZipFile]::CreateFromDirectory girdi adlarini TERS BOLU ile yazar. ZIP standardi duz bolu ister; Linux'ta ters bolu dosya adinin parcasi sayilir ve rsync 'failed to stat ... Invalid argument (22)' + exit 23 -> Kudu 400 verir. COZUM: ZipArchive'i elle ac, her dosya icin CreateEntryFromFile'a rel yolu `-replace '\\','/'` ile ver. Dogrulama: hicbir girdide ters bolu olmamali, 69 girdi.
+4) `az webapp deploy -g doctick-rg -n doctick --src-path app.zip --type zip` -> beklenen: status RuntimeSuccessful, numberOfInstancesFailed 0.
+5) Hata ayiklama: `az webapp log deployment show` JSON'unda \n'ler escape'li; PowerShell ile `-replace '\\n'` yapip 'failed to stat' satirlarini ara — dosya adi orada.
+NOT: `zip` komutu bu makinede YOK, PowerShell ZipArchive kullan.
+NOT: PublicEndpoints adina ragmen .RequireAuthorization() iceriyor — /api/departments'in 401 donmesi NORMAL, regresyon degil. [Source: deploy]
+
+- **2026-07-30** | Admin Randevular sayfasi varsayilan olarak Tumu kipinde acilir (eski varsayilan ay = gelecek aya alinan randevulari gizliyordu). Uretim doctick.me uzerinde calisiyor; local doctick.db ayri ve guncel degil. [Source: bugfix]
+
+- **2026-07-30** | Giris->ana sayfa perf plani tamamlandi ve canliya alindi. Olcum: geri donen kullanici ~187ms, soguk ~575ms; ikisi de 700ms hedefinin altinda. Statik varliklar brotli + immutable cache ile servis ediliyor. Deploy elle zip-deploy ile yapiliyor, main degil. [Source: perf]
 
 - **2026-07-30** | GIT/DEPLOY DURUMU (2026-07-30): TUZAK — origin/main ile perf/login-to-home ORTAK ATA 3aaf655'te ayrilmis ve FARKLI DIZIN DUZENINDE: main her seyi DocTick-Main/ altina almis (monorepo, eb6e068), dal duz duzende. `git merge-tree` SIFIR CAKISMA raporlar cunku yollar hic ortusmez — naif merge sessizce basarili olup projenin IKI kopyasini birakir. Fast-forward degildir, oyle sanip push etme. Uretime (doctick.me) deploy edilen DALDIR; main'deki monorepo 07-27'den kalma ayrik bir deneme. GitHub Actions deploy yolu CALISMIYOR: AZURE_WEBAPP_PUBLISH_PROFILE secret'i tanimsiz ve workflow hic basariyla kosmamis; deploy'lar elle zip/Kudu ile yapiliyor. Workflow dosyasi ayrica backend/DocTick.Api.csproj yollarini kullanir — main'in monorepo duzeninde o yollar yok. Not: .github/workflows/ iceren dal push'u icin gh token'inda `workflow` scope'u sart (`gh auth refresh -s workflow`). KACIRILAN KAZANC: deploy zip'i onceden sikistirilmis .br dosyalari iceriyor (js icin 150.564 bayt) ama Program.cs statik on-sikistirma pazarligi yapmadigi icin Kestrel calisma aninda uretiyor (223.528 bayt) — %33 daha kazanc masada duruyor. [Source: git]
 
