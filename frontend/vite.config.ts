@@ -36,15 +36,10 @@ export default defineConfig({
       workbox: {
         // SPA navigasyonları offline'da index.html'e düşer; /api asla HTML'e düşmesin.
         navigateFallbackDenylist: [/^\/api\//],
-        runtimeCaching: [
-          {
-            // Yalnız Randevularım listesi (GET): önce ağ, ağ yoksa son önbellek.
-            // Workbox route'ları varsayılan olarak yalnız GET ile eşleşir — POST /api/appointments önbelleklenmez.
-            urlPattern: ({ url }) => url.pathname === '/api/appointments',
-            handler: 'NetworkFirst',
-            options: { cacheName: 'appointments', networkTimeoutSeconds: 3 },
-          },
-        ],
+        // /api/appointments için NetworkFirst runtime cache KALDIRILDI: 'appointments'
+        // önbelleği kullanıcıdan bağımsızdı ve diskte kalıcıydı, yani ağ yavaşsa (>3 sn)
+        // veya yoksa yeni kullanıcıya öncekinin randevu listesi servis ediliyordu.
+        // Offline liste istenirse önbellek adı kullanıcı kimliğiyle anahtarlanmalı.
       },
     }),
   ],
