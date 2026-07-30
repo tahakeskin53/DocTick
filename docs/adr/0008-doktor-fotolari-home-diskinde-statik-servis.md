@@ -1,0 +1,7 @@
+# ADR-0008 — Doktor Profil Fotoğraflarının Sunucu Tarafı Kalıcı Diskinde Saklanması ve Statik Servis Edilmesi
+
+**Bağlam:** Adminlerin yüklediği doktor profil fotoğraflarının her kullanıcıda ve tarayıcıda görünmesi gerekmektedir. Önceki durum (localStorage tabanlı) veriyi sadece yükleyen tarayıcıda tutuyordu ve senkronizasyon yoktu.
+
+**Karar:** Fotoğrafların tek kaynaktan (`Doctor.PhotoUrl`) okunması, dosyaların Azure App Service üzerinde kalıcı olan `/home/photos` disk dizininde (lokal geliştirmede `./photos` dizini) saklanması, sunucuda ikinci bir `PhysicalFileProvider` ile `/uploads/doctors` yolu altından statik servis edilmesi kararlaştırıldı. Fotoğraf güncellemelerinde veri kaybını önlemek ve tarayıcılarda `immutable` önbelleklemeyi etkinleştirmek için dosya adları benzersiz rastgele sürüm damgasıyla (`{id}-{8_hex}{ext}`) üretilir. Dosya yüklemeleri, istemci tarafında üretilen Data URL'in JSON PUT isteği olarak post edilmesiyle yapılır (antiforgery ve multipart/IFormFile karmaşıklığından kaçınmak için). Magic byte kontrolü ile dosya türü sunucuda doğrulanır ve 5 MB boyutu aşan girdiler reddedilir.
+
+**Sonuçlar:** Azure App Service'e yapılan yeni deploy'lar wwwroot dışındaki dosyaları silmez, böylece fotoğraflar kalıcı olur. İlk indirmeden sonra tarayıcı önbelleğinden (`max-age=31536000, immutable`) gelen dosyalar sayesinde sunucuya istek yükü neredeyse sıfıra iner. Sunucu tarafında resim kırpma ve ölçekleme kütüphaneleri eklenmeyerek bağımlılık yükü düşük tutulmuştur.

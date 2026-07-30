@@ -17,7 +17,7 @@ Kimlik doğrulama her istekte **cookie** (`DocTick.Auth`) ile. Yetki, `ActiveGua
 | Method | Route | Davranış |
 |---|---|---|
 | GET | `/api/departments?active=true` | Bölümleri listeler; opsiyonel aktif filtresi, isme göre sıralı. `DepartmentDto[]`. |
-| GET | `/api/doctors?deptId=&active=` | Doktorları bölüm adıyla listeler; opsiiyonel filtreler. `DoctorDto[]`. |
+| GET | `/api/doctors?deptId=&active=` | Doktorları bölüm adıyla listeler; opsiyonel filtreler. `DoctorDto[]` (photoUrl dahil). |
 | GET | `/api/availability?doctorId=&date=yyyy-MM-dd` | O doktor/tarih için müsait `"HH:mm"` saatleri: açık slotlar − onaylı randevular (bugün için geçmiş saatler hariç). |
 | POST | `/api/contact` | Body: `{ subject(1-150), message(1-2000) }`. Metni HTML-encode eder, `EmailService` ile `Admin:Email`'a gönderir. Gönderim başarısızsa `502`. |
 
@@ -38,10 +38,12 @@ Kimlik doğrulama her istekte **cookie** (`DocTick.Auth`) ile. Yetki, `ActiveGua
 | POST | `/api/admin/departments` | Body: `{ name, isActive }`. `201`. |
 | PUT | `/api/admin/departments/{id}` | Güncelle. |
 | DELETE | `/api/admin/departments/{id}` | Üzerinde doktor varsa `409`; yoksa `204`. |
-| GET | `/api/admin/doctors` | Doktorlar + bölüm adları. |
+| GET | `/api/admin/doctors` | Doktorlar + bölüm adları (photoUrl dahil). |
 | POST | `/api/admin/doctors` | Body: `{ name, departmentId, isActive }`. Varsayılan haftalık slot ızgarası otomatik oluşturulur. |
 | PUT | `/api/admin/doctors/{id}` | Güncelle. |
 | DELETE | `/api/admin/doctors/{id}` | Randevu geçmişi varsa `409`; yoksa `204`. |
+| PUT | `/api/admin/doctors/{id}/photo` | Body: `{ dataUrl, url }`. Profil fotoğrafı kaydeder (dataUrl Base64 veya hazır galeri url'i), eski dosyayı siler. |
+| DELETE | `/api/admin/doctors/{id}/photo` | Profil fotoğrafını sıfırlar ve diskteki dosyayı temizler. |
 | GET | `/api/admin/schedule?doctorId=` | `ScheduleGrid{DoctorId, ScheduleCell[](DayOfWeek, Time, IsOpen)}` — tam 7×10 ızgara. |
 | PUT | `/api/admin/schedule?doctorId=` | Tümünü değiştir: mevcut slotları sil, gönderilen ızgarayı (geçerli gün/saatlere filtrelenmiş) ekler. |
 | GET | `/api/admin/users` | Tüm kullanıcılar `UserDto[]`, en yeniden eskiye. |
