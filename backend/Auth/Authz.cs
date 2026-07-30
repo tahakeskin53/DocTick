@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using Microsoft.EntityFrameworkCore;
 using DocTick.Api.Models;
 
 namespace DocTick.Api.Auth;
@@ -26,18 +25,16 @@ public static class ActiveGuard
 {
     public static async ValueTask<object?> Patient(EndpointFilterInvocationContext ctx, EndpointFilterDelegate next)
     {
-        var db = ctx.HttpContext.RequestServices.GetRequiredService<AppDb>();
-        var u = await db.Users.AsNoTracking()
-            .FirstOrDefaultAsync(x => x.Id == CurrentUser.Uid(ctx.HttpContext.User), ctx.HttpContext.RequestAborted);
+        var gate = ctx.HttpContext.RequestServices.GetRequiredService<UserGate>();
+        var u = await gate.GetAsync(CurrentUser.Uid(ctx.HttpContext.User), ctx.HttpContext.RequestAborted);
         if (u is null || u.Status != UserStatus.Active) return Results.Forbid();
         return await next(ctx);
     }
 
     public static async ValueTask<object?> Admin(EndpointFilterInvocationContext ctx, EndpointFilterDelegate next)
     {
-        var db = ctx.HttpContext.RequestServices.GetRequiredService<AppDb>();
-        var u = await db.Users.AsNoTracking()
-            .FirstOrDefaultAsync(x => x.Id == CurrentUser.Uid(ctx.HttpContext.User), ctx.HttpContext.RequestAborted);
+        var gate = ctx.HttpContext.RequestServices.GetRequiredService<UserGate>();
+        var u = await gate.GetAsync(CurrentUser.Uid(ctx.HttpContext.User), ctx.HttpContext.RequestAborted);
         if (u is null || u.Role != UserRole.Admin) return Results.Forbid();
         return await next(ctx);
     }

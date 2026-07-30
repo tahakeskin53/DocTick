@@ -2,6 +2,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using DocTick.Api.Auth;
 using DocTick.Api.Models;
 using DocTick.Api.Services;
@@ -206,5 +207,54 @@ public class ReminderWindowTests
     public void FormatDate_ProducesTurkishLabel()
     {
         Assert.Equal("24 Tem 2026, Cum", ReminderService.FormatDate("2026-07-24"));
+    }
+}
+
+public class UserGateTests
+{
+    static SqliteConnection OpenShared()
+    {
+        var c = new SqliteConnection("DataSource=:memory:");
+        c.Open();
+        return c;
+    }
+
+    static AppDb NewDb(SqliteConnection c)
+    {
+        var db = new AppDb(new DbContextOptionsBuilder<AppDb>().UseSqlite(c).Options);
+        db.Database.EnsureCreated();
+        return db;
+    }
+
+    // Önbellek gerçekten sorguyu atlamalı (bayat değer döner) ve Invalidate onu anında tazelemeli.
+    [Fact]
+    public async Task Caches_UntilInvalidated()
+    {
+        var conn = OpenShared();
+        var seed = NewDb(conn);
+        var u = new User { GoogleSub = "s1", Email = "a@b.c", Name = "Hasta", Status = UserStatus.Active };
+        seed.Users.Add(u);
+        await seed.SaveChangesAsync();
+        var uid = u.Id;
+        await seed.DisposeAsync();
+
+        var cache = new MemoryCache(new MemoryCacheOptions());
+        var gate = new UserGate(NewDb(conn), cache);
+
+        Assert.Equal(UserStatus.Active, (await gate.GetAsync(uid))!.Status);
+
+        // Durumu DB'de ayrı bir bağlamdan değiştir — önbellek bunu görmemeli.
+        var other = NewDb(conn);
+        (await other.Users.FirstAsync(x => x.Id == uid)).Status = UserStatus.Rejected;
+        await other.SaveChangesAsync();
+        await other.DisposeAsync();
+
+        Assert.Equal(UserStatus.Active, (await gate.GetAsync(uid))!.Status); // bayat = önbellek çalışıyor
+
+        gate.Invalidate(uid);
+
+        // Invalidate sonrası taze okuma için yeni bir DbContext (aynı bağlantı, aynı veri).
+        var fresh = new UserGate(NewDb(conn), cache);
+        Assert.Equal(UserStatus.Rejected, (await fresh.GetAsync(uid))!.Status);
     }
 }

@@ -122,31 +122,33 @@ public static class AdminEndpoints
             Results.Ok(await db.Users.AsNoTracking().OrderByDescending(u => u.CreatedAt)
                 .Select(u => new UserDto(u.Id, u.Email, u.Name, u.Role.ToString(), u.Status.ToString(), u.CreatedAt)).ToListAsync(ct)));
 
-        grp.MapPost("/users/{id}/approve", async (int id, AppDb db, EmailService email, CancellationToken ct) =>
+        grp.MapPost("/users/{id}/approve", async (int id, AppDb db, EmailService email, UserGate gate, CancellationToken ct) =>
         {
             var u = await db.Users.FindAsync([id], ct);
             if (u is null) return Results.NotFound();
             u.Status = UserStatus.Active;
             await db.SaveChangesAsync(ct);
+            gate.Invalidate(id); // yetki önbelleği bayat kalmasın — onay anında geçerli olmalı
             // Best-effort: e-posta başarısız olsa da onay geri alınmaz (ör. Resend test modu 403).
             try { await email.SendAsync(u.Email, "DocTick — Hesabınız onaylandı", EmailTemplates.Approved(u.Name)); }
             catch { /* onay tamamlandı; bildirim gönderilemedi */ }
             return Results.Ok(new UserDto(u.Id, u.Email, u.Name, u.Role.ToString(), u.Status.ToString(), u.CreatedAt));
         });
 
-        grp.MapPost("/users/{id}/reject", async (int id, AppDb db, EmailService email, CancellationToken ct) =>
+        grp.MapPost("/users/{id}/reject", async (int id, AppDb db, EmailService email, UserGate gate, CancellationToken ct) =>
         {
             var u = await db.Users.FindAsync([id], ct);
             if (u is null) return Results.NotFound();
             u.Status = UserStatus.Rejected;
             await db.SaveChangesAsync(ct);
+            gate.Invalidate(id); // reddedilen kullanıcı bir sonraki istekte 403 almalı
             // Best-effort: e-posta başarısız olsa da red geri alınmaz.
             try { await email.SendAsync(u.Email, "DocTick — Hesap başvurunuz", EmailTemplates.Rejected(u.Name)); }
             catch { /* red tamamlandı; bildirim gönderilemedi */ }
             return Results.Ok(new UserDto(u.Id, u.Email, u.Name, u.Role.ToString(), u.Status.ToString(), u.CreatedAt));
         });
 
-        grp.MapDelete("/users/{id}", async (int id, AppDb db, ClaimsPrincipal me, CancellationToken ct) =>
+        grp.MapDelete("/users/{id}", async (int id, AppDb db, ClaimsPrincipal me, UserGate gate, CancellationToken ct) =>
         {
             var u = await db.Users.FindAsync([id], ct);
             if (u is null) return Results.NotFound();
@@ -158,6 +160,7 @@ public static class AdminEndpoints
             db.Appointments.RemoveRange(appts);
             db.Users.Remove(u);
             await db.SaveChangesAsync(ct);
+            gate.Invalidate(id); // silinen kullanıcının önbellekteki kaydı kalmasın
             return Results.NoContent();
         });
 

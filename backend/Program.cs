@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
+using DocTick.Api.Auth;
 using DocTick.Api.Endpoints;
 using DocTick.Api.Models;
 using DocTick.Api.Services;
@@ -32,6 +33,10 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     });
 
 builder.Services.AddAuthorization();
+
+// Yetki denetimi önbelleği — ActiveGuard'ın istek başına DB turunu kaldırır (bkz. UserGate).
+builder.Services.AddMemoryCache();
+builder.Services.AddScoped<UserGate>();
 
 // --- Yanıt sıkıştırma ---
 // Linux App Service'te uygulama doğrudan Kestrel; gzip yapan bir ön uç YOK — burada açılmazsa
