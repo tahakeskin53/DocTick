@@ -10,6 +10,7 @@ public static class AuthAudit
 
     public static void Write(HttpContext ctx, string evt, string? email = null, string? reason = null)
     {
+        // HttpContext yanıt tamamlandıktan sonra güvenle okunamaz — alanlar ŞİMDİ, senkron okunur.
         var line = JsonSerializer.Serialize(new
         {
             ts = DateTime.UtcNow.ToString("o"),
@@ -19,13 +20,29 @@ public static class AuthAudit
             ip = ctx.Connection.RemoteIpAddress?.ToString(),
             ua = ctx.Request.Headers.UserAgent.ToString(),
         });
-        // Prod'da AUTH_AUDIT_DIR=/home/LogFiles/auth verilirse her deploy'da silinen wwwroot yerine kalıcı Azure Files'a yazar.
-        // `dotnet run --project backend` → backend/logs (dev varsayılanı değişmez).
+
+        // Prod'da AUTH_AUDIT_DIR=/home/LogFiles/auth → Azure Files (SMB). Dosya yazımı istek yolunda
+        // kalırsa her giriş ağ diski gecikmesini öder, üstelik kilit eşzamanlı girişleri sıraya sokar.
+        // ponytail: fire-and-forget; süreç yazım tamamlanmadan ölürse son satır(lar) kaybolabilir —
+        // audit için kabul edilen üst sınır. Garanti gerekirse Channel + BackgroundService'e yükselt.
         var dir = Environment.GetEnvironmentVariable("AUTH_AUDIT_DIR") ?? Path.Combine(Directory.GetCurrentDirectory(), "logs");
-        lock (_gate)
+        _ = Task.Run(() => Append(dir, line));
+    }
+
+    static void Append(string dir, string line)
+    {
+        try
         {
-            Directory.CreateDirectory(dir);
-            File.AppendAllText(Path.Combine(dir, $"auth-{DateTime.UtcNow:yyyy-MM-dd}.log"), line + "\n");
+            lock (_gate)
+            {
+                Directory.CreateDirectory(dir);
+                File.AppendAllText(Path.Combine(dir, $"auth-{DateTime.UtcNow:yyyy-MM-dd}.log"), line + "\n");
+            }
+        }
+        catch (Exception ex)
+        {
+            // Arka plan görevinde yakalanmayan istisna süreci düşürebilir — audit yazımı uygulamayı öldürmemeli.
+            Console.Error.WriteLine($"[AuthAudit] yazilamadi: {ex.Message}");
         }
     }
 }

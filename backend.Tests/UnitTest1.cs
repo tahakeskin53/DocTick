@@ -128,6 +128,26 @@ public class DbTests
 
 public class AuthAuditTests
 {
+    // Dosya yazımı artık istek yolunda değil (arka plan) — satır hemen değil, kısa süre içinde görünür.
+    static string? WaitForLine(string path, string marker, int timeoutMs = 5000)
+    {
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+        while (sw.ElapsedMilliseconds < timeoutMs)
+        {
+            if (File.Exists(path))
+            {
+                try
+                {
+                    var line = File.ReadLines(path).LastOrDefault(l => l.Contains(marker));
+                    if (line is not null) return line;
+                }
+                catch (IOException) { /* eşzamanlı yazma sürüyor — tekrar dene */ }
+            }
+            Thread.Sleep(25);
+        }
+        return null;
+    }
+
     // AuthAudit.Write bugünkü auth-*.log dosyasına geçerli JSON bir satır eklemeli.
     [Fact]
     public void Write_AppendsParsableJsonLine()
@@ -137,8 +157,9 @@ public class AuthAuditTests
         AuthAudit.Write(ctx, marker, "a@b.c", "sebep-x");
 
         var path = Path.Combine(Directory.GetCurrentDirectory(), "logs", $"auth-{DateTime.UtcNow:yyyy-MM-dd}.log");
-        var last = File.ReadLines(path).Last(l => l.Contains(marker));
-        using var doc = JsonDocument.Parse(last); // parse edilemezse fırlatır → test kırılır
+        var last = WaitForLine(path, marker);
+        Assert.NotNull(last); // süre içinde yazılmadıysa arka plan yazımı bozuk
+        using var doc = JsonDocument.Parse(last!); // parse edilemezse fırlatır → test kırılır
         Assert.Equal(marker, doc.RootElement.GetProperty("evt").GetString());
         Assert.Equal("a@b.c", doc.RootElement.GetProperty("email").GetString());
         Assert.Equal("sebep-x", doc.RootElement.GetProperty("reason").GetString());
