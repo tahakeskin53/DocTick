@@ -16,7 +16,7 @@ public static class AuthEndpoints
     {
         var grp = app.MapGroup("/api/auth").WithTags("Auth");
 
-        grp.MapPost("/google", async (GoogleLoginRequest req, AppDb db, HttpContext ctx) =>
+        grp.MapPost("/google", async (GoogleLoginRequest req, AppDb db, HttpContext ctx, UserGate gate) =>
         {
             var clientId = cfg["Google:ClientId"];
             if (string.IsNullOrWhiteSpace(clientId))
@@ -74,6 +74,11 @@ public static class AuthEndpoints
                 user.Status = UserStatus.Active;
                 await db.SaveChangesAsync();
             }
+
+            // Yukarıdaki iki dal Status/Role değiştirebiliyor (admin yükseltme, ön-onaylı aktivasyon).
+            // Tek noktada geçersiz kıl: dal başına ayrı çağrıdan kısa ve biri unutulamaz.
+            // Yeni kullanıcıda önbellekte kayıt yok — Remove zararsız no-op.
+            gate.Invalidate(user.Id);
 
             var claims = new List<Claim>
             {
