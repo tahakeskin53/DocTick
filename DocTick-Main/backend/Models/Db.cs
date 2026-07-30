@@ -116,6 +116,14 @@ public class AppDb(DbContextOptions<AppDb> options) : DbContext(options)
 
 public static class DbSeeder
 {
+    // Program.cs tarafından çağrılan şema-uyumluluk kancası.
+    // Şu an için ek işlem gerekmiyor; yöntem bilerek idempotent/no-op.
+    public static Task EnsureSchemaAsync(AppDb db)
+    {
+        ArgumentNullException.ThrowIfNull(db);
+        return Task.CompletedTask;
+    }
+
     // Seed verisi tasarım sisteminden (data.js) alındı.
     public static async Task SeedAsync(AppDb db, string adminEmail)
     {
