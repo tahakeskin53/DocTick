@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using DocTick.Api.Auth;
@@ -53,15 +54,21 @@ builder.Services.AddResponseCompression(o =>
 // ayarı DI'dan okur. Inline verildiğinde /login, /randevularim ve kök yol fallback üzerinden
 // gelip no-cache'siz kalıyordu — bayat index.html, immutable /assets ile birlikte kullanıcıyı
 // eski hash'lere kilitler ve deploy'lar ulaşmaz.
-builder.Services.Configure<StaticFileOptions>(o => o.OnPrepareResponse = ctx =>
+builder.Services.Configure<StaticFileOptions>(o =>
 {
-    // SW, giriş HTML'i ve manifest asla önbelleklenmesin — PWA güncellemeleri gecikmesin.
-    if (ctx.File.Name is "sw.js" or "index.html" or "manifest.webmanifest" or "registerSW.js")
-        ctx.Context.Response.Headers.CacheControl = "no-cache";
-    // /assets/* dosya adı içerik hash'i taşır (Vite) — içerik değişirse ad değişir.
-    // Sonsuza dek önbelleklenebilir; aksi hâlde her ziyarette boşuna 304 turu atılıyordu.
-    else if (ctx.Context.Request.Path.StartsWithSegments("/assets"))
-        ctx.Context.Response.Headers.CacheControl = "public, max-age=31536000, immutable";
+    // ".br" MIME listesinde yok; provider olmadan StaticFileMiddleware önceden sıkıştırılmış
+    // dosyayı "bilinmeyen tür" sayıp 404 döndürür.
+    o.ContentTypeProvider = new BrotliContentTypeProvider();
+    o.OnPrepareResponse = ctx =>
+    {
+        // SW, giriş HTML'i ve manifest asla önbelleklenmesin — PWA güncellemeleri gecikmesin.
+        if (ctx.File.Name is "sw.js" or "index.html" or "manifest.webmanifest" or "registerSW.js")
+            ctx.Context.Response.Headers.CacheControl = "no-cache";
+        // /assets/* dosya adı içerik hash'i taşır (Vite) — içerik değişirse ad değişir.
+        // Sonsuza dek önbelleklenebilir; aksi hâlde her ziyarette boşuna 304 turu atılıyordu.
+        else if (ctx.Context.Request.Path.StartsWithSegments("/assets"))
+            ctx.Context.Response.Headers.CacheControl = "public, max-age=31536000, immutable";
+    };
 });
 
 // --- OpenAPI + Scalar ---
@@ -72,6 +79,26 @@ var app = builder.Build();
 // --- SPA statik servis (üretim: frontend/dist → wwwroot; dev'de Vite 5173 kullanılır) ---
 // Statik dosyalar auth boru hattından önce — uygulama kabuğu herkese açık.
 app.UseResponseCompression(); // UseStaticFiles'tan ÖNCE olmalı — sonra gelirse yanıt çoktan yazılmış olur
+
+// Önceden sıkıştırılmış varlık: /assets/x.js istenir, x.js.br varsa onu gönder.
+// Build zamanı brotli kalite 11 (~150 KB) — çalışma anındaki hız öncelikli sıkıştırma ~224 KB.
+// Content-Encoding'i burada set etmek ResponseCompression'ı da devre dışı bırakır (zaten kodlanmış
+// yanıtı ikinci kez sıkıştırmaz). .br yoksa hiçbir şey yapmayız, çalışma anı sıkıştırmasına düşer.
+app.Use(async (ctx, next) =>
+{
+    var path = ctx.Request.Path.Value;
+    if (path is not null
+        && path.StartsWith("/assets/", StringComparison.Ordinal)
+        && ctx.Request.Headers.AcceptEncoding.ToString().Contains("br", StringComparison.Ordinal)
+        && app.Environment.WebRootFileProvider.GetFileInfo(path + ".br").Exists)
+    {
+        ctx.Request.Path = path + ".br";
+        ctx.Response.Headers.ContentEncoding = "br";
+        ctx.Response.Headers.Vary = "Accept-Encoding"; // ara önbellekler kodlanmışı kodsuza servis etmesin
+    }
+    await next();
+});
+
 app.UseDefaultFiles();
 app.UseStaticFiles(); // seçenekler DI'dan (yukarıdaki Configure<StaticFileOptions>)
 
@@ -114,3 +141,15 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.Run();
+
+// ".br" kabuğunu soyup gerçek MIME'i bulur: index-abc.js.br -> text/javascript.
+// Olmazsa StaticFileMiddleware bilinmeyen uzantıyı servis etmeyi reddeder (404).
+public sealed class BrotliContentTypeProvider : IContentTypeProvider
+{
+    static readonly FileExtensionContentTypeProvider Inner = new();
+
+    public bool TryGetContentType(string subpath, out string contentType) =>
+        Inner.TryGetContentType(
+            subpath.EndsWith(".br", StringComparison.Ordinal) ? subpath[..^3] : subpath,
+            out contentType!);
+}
