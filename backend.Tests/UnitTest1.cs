@@ -139,8 +139,15 @@ public class AuthAuditTests
             {
                 try
                 {
-                    var line = File.ReadLines(path).LastOrDefault(l => l.Contains(marker));
-                    if (line is not null) return line;
+                    using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                    using var sr = new StreamReader(fs);
+                    string? line = null;
+                    string? match = null;
+                    while ((line = sr.ReadLine()) is not null)
+                    {
+                        if (line.Contains(marker)) match = line;
+                    }
+                    if (match is not null) return match;
                 }
                 catch (IOException) { /* eşzamanlı yazma sürüyor — tekrar dene */ }
             }
@@ -258,3 +265,62 @@ public class UserGateTests
         Assert.Equal(UserStatus.Rejected, (await fresh.GetAsync(uid))!.Status);
     }
 }
+
+public class ProfileTests
+{
+    private static SqliteConnection OpenShared()
+    {
+        var c = new SqliteConnection("DataSource=:memory:");
+        c.Open();
+        return c;
+    }
+
+    private static AppDb NewDb(SqliteConnection c)
+    {
+        var db = new AppDb(new DbContextOptionsBuilder<AppDb>().UseSqlite(c).Options);
+        db.Database.EnsureCreated();
+        return db;
+    }
+
+    [Fact]
+    public async Task ProfileUpdate_ChangesUserNameInDb()
+    {
+        using var conn = OpenShared();
+        var seed = NewDb(conn);
+        var u = new User { GoogleSub = "sub1", Email = "hasta@x.com", Name = "Ahmet Yilmaz", FirstName = "Ahmet", LastName = "Yilmaz", Status = UserStatus.Active };
+        seed.Users.Add(u);
+        await seed.SaveChangesAsync();
+        var uid = u.Id;
+        await seed.DisposeAsync();
+
+        var db = NewDb(conn);
+        var user = await db.Users.FirstAsync(x => x.Id == uid);
+        user.FirstName = "Mehmet";
+        user.LastName = "Kaya";
+        user.Name = $"{user.FirstName} {user.LastName}";
+        user.PhoneNumber = "05551234567";
+        user.IdentityNumber = "12345678901";
+        user.DateOfBirth = "1990-05-15";
+        user.Gender = "Erkek";
+        user.BloodType = "A Rh+";
+        user.EmergencyContactName = "Ayse Kaya";
+        user.EmergencyContactPhone = "05559876543";
+        await db.SaveChangesAsync();
+
+        var dbCheck = NewDb(conn);
+        var updated = await dbCheck.Users.FirstAsync(x => x.Id == uid);
+        Assert.Equal("Mehmet Kaya", updated.Name);
+        Assert.Equal("Mehmet", updated.FirstName);
+        Assert.Equal("Kaya", updated.LastName);
+        Assert.Equal("05551234567", updated.PhoneNumber);
+        Assert.Equal("12345678901", updated.IdentityNumber);
+        Assert.Equal("1990-05-15", updated.DateOfBirth);
+        Assert.Equal("Erkek", updated.Gender);
+        Assert.Equal("A Rh+", updated.BloodType);
+        Assert.Equal("Ayse Kaya", updated.EmergencyContactName);
+        Assert.Equal("05559876543", updated.EmergencyContactPhone);
+    }
+
+
+}
+
