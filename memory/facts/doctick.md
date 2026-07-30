@@ -49,3 +49,6 @@
 - zombie_pwa_tuzagi: Bir origin i sunucu tarafinda engellersen (400/403) o origin de kayitli service worker KENDINI GUNCELLEYEMEZ (sw.js de engellenir) ve eski precache i sonsuza kadar servis eder. Kullanici siteyi calisiyor sanir. Cozum: o originde navigator.serviceWorker.getRegistrations()->unregister() + caches.keys()->delete, ya da engellemeden once self-destroying SW deploy et. <!-- valid:[2026-07-30..) recorded:2026-07-30T10:26 -->
 - static_cache_policy: Configure<StaticFileOptions> ile DI'da; UseStaticFiles'a inline verilmez <!-- valid:[2026-07-30..) recorded:2026-07-30T10:28 -->
 - authz_cache: UserGate + IMemoryCache, 15 sn TTL <!-- valid:[2026-07-30..) recorded:2026-07-30T10:28 -->
+- git_push_workflow_scope: perf/login-to-home dali .github/workflows/azure-deploy.yml iceriyor; push icin token da workflow scope u SART. Mevcut gh token: gist,read:org,repo. Duzeltme: gh auth refresh -h github.com -s workflow + gh auth setup-git (git credential helper manager oldugu icin setup-git gerekli). <!-- valid:[2026-07-30..) recorded:2026-07-30T10:38 -->
+- main_layout: monorepo: DocTick-Main/ + DocTick-Test/ (eb6e068, 07-27) <!-- valid:[2026-07-27..) recorded:2026-07-30T10:48 -->
+- aktif_gelistirme_dali: perf/login-to-home (duz duzen, uretime deploy edilen bu) <!-- valid:[2026-07-30..) recorded:2026-07-30T10:48 -->
