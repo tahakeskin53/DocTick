@@ -15,19 +15,14 @@ import { Doctors } from './pages/admin/Doctors';
 import { Schedule } from './pages/admin/Schedule';
 import { EmailSettings } from './pages/admin/EmailSettings';
 import { Users } from './pages/admin/Users';
-
-function Splash() {
-  return (
-    <div style={{ minHeight: '100vh', display: 'grid', placeContent: 'center', background: 'var(--surface-page)', color: 'var(--text-muted)', font: 'var(--text-body-md)' }}>
-      DocTick yükleniyor…
-    </div>
-  );
-}
+import { HastaSkeleton, AdminSkeleton } from './components/display/LayoutSkeleton';
 
 // Aktif hasta gerektirir. Admin/pending/rejected kullanıcıları doğru yere yönlendir.
 function HastaGuard() {
   const { user, loading } = useAuth();
-  if (loading) return <Splash />;
+  // ponytail: /'a gelen bir Admin kısa süre hasta kabuğunu görür sonra /admin'e döner.
+  // Admin tek kişi ve pencere <100 ms; role göre tahmin yürütmek buna değmez.
+  if (loading) return <HastaSkeleton />;
   if (!user) return <Navigate to="/login" replace />;
   if (user.role === 'Admin') return <Navigate to="/admin" replace />;
   if (user.status === 'Pending') return <Navigate to="/onay-bekliyor" replace />;
@@ -37,7 +32,7 @@ function HastaGuard() {
 
 function AdminGuard() {
   const { user, loading } = useAuth();
-  if (loading) return <Splash />;
+  if (loading) return <AdminSkeleton />;
   if (!user) return <Navigate to="/login" replace />;
   if (user.role !== 'Admin') return <Navigate to="/" replace />;
   return <Outlet />;

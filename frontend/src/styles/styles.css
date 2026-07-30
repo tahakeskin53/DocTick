@@ -29,3 +29,8 @@ html.lenis, html.lenis body { height: auto; }
 .lenis.lenis-smooth { scroll-behavior: auto !important; }
 .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
 .lenis.lenis-stopped { overflow: hidden; }
+
+/* Yükleme iskeleti — statik gri bloklar "donmuş" hissi verir, hafif nabız beklemeyi canlı gösterir. */
+@keyframes dt-pulse { 0%, 100% { opacity: .55; } 50% { opacity: .9; } }
+.dt-skel { background: rgba(15, 23, 42, .07); border-radius: var(--radius-md); animation: dt-pulse 1.4s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .dt-skel { animation: none; } }
