@@ -7,6 +7,21 @@
     <meta name="theme-color" content="#164478" />
     <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" />
     <title>DocTick — Randevu</title>
+    <script>
+      // Bundle inerken auth + randevu isteklerini başlat.
+      // React mount'unu beklersek bu iki round trip (~150 ms) şelalenin sonuna eklenirdi.
+      // Promise'ler client.ts tarafından TEK SEFER tüketilir; tüketilmezse boşa 401 döner, zararsız.
+      // ponytail: anonim ziyaretçi de bu iki isteği atar (2× 401). Hedef kitle giriş yapmış
+      // kullanıcı olduğu için kabul; kaçınmak HttpOnly olmayan bir "oturum var" ipucu cookie'si gerektirir.
+      (function () {
+        var start = function (url) {
+          var p = fetch(url, { credentials: 'include' });
+          p.catch(function () {}); // tüketilmezse "unhandled rejection" uyarısı çıkmasın
+          return p;
+        };
+        window.__boot = { me: start('/api/auth/me'), appts: start('/api/appointments') };
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

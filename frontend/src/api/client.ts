@@ -30,16 +30,30 @@ export interface Settings { reminderEnabled: boolean; reminderHoursBefore: numbe
 export interface UserRow { id: number; email: string; name: string; role: string; status: string; createdAt: string }
 
 export class ApiError extends Error {
-  constructor(public status: number, message: string) { super(message); }
+  status: number;
+  // Not: `constructor(public status: ...)` kısayolu kullanılmıyor — Node'un tip-sıyırma modu
+  // (test dosyaları .ts'i doğrudan çalıştırıyor) parameter property'yi desteklemiyor.
+  constructor(status: number, message: string) { super(message); this.status = status; }
 }
 
-async function api<T>(path: string, opts: RequestInit = {}): Promise<T> {
+// index.html'de başlatılan önyükleme isteğini tek seferlik devral (yoksa undefined).
+// export: Response gövdesi bir kez okunabildiği için "tek seferlik" garantisi test edilir (boot.test.ts).
+export function takeBoot(key: 'me' | 'appts'): Promise<Response> | undefined {
+  const b = (window as unknown as { __boot?: Record<string, Promise<Response> | undefined> }).__boot;
+  if (!b) return undefined;
+  const p = b[key];
+  b[key] = undefined; // Response gövdesi bir kez okunur — ikinci tüketimi engelle
+  return p;
+}
+
+async function api<T>(path: string, opts: RequestInit = {}, pre?: Promise<Response>): Promise<T> {
   // ...opts önce; credentials/headers sonda — çağrıcı yanlışlıkla ezemez.
-  const res = await fetch(path, {
+  // pre: index.html'de erken başlatılmış istek; geri kalan 401/403/JSON işleme aynen geçerli.
+  const res = await (pre ?? fetch(path, {
     ...opts,
     credentials: 'include',
     headers: { 'Content-Type': 'application/json', ...(opts.headers || {}) },
-  });
+  }));
   if (res.status === 401) throw new ApiError(401, 'Oturum açılmamış');
   if (res.status === 403) {
     // Yetki DB'de değişti (ör. admin kullanıcıyı reddetti). Sayfayı yenile:
@@ -57,7 +71,7 @@ async function api<T>(path: string, opts: RequestInit = {}): Promise<T> {
 }
 
 export const Api = {
-  me: () => api<Me>('/api/auth/me'),
+  me: () => api<Me>('/api/auth/me', {}, takeBoot('me')),
   loginGoogle: (credential: string) => api<Me>('/api/auth/google', { method: 'POST', body: JSON.stringify({ credential }) }),
   logout: () => api('/api/auth/logout', { method: 'POST' }),
 
@@ -67,7 +81,7 @@ export const Api = {
 
   contact: (subject: string, message: string) => api('/api/contact', { method: 'POST', body: JSON.stringify({ subject, message }) }),
 
-  myAppointments: () => api<Appointment[]>('/api/appointments'),
+  myAppointments: () => api<Appointment[]>('/api/appointments', {}, takeBoot('appts')),
   createAppointment: (doctorId: number, date: string, time: string) =>
     api<Appointment>('/api/appointments', { method: 'POST', body: JSON.stringify({ doctorId, date, time }) }),
   cancelAppointment: (id: number) => api<Appointment>(`/api/appointments/${id}/cancel`, { method: 'POST' }),
