@@ -64,3 +64,4 @@
 - install_scope: project-venv <!-- valid:[2026-07-21..) recorded:2026-07-30T13:41 -->
 - python_version: 3.14.4 <!-- valid:[2026-07-21..) recorded:2026-07-30T13:41 -->
 - eposta_kok_neden: Resend'de doctick.me domaini status=not_started - DKIM/SPF DNS kayitlari hic eklenmemis (resend._domainkey.doctick.me ve send.doctick.me NXDOMAIN). Azure app settings DOGRU: Resend__ApiKey dolu, Resend__RedirectTo BOS, Resend__FromEmail=randevu@doctick.me. Kod da dogru alicilara gonderiyor. Dogrulanmamis domainden gonderim Resend tarafindan reddediliyor, cagri yerlerindeki catch bloklari yutuyor. <!-- valid:[2026-07-30..) recorded:2026-07-30T15:17 -->
+- mobil_hero_source: /media/doctick-hero-9x16.mp4 <!-- valid:[2026-07-30..) recorded:2026-07-30T15:53 -->

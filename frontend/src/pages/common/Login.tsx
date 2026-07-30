@@ -14,6 +14,12 @@ import '../../styles/landing.css';
 const REDUCED =
   typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+const IS_MOBILE_RATIO =
+  typeof window !== 'undefined' && window.matchMedia('(max-aspect-ratio: 1/1)').matches;
+
+const HERO_VIDEO_SRC = IS_MOBILE_RATIO ? '/media/doctick-hero-9x16.mp4' : '/media/doctick-hero.mp4';
+
+
 const CHAPTERS = [
   { id: 'giris', label: 'Giriş' },
   { id: 'yonlendirme', label: 'Yönlendirme' },
@@ -182,7 +188,7 @@ export function Login() {
 
   return (
     <div className="dt-landing" ref={rootRef}>
-      <ScrollVideo src="/media/doctick-hero.mp4" />
+      <ScrollVideo src={HERO_VIDEO_SRC} />
 
       <header className="dt-top">
         <button className="dt-top__brand" type="button" onClick={() => api.scrollTo(0)} aria-label="DocTick — başa dön">
