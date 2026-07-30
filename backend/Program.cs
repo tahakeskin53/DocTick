@@ -9,6 +9,29 @@ using DocTick.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// --- Azure Key Vault entegrasyonu (isteğe bağlı) ---
+// Eğer AZURE_KEYVAULT_URI ortam değişkeni ayarlıysa, uygulama başlarken
+// Key Vault içeriğini konfigürasyona ekler. Böylece gizli anahtarlar
+// appsettings.json içinde saklanmaz; production için tavsiye edilen yol bu.
+builder.Host.ConfigureAppConfiguration((context, config) =>
+{
+    var kv = Environment.GetEnvironmentVariable("AZURE_KEYVAULT_URI");
+    if (!string.IsNullOrEmpty(kv))
+    {
+        try
+        {
+            // Requires Azure.Extensions.AspNetCore.Configuration.Secrets + Azure.Identity paketleri
+            config.AddAzureKeyVault(new Uri(kv), new Azure.Identity.DefaultAzureCredential());
+        }
+        catch (Exception ex)
+        {
+            // Konfigürasyon aşamasında hata olsa bile startup devam etsin; hata loglanır.
+            var lf = LoggerFactory.Create(lb => lb.AddConsole());
+            lf.CreateLogger("Program").LogError(ex, "Azure Key Vault eklenemedi: {Message}", ex.Message);
+        }
+    }
+});
+
 // --- Veritabanı ---
 var conn = builder.Configuration.GetConnectionString("Default") ?? "Data Source=doctick.db";
 builder.Services.AddDbContext<AppDb>(o => o.UseSqlite(conn));
@@ -140,8 +163,10 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDb>();
     db.Database.EnsureCreated();
+    await DbSeeder.EnsureSchemaAsync(db);
     await DbSeeder.SeedAsync(db, adminEmail);
 }
+
 
 app.Run();
 
