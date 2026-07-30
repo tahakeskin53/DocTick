@@ -13,7 +13,7 @@ name: Deploy to Azure
 
 on:
   push:
-    branches: [main]
+    branches: [main, perf/login-to-home]
   workflow_dispatch:
 
 # Aynı branch için eski deploy'u iptal et (yarım kalan eşzamanlı çalışmayı önler).
