@@ -33,6 +33,16 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 builder.Services.AddAuthorization();
 
+// --- Yanıt sıkıştırma ---
+// Linux App Service'te uygulama doğrudan Kestrel; gzip yapan bir ön uç YOK — burada açılmazsa
+// 542 KB JS ham gider. text/javascript ve image/svg+xml varsayılan listede yok, elle ekleniyor.
+// JSON bilerek dışarıda: yanıtlar zaten küçük, HTTPS+cookie ile sıkıştırma riski gereksiz.
+builder.Services.AddResponseCompression(o =>
+{
+    o.EnableForHttps = true; // varsayılan false; site tamamen HTTPS
+    o.MimeTypes = new[] { "text/javascript", "text/css", "text/html", "image/svg+xml", "application/manifest+json" };
+});
+
 // --- OpenAPI + Scalar ---
 builder.Services.AddOpenApi();
 
@@ -40,6 +50,7 @@ var app = builder.Build();
 
 // --- SPA statik servis (üretim: frontend/dist → wwwroot; dev'de Vite 5173 kullanılır) ---
 // Statik dosyalar auth boru hattından önce — uygulama kabuğu herkese açık.
+app.UseResponseCompression(); // UseStaticFiles'tan ÖNCE olmalı — sonra gelirse yanıt çoktan yazılmış olur
 app.UseDefaultFiles();
 app.UseStaticFiles(new StaticFileOptions
 {
@@ -48,6 +59,10 @@ app.UseStaticFiles(new StaticFileOptions
         // SW, giriş HTML'i ve manifest asla önbelleklenmesin — PWA güncellemeleri gecikmesin.
         if (ctx.File.Name is "sw.js" or "index.html" or "manifest.webmanifest" or "registerSW.js")
             ctx.Context.Response.Headers.CacheControl = "no-cache";
+        // /assets/* dosya adı içerik hash'i taşır (Vite) — içerik değişirse ad değişir.
+        // Sonsuza dek önbelleklenebilir; aksi hâlde her ziyarette boşuna 304 turu atılıyordu.
+        else if (ctx.Context.Request.Path.StartsWithSegments("/assets"))
+            ctx.Context.Response.Headers.CacheControl = "public, max-age=31536000, immutable";
     }
 });
 
