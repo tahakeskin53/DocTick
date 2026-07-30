@@ -81,7 +81,10 @@ var app = builder.Build();
 app.UseResponseCompression(); // UseStaticFiles'tan ÖNCE olmalı — sonra gelirse yanıt çoktan yazılmış olur
 
 // Önceden sıkıştırılmış varlık: /assets/x.js istenir, x.js.br varsa onu gönder.
-// Build zamanı brotli kalite 11 (~150 KB) — çalışma anındaki hız öncelikli sıkıştırma ~224 KB.
+// .br/.gz dosyalarını `dotnet publish` kendisi üretir (.NET statik varlık sıkıştırması) —
+// kalite 11, ~150 KB. Çalışma anındaki hız öncelikli sıkıştırma aynı dosya için ~224 KB.
+// Not: dosyalar yalnızca publish çıktısında var; `dotnet run` ile geliştirmede .br yoktur,
+// o zaman aşağıdaki koşul eşleşmez ve çalışma anı sıkıştırması devreye girer.
 // Content-Encoding'i burada set etmek ResponseCompression'ı da devre dışı bırakır (zaten kodlanmış
 // yanıtı ikinci kez sıkıştırmaz). .br yoksa hiçbir şey yapmayız, çalışma anı sıkıştırmasına düşer.
 app.Use(async (ctx, next) =>
