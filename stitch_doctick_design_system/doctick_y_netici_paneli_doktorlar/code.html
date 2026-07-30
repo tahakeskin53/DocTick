@@ -1,0 +1,289 @@
+<!DOCTYPE html><html class="light" lang="tr"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>DocTick - Doktorlar</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Google Fonts: Sora, IBM Plex Sans, IBM Plex Mono -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&amp;family=IBM+Plex+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&amp;family=Sora:wght@100..800&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface": "#0d1d2a",
+                        "outline": "#727781",
+                        "status-cancelled": "#C03B36",
+                        "primary-fixed-dim": "#a6c8ff",
+                        "inverse-on-surface": "#e7f2ff",
+                        "secondary": "#375f95",
+                        "primary-fixed": "#d4e3ff",
+                        "on-error-container": "#93000a",
+                        "brand-soft": "#EEF4FB",
+                        "secondary-fixed-dim": "#a6c8ff",
+                        "primary-container": "#1b5493",
+                        "on-tertiary-fixed-variant": "#004883",
+                        "text-secondary": "#51626F",
+                        "on-surface-variant": "#424750",
+                        "surface-container-low": "#ecf4ff",
+                        "on-primary": "#ffffff",
+                        "on-primary-fixed": "#001c3a",
+                        "surface-page": "#F7F9FB",
+                        "surface-container-highest": "#d4e4f6",
+                        "on-secondary": "#ffffff",
+                        "secondary-fixed": "#d4e3ff",
+                        "status-neutral-bg": "#E3E9EE",
+                        "surface-card": "#FFFFFF",
+                        "outline-variant": "#c2c6d2",
+                        "tertiary-container": "#005498",
+                        "status-pending": "#A16814",
+                        "on-tertiary-fixed": "#001c39",
+                        "on-tertiary-container": "#a4c9ff",
+                        "status-pending-bg": "#FAEEDA",
+                        "on-secondary-container": "#255084",
+                        "on-primary-container": "#a7c9ff",
+                        "tertiary": "#003d70",
+                        "surface-container-lowest": "#ffffff",
+                        "brand-line": "#AFCCEE",
+                        "on-background": "#0d1d2a",
+                        "error": "#ba1a1a",
+                        "surface-container": "#e2efff",
+                        "surface-bright": "#f7f9ff",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed": "#d3e3ff",
+                        "on-secondary-fixed": "#001c3a",
+                        "on-tertiary": "#ffffff",
+                        "status-confirmed-bg": "#DCF2E7",
+                        "inverse-surface": "#223240",
+                        "surface": "#f7f9ff",
+                        "text-muted": "#70808C",
+                        "background": "#f7f9ff",
+                        "surface-dim": "#cbdcee",
+                        "primary": "#003d73",
+                        "surface-container-high": "#d9eafc",
+                        "surface-sunken": "#EEF2F6",
+                        "surface-variant": "#d4e4f6",
+                        "border-default": "#CAD4DC",
+                        "on-primary-fixed-variant": "#014786",
+                        "tertiary-fixed-dim": "#a3c9ff",
+                        "surface-tint": "#2a5f9f",
+                        "error-container": "#ffdad6",
+                        "inverse-primary": "#a6c8ff",
+                        "status-confirmed": "#1B8354",
+                        "status-neutral": "#51626F",
+                        "status-cancelled-bg": "#F9E4E3",
+                        "secondary-container": "#9cc3ff",
+                        "on-secondary-fixed-variant": "#1b477c",
+                        "border-soft": "#E3E9EE"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "sidebar-width": "220px",
+                        "max-width-admin": "1200px",
+                        "card-pad": "20px",
+                        "stack-gap": "16px",
+                        "page-pad": "24px",
+                        "max-width-patient": "1080px",
+                        "base": "4px"
+                    },
+                    "fontFamily": {
+                        "overline": ["IBM Plex Sans"],
+                        "body-lg": ["IBM Plex Sans"],
+                        "h1": ["Sora"],
+                        "label": ["IBM Plex Sans"],
+                        "h2": ["Sora"],
+                        "display": ["Sora"],
+                        "h3": ["Sora"],
+                        "time-lg": ["IBM Plex Mono"],
+                        "time": ["IBM Plex Mono"],
+                        "body-sm": ["IBM Plex Sans"],
+                        "body-md": ["IBM Plex Sans"]
+                    },
+                    "fontSize": {
+                        "overline": ["11px", { "lineHeight": "1.2", "letterSpacing": "0.08em", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "1.55", "fontWeight": "400" }],
+                        "h1": ["24px", { "lineHeight": "1.25", "fontWeight": "700" }],
+                        "label": ["13px", { "lineHeight": "1.2", "fontWeight": "600" }],
+                        "h2": ["19px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "display": ["32px", { "lineHeight": "1.15", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "h3": ["16px", { "lineHeight": "1.35", "fontWeight": "600" }],
+                        "time-lg": ["22px", { "lineHeight": "1.0", "fontWeight": "600" }],
+                        "time": ["15px", { "lineHeight": "1.0", "fontWeight": "600" }],
+                        "body-sm": ["13px", { "lineHeight": "1.45", "fontWeight": "400" }],
+                        "body-md": ["14.5px", { "lineHeight": "1.5", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: #F7F9FB; }
+        .shadow-subtle { box-shadow: 0 1px 2px rgba(14,42,74,.05), 0 4px 14px rgba(14,42,74,.07); }
+    </style>
+</head>
+<body class="text-on-surface antialiased font-body-md flex h-screen overflow-hidden">
+<!-- Admin Sidebar -->
+<aside class="w-sidebar-width bg-primary h-full flex flex-col shrink-0">
+<div class="px-page-pad py-6 flex items-center justify-start h-20">
+<span class="font-display text-display text-on-primary">DocTick</span>
+</div>
+<nav class="flex flex-col gap-2 px-4 flex-1 overflow-y-auto mt-4">
+<!-- Inactive Item -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-primary/80 hover:bg-white/5 transition-colors font-label text-label" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+                Dashboard
+            </a>
+<!-- Inactive Item -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-primary/80 hover:bg-white/5 transition-colors font-label text-label" href="#">
+<span class="material-symbols-outlined text-[20px]">event</span>
+                Randevular
+            </a>
+<!-- Active Item -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-white/14 text-on-primary font-bold font-label text-label transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">medical_services</span>
+                Doktorlar
+            </a>
+<!-- Inactive Item -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-primary/80 hover:bg-white/5 transition-colors font-label text-label" href="#">
+<span class="material-symbols-outlined text-[20px]">group</span>
+                Hastalar
+            </a>
+<!-- Inactive Item -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-primary/80 hover:bg-white/5 transition-colors font-label text-label" href="#">
+<span class="material-symbols-outlined text-[20px]">apartment</span>
+                Departmanlar
+            </a>
+</nav>
+<div class="p-4 mt-auto">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-primary/80 hover:bg-white/5 transition-colors font-label text-label" href="#">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+                Ayarlar
+            </a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col h-full overflow-hidden bg-surface-page">
+<!-- Top Bar for Admin area -->
+<header class="h-20 bg-surface-page flex items-center justify-end px-page-pad shrink-0">
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 rounded-full border border-border-default flex items-center justify-center text-text-muted hover:text-primary transition-colors bg-surface-card">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="flex items-center gap-3 cursor-pointer">
+<div class="w-10 h-10 rounded-full bg-surface-dim overflow-hidden flex items-center justify-center">
+<img class="object-cover w-full h-full" data-alt="A professional headshot of a mature male medical administrator wearing a crisp white shirt and dark blue tie. The background is a clean, slightly blurred modern clinical office with bright, cool lighting. The overall mood is confident and reassuring, fitting a high-end medical software interface. Colors are predominantly soft blues and whites." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB2RW5QcyU1B06HMV9Ubx9vrTenXwQYjEJx5TYFB7XSTN870ejwjIHEa4duuANxcH5-FcRLAtCPTmZZ8O4kiQhMLga33eX_LOR54ncyw2Kb1hNdIwwbyzosqygT4H606nUHNPkWFql3myCFgEOwPWeHmXm_C5yUetxjQsjNr6SDmoKyKEu7hpkiA3cxRNHrVZdufJqOBoG3fbp4ZpxesPMgkld83Y031J8SKL3uwjZHReKdZzOjyCLum0pYjJY07qNi4ZDiZ89QrWU">
+</div>
+<div class="hidden md:block">
+<p class="font-h3 text-h3 text-on-surface">Dr. Admin</p>
+<p class="font-body-sm text-body-sm text-text-muted">Başhekim</p>
+</div>
+</div>
+</div>
+</header>
+<!-- Page Content -->
+<div class="flex-1 overflow-y-auto px-page-pad pb-page-pad">
+<div class="max-w-max-width-admin mx-auto flex flex-col gap-stack-gap">
+<!-- Page Header -->
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+<h1 class="font-h1 text-h1 text-on-surface">Doktorlar</h1>
+<button class="bg-primary-container text-on-primary px-4 py-2.5 rounded flex items-center gap-2 hover:bg-tertiary-container transition-colors font-label text-label">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                        Doktor ekle
+                    </button>
+</div>
+<!-- Doctor List Card -->
+<div class="bg-surface-card rounded-lg shadow-subtle flex flex-col">
+<!-- Header Row (Optional for structural clarity, but omitted per prompt's exact row breakdown) -->
+<!-- Row 1 -->
+<div class="flex items-center justify-between p-card-pad border-b border-border-soft hover:bg-surface-sunken/50 transition-colors group">
+<div class="flex items-center gap-4 flex-1">
+<div class="w-12 h-12 rounded-full bg-brand-soft flex items-center justify-center text-primary-container shrink-0">
+<span class="material-symbols-outlined text-[24px]">person</span>
+</div>
+<div class="flex flex-col">
+<span class="font-h3 text-h3 text-on-surface">Uzm. Dr. Ayşe Demir</span>
+<span class="font-body-md text-body-md text-text-muted mt-0.5">Kardiyoloji</span>
+</div>
+</div>
+<div class="flex items-center justify-end gap-6 flex-1">
+<div class="hidden md:flex bg-status-confirmed-bg text-status-confirmed px-3 py-1 rounded-full font-label text-label flex items-center gap-1.5">
+<div class="w-1.5 h-1.5 rounded-full bg-status-confirmed"></div>
+                                Randevuya açık
+                            </div>
+<div class="flex items-center gap-2">
+<button class="w-8 h-8 rounded text-text-muted hover:text-primary hover:bg-brand-soft flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+</button>
+<button class="w-8 h-8 rounded text-text-muted hover:text-status-cancelled hover:bg-status-cancelled-bg flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Row 2 -->
+<div class="flex items-center justify-between p-card-pad border-b border-border-soft hover:bg-surface-sunken/50 transition-colors group">
+<div class="flex items-center gap-4 flex-1">
+<div class="w-12 h-12 rounded-full bg-brand-soft flex items-center justify-center text-primary-container shrink-0">
+<span class="material-symbols-outlined text-[24px]">person</span>
+</div>
+<div class="flex flex-col">
+<span class="font-h3 text-h3 text-on-surface">Doç. Dr. Mehmet Kaya</span>
+<span class="font-body-md text-body-md text-text-muted mt-0.5">Dermatoloji</span>
+</div>
+</div>
+<div class="flex items-center justify-end gap-6 flex-1">
+<div class="hidden md:flex bg-status-confirmed-bg text-status-confirmed px-3 py-1 rounded-full font-label text-label flex items-center gap-1.5">
+<div class="w-1.5 h-1.5 rounded-full bg-status-confirmed"></div>
+                                Randevuya açık
+                            </div>
+<div class="flex items-center gap-2">
+<button class="w-8 h-8 rounded text-text-muted hover:text-primary hover:bg-brand-soft flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+</button>
+<button class="w-8 h-8 rounded text-text-muted hover:text-status-cancelled hover:bg-status-cancelled-bg flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Row 3 -->
+<div class="flex items-center justify-between p-card-pad hover:bg-surface-sunken/50 transition-colors group rounded-b-lg">
+<div class="flex items-center gap-4 flex-1">
+<div class="w-12 h-12 rounded-full bg-brand-soft flex items-center justify-center text-primary-container shrink-0 opacity-70">
+<span class="material-symbols-outlined text-[24px]">person</span>
+</div>
+<div class="flex flex-col opacity-70">
+<span class="font-h3 text-h3 text-on-surface">Uzm. Dr. Elif Şahin</span>
+<span class="font-body-md text-body-md text-text-muted mt-0.5">Nöroloji</span>
+</div>
+</div>
+<div class="flex items-center justify-end gap-6 flex-1">
+<div class="hidden md:flex bg-status-neutral-bg text-status-neutral px-3 py-1 rounded-full font-label text-label flex items-center gap-1.5">
+<div class="w-1.5 h-1.5 rounded-full bg-status-neutral"></div>
+                                Kapalı
+                            </div>
+<div class="flex items-center gap-2">
+<button class="w-8 h-8 rounded text-text-muted hover:text-primary hover:bg-brand-soft flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+</button>
+<button class="w-8 h-8 rounded text-text-muted hover:text-status-cancelled hover:bg-status-cancelled-bg flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

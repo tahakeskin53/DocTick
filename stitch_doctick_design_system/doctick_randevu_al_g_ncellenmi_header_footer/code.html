@@ -1,0 +1,262 @@
+<!DOCTYPE html><html class="light" lang="tr"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>DocTick - Randevu Al</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@600&amp;family=IBM+Plex+Sans:wght@400;600&amp;family=Sora:wght@600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "status-neutral-bg": "#E3E9EE",
+                      "border-soft": "#E3E9EE",
+                      "status-neutral": "#51626F",
+                      "primary-fixed": "#d4e3ff",
+                      "surface-dim": "#cbdcee",
+                      "brand-line": "#AFCCEE",
+                      "on-primary-fixed": "#001c3a",
+                      "inverse-primary": "#a6c8ff",
+                      "border-default": "#CAD4DC",
+                      "secondary-fixed-dim": "#a6c8ff",
+                      "primary-fixed-dim": "#a6c8ff",
+                      "surface-card": "#FFFFFF",
+                      "on-tertiary": "#ffffff",
+                      "tertiary-container": "#005498",
+                      "surface-page": "#F7F9FB",
+                      "status-pending-bg": "#FAEEDA",
+                      "surface-container-low": "#ecf4ff",
+                      "on-background": "#0d1d2a",
+                      "status-confirmed-bg": "#DCF2E7",
+                      "text-secondary": "#51626F",
+                      "on-primary": "#ffffff",
+                      "error-container": "#ffdad6",
+                      "secondary-container": "#9cc3ff",
+                      "status-cancelled": "#C03B36",
+                      "inverse-surface": "#223240",
+                      "on-secondary-container": "#255084",
+                      "secondary-fixed": "#d4e3ff",
+                      "outline-variant": "#c2c6d2",
+                      "on-error": "#ffffff",
+                      "tertiary-fixed": "#d3e3ff",
+                      "on-error-container": "#93000a",
+                      "text-muted": "#70808C",
+                      "error": "#ba1a1a",
+                      "surface-bright": "#f7f9ff",
+                      "primary": "#003d73",
+                      "background": "#f7f9ff",
+                      "on-tertiary-fixed-variant": "#004883",
+                      "secondary": "#375f95",
+                      "surface-variant": "#d4e4f6",
+                      "tertiary": "#003d70",
+                      "on-surface": "#0d1d2a",
+                      "status-cancelled-bg": "#F9E4E3",
+                      "brand-soft": "#EEF4FB",
+                      "on-secondary-fixed": "#001c3a",
+                      "surface-container-lowest": "#ffffff",
+                      "tertiary-fixed-dim": "#a3c9ff",
+                      "status-pending": "#A16814",
+                      "surface-tint": "#2a5f9f",
+                      "on-secondary": "#ffffff",
+                      "on-primary-fixed-variant": "#014786",
+                      "status-confirmed": "#1B8354",
+                      "on-surface-variant": "#424750",
+                      "on-primary-container": "#a7c9ff",
+                      "surface-sunken": "#EEF2F6",
+                      "surface-container-highest": "#d4e4f6",
+                      "surface-container": "#e2efff",
+                      "surface": "#f7f9ff",
+                      "primary-container": "#1b5493",
+                      "on-secondary-fixed-variant": "#1b477c",
+                      "surface-container-high": "#d9eafc",
+                      "outline": "#727781",
+                      "on-tertiary-container": "#a4c9ff",
+                      "inverse-on-surface": "#e7f2ff",
+                      "on-tertiary-fixed": "#001c39"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "sidebar-width": "220px",
+                      "card-pad": "20px",
+                      "stack-gap": "16px",
+                      "page-pad": "24px",
+                      "max-width-admin": "1200px",
+                      "base": "4px",
+                      "max-width-patient": "1080px"
+              },
+              "fontFamily": {
+                      "body-md": ["IBM Plex Sans"],
+                      "time": ["IBM Plex Mono"],
+                      "time-lg": ["IBM Plex Mono"],
+                      "display": ["Sora"],
+                      "body-lg": ["IBM Plex Sans"],
+                      "body-sm": ["IBM Plex Sans"],
+                      "h2": ["Sora"],
+                      "overline": ["IBM Plex Sans"],
+                      "label": ["IBM Plex Sans"],
+                      "h1": ["Sora"],
+                      "h3": ["Sora"]
+              },
+              "fontSize": {
+                      "body-md": ["14.5px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                      "time": ["15px", {"lineHeight": "1.0", "fontWeight": "600"}],
+                      "time-lg": ["22px", {"lineHeight": "1.0", "fontWeight": "600"}],
+                      "display": ["32px", {"lineHeight": "1.15", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "body-lg": ["16px", {"lineHeight": "1.55", "fontWeight": "400"}],
+                      "body-sm": ["13px", {"lineHeight": "1.45", "fontWeight": "400"}],
+                      "h2": ["19px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                      "overline": ["11px", {"lineHeight": "1.2", "letterSpacing": "0.08em", "fontWeight": "600"}],
+                      "label": ["13px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                      "h1": ["24px", {"lineHeight": "1.25", "fontWeight": "700"}],
+                      "h3": ["16px", {"lineHeight": "1.35", "fontWeight": "600"}]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        .custom-shadow {
+            box-shadow: 0 1px 2px rgba(14,42,74,.05), 0 4px 14px rgba(14,42,74,.07);
+        }
+    </style>
+</head>
+<body class="bg-surface-page text-on-surface font-body-md min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<header class="shadow-sm docked full-width top-0 z-50" style="background-color: #164478;">
+<div class="flex justify-between items-center w-full px-page-pad py-4 max-w-max-width-patient mx-auto"><!-- Brand Logo -->
+<a class="font-h1 text-h1 font-bold text-on-primary" href="#">DocTick</a>
+<!-- Navigation Links -->
+<nav class="hidden md:flex items-center gap-4">
+<a class="text-on-primary/80 font-label hover:text-on-primary transition-colors px-3 py-1.5" href="#">Ana sayfa</a>
+<a class="text-on-primary font-label bg-on-primary/10 rounded-full px-3 py-1.5 transition-colors" href="#">Randevu al</a>
+<a class="text-on-primary/80 font-label hover:text-on-primary transition-colors px-3 py-1.5" href="#">Randevularım</a>
+<a class="text-on-primary/80 font-label hover:text-on-primary transition-colors px-3 py-1.5" href="#">İletişim</a>
+</nav>
+<!-- User Profile & Logout -->
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 text-on-primary">
+<span class="material-symbols-outlined text-[24px]">account_circle</span>
+<span class="font-label text-label">Elif Yurt</span>
+</div>
+<button class="text-on-primary/80 hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined text-[24px]">logout</span>
+</button>
+<button class="md:hidden text-on-primary p-2">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</div></div>
+</header>
+<!-- Main Content -->
+<main class="flex-grow w-full px-page-pad py-8 max-w-max-width-patient mx-auto">
+<!-- Page Header -->
+<div class="mb-8">
+<h1 class="font-display text-display text-on-surface mb-2">Randevu al</h1>
+<p class="font-body-lg text-body-lg text-text-muted">Birkaç adımda bölümünüzü, doktorunuzu ve saatinizi belirleyin.</p>
+</div>
+<!-- Stepper -->
+<div class="mb-8 flex items-center justify-between max-w-3xl">
+<!-- Step 1 (Active) -->
+<div class="flex items-center gap-3 relative z-10 flex-1">
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-label text-label z-10">1</div>
+<span class="font-label text-label text-primary-container">Bölüm &amp; doktor</span>
+</div>
+<div class="flex-1 h-[1px] bg-border-soft -ml-4 -mr-4 z-0"></div>
+<!-- Step 2 (Inactive) -->
+<div class="flex items-center gap-3 relative z-10 flex-1 justify-center">
+<div class="w-8 h-8 rounded-full bg-surface-sunken border border-border-default text-text-muted flex items-center justify-center font-label text-label z-10">2</div>
+<span class="font-label text-label text-text-muted">Tarih &amp; saat</span>
+</div>
+<div class="flex-1 h-[1px] bg-border-soft -ml-4 -mr-4 z-0"></div>
+<!-- Step 3 (Inactive) -->
+<div class="flex items-center gap-3 relative z-10 flex-1 justify-end">
+<div class="w-8 h-8 rounded-full bg-surface-sunken border border-border-default text-text-muted flex items-center justify-center font-label text-label z-10">3</div>
+<span class="font-label text-label text-text-muted">Onay</span>
+</div>
+</div>
+<!-- Card Container -->
+<div class="bg-surface-card rounded-lg custom-shadow overflow-hidden max-w-3xl">
+<!-- Card Header -->
+<div class="p-card-pad border-b border-border-soft">
+<h2 class="font-h2 text-h2 text-on-surface">Bölüm ve doktor seçin</h2>
+</div>
+<!-- Card Body -->
+<div class="p-card-pad flex flex-col gap-stack-gap">
+<!-- Department Dropdown -->
+<div class="flex flex-col gap-1 w-full md:w-1/2">
+<label class="font-label text-label text-text-muted">Bölüm</label>
+<div class="relative">
+<select class="w-full appearance-none bg-surface-card border border-border-default rounded-sm py-2 px-3 pr-8 font-body-md text-body-md text-on-surface focus:outline-none focus:ring-[3px] focus:ring-secondary-container/28 focus:border-tertiary-container transition-all">
+<option selected="" value="kardiyoloji">Kardiyoloji</option>
+<option value="dahiliye">Dahiliye</option>
+<option value="noroloji">Nöroloji</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-text-muted">
+<span class="material-symbols-outlined text-[20px]">expand_more</span>
+</div>
+</div>
+</div>
+<!-- Doctors Grid -->
+<div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Doctor Card 1 (Selected) -->
+<div class="bg-brand-soft border-2 border-primary-container rounded-md p-4 flex items-center gap-4 cursor-pointer relative overflow-hidden group transition-all">
+<div class="absolute top-2 right-2 text-primary-container">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div class="w-12 h-12 rounded-full bg-primary-container/10 flex items-center justify-center text-primary-container flex-shrink-0">
+<span class="material-symbols-outlined text-[24px]">person</span>
+</div>
+<div class="flex flex-col">
+<span class="font-h3 text-h3 text-primary-container">Uzm. Dr. Ayşe Demir</span>
+<span class="font-body-sm text-body-sm text-text-muted">Kardiyoloji</span>
+</div>
+</div>
+<!-- Doctor Card 2 (Default) -->
+<div class="bg-surface-card border border-border-default rounded-md p-4 flex items-center gap-4 cursor-pointer hover:border-primary-container hover:shadow-sm transition-all group">
+<div class="absolute top-2 right-2 text-border-default group-hover:text-border-soft opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-[20px]">radio_button_unchecked</span>
+</div>
+<div class="w-12 h-12 rounded-full bg-surface-sunken flex items-center justify-center text-text-muted flex-shrink-0 group-hover:text-primary-container transition-colors">
+<span class="material-symbols-outlined text-[24px]">person</span>
+</div>
+<div class="flex flex-col">
+<span class="font-h3 text-h3 text-on-surface">Doç. Dr. Mehmet Kaya</span>
+<span class="font-body-sm text-body-sm text-text-muted">Kardiyoloji</span>
+</div>
+</div>
+<!-- Doctor Card 3 (Default) -->
+<div class="bg-surface-card border border-border-default rounded-md p-4 flex items-center gap-4 cursor-pointer hover:border-primary-container hover:shadow-sm transition-all group">
+<div class="absolute top-2 right-2 text-border-default group-hover:text-border-soft opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-[20px]">radio_button_unchecked</span>
+</div>
+<div class="w-12 h-12 rounded-full bg-surface-sunken flex items-center justify-center text-text-muted flex-shrink-0 group-hover:text-primary-container transition-colors">
+<span class="material-symbols-outlined text-[24px]">person</span>
+</div>
+<div class="flex flex-col">
+<span class="font-h3 text-h3 text-on-surface">Uzm. Dr. Elif Şahin</span>
+<span class="font-body-sm text-body-sm text-text-muted">Kardiyoloji</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Flow Footer -->
+<div class="p-card-pad border-t border-border-soft bg-surface-page flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-text-muted">Adım 1 / 3</span>
+<button class="bg-primary-container text-on-primary font-label text-label py-2 px-6 rounded hover:bg-primary transition-colors flex items-center gap-2">
+                    Devam et
+                    <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</main>
+<!-- Footer -->
+</body></html>

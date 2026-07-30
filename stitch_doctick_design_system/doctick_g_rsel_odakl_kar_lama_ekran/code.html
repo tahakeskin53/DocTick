@@ -1,0 +1,234 @@
+<!DOCTYPE html><html lang="tr"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>DocTick - Hastane Randevu Sistemi</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&amp;family=IBM+Plex+Sans:wght@400;600&amp;family=Sora:wght@600;700;800&amp;display=swap" rel="stylesheet">
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-primary": "#a6c8ff",
+                        "on-secondary-fixed-variant": "#1b477c",
+                        "border-soft": "#E3E9EE",
+                        "tertiary-fixed": "#d3e3ff",
+                        "surface-card": "#FFFFFF",
+                        "on-error-container": "#93000a",
+                        "status-neutral-bg": "#E3E9EE",
+                        "outline-variant": "#c2c6d2",
+                        "surface-dim": "#cbdcee",
+                        "surface-tint": "#2a5f9f",
+                        "secondary-fixed-dim": "#a6c8ff",
+                        "text-muted": "#70808C",
+                        "on-surface": "#0d1d2a",
+                        "status-pending": "#A16814",
+                        "surface-bright": "#f7f9ff",
+                        "inverse-surface": "#223240",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed-variant": "#014786",
+                        "primary-fixed": "#d4e3ff",
+                        "status-neutral": "#51626F",
+                        "surface-container": "#e2efff",
+                        "status-confirmed": "#1B8354",
+                        "background": "#f7f9ff",
+                        "on-tertiary-fixed": "#001c39",
+                        "tertiary": "#003d70",
+                        "surface-variant": "#d4e4f6",
+                        "brand-soft": "#EEF4FB",
+                        "border-default": "#CAD4DC",
+                        "surface-page": "#F7F9FB",
+                        "on-surface-variant": "#424750",
+                        "on-primary-container": "#a7c9ff",
+                        "text-secondary": "#51626F",
+                        "on-primary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "status-pending-bg": "#FAEEDA",
+                        "surface-container-low": "#ecf4ff",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed-dim": "#a3c9ff",
+                        "on-secondary-container": "#255084",
+                        "error-container": "#ffdad6",
+                        "surface": "#f7f9ff",
+                        "status-cancelled-bg": "#F9E4E3",
+                        "status-cancelled": "#C03B36",
+                        "error": "#ba1a1a",
+                        "surface-sunken": "#EEF2F6",
+                        "inverse-on-surface": "#e7f2ff",
+                        "on-background": "#0d1d2a",
+                        "secondary": "#375f95",
+                        "brand-line": "#AFCCEE",
+                        "primary": "#003d73",
+                        "surface-container-high": "#d9eafc",
+                        "outline": "#727781",
+                        "on-tertiary-fixed-variant": "#004883",
+                        "surface-container-highest": "#d4e4f6",
+                        "secondary-fixed": "#d4e3ff",
+                        "secondary-container": "#9cc3ff",
+                        "on-secondary-fixed": "#001c3a",
+                        "tertiary-container": "#005498",
+                        "primary-container": "#1b5493",
+                        "on-tertiary": "#ffffff",
+                        "on-tertiary-container": "#a4c9ff",
+                        "primary-fixed-dim": "#a6c8ff",
+                        "on-primary-fixed": "#001c3a",
+                        "status-confirmed-bg": "#DCF2E7"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-gap": "16px",
+                        "sidebar-width": "220px",
+                        "max-width-patient": "1080px",
+                        "base": "4px",
+                        "page-pad": "24px",
+                        "max-width-admin": "1200px",
+                        "card-pad": "20px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["IBM Plex Sans"],
+                        "time-lg": ["IBM Plex Mono"],
+                        "overline": ["IBM Plex Sans"],
+                        "h3": ["Sora"],
+                        "display": ["Sora"],
+                        "h2": ["Sora"],
+                        "time": ["IBM Plex Mono"],
+                        "body-sm": ["IBM Plex Sans"],
+                        "body-lg": ["IBM Plex Sans"],
+                        "label": ["IBM Plex Sans"],
+                        "h1": ["Sora"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14.5px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "time-lg": ["22px", { "lineHeight": "1.0", "fontWeight": "600" }],
+                        "overline": ["11px", { "lineHeight": "1.2", "letterSpacing": "0.08em", "fontWeight": "600" }],
+                        "h3": ["16px", { "lineHeight": "1.35", "fontWeight": "600" }],
+                        "display": ["56px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "h2": ["19px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "time": ["15px", { "lineHeight": "1.0", "fontWeight": "600" }],
+                        "body-sm": ["13px", { "lineHeight": "1.45", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "1.55", "fontWeight": "400" }],
+                        "label": ["13px", { "lineHeight": "1.2", "fontWeight": "600" }],
+                        "h1": ["24px", { "lineHeight": "1.25", "fontWeight": "700" }]
+                    },
+                    "keyframes": {
+                        "fade-up": {
+                            "0%": { opacity: "0", transform: "translateY(20px)" },
+                            "100%": { opacity: "1", transform: "translateY(0)" }
+                        },
+                        "float": {
+                            "0%, 100%": { transform: "translateY(0)" },
+                            "50%": { transform: "translateY(-12px)" }
+                        },
+                        "ecg-draw": {
+                            "0%": { strokeDashoffset: "1440" },
+                            "100%": { strokeDashoffset: "-1440" }
+                        },
+                        "pulse-soft": {
+                            "0%, 100%": { transform: "scale(1)" },
+                            "50%": { transform: "scale(1.02)" }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-[#0f172a] font-body-md text-body-md antialiased overflow-x-hidden min-h-screen relative">
+<!-- Background Image with Overlay -->
+<div class="absolute inset-0 z-0">
+<img src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_h90hRB99S1uV1_-zHrFgQ73kT2YA2kotH1_Ih12knRIKUY3hAkS2Vf-xt60D2LUxdczo1_e2mqBlemmkRAgIAZjmhIBfx8qZFHMe7OuJ9_fXxM6TLZtaOwmXA039rD9_s-nf8xyzfk1EFh0lU6McBx6ndQ6DE1vOck3PHiLdULijOaS89NTgT1MfemddRr17y50T1BZNMOt4NJ5AM4lKR16sjA8tkGmZxeGFKXcFOYChiVkTciTb34j1703F-IGBvsbONziey74" alt="Stethoscope Background" class="w-full h-full object-cover object-center">
+<div class="absolute inset-0 bg-gradient-to-r from-[#0f172a]/90 via-[#0f172a]/60 to-transparent"></div>
+</div>
+<!-- TopNavBar -->
+<nav class="w-full absolute top-0 z-50 bg-transparent">
+<div class="flex justify-between items-center w-full px-8 py-6">
+<!-- Brand -->
+<div class="flex items-center gap-3">
+<svg class="h-8 w-8 text-white" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 3H5c-1.1 0-1.99.9-1.99 2L3 19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-8.5 13H9v-2.5H6.5v-2H9V9h1.5v2.5H13v2h-2.5V16zm5.5-5h-3V9h3v2z"></path></svg>
+<span class="font-h1 text-h1 font-bold text-white tracking-tight">DocTick</span>
+</div>
+<!-- Trailing Action -->
+<div>
+<button class="bg-white text-[#0f172a] hover:bg-surface-container-low rounded-full py-2.5 px-6 flex items-center gap-2 font-label text-label transition-all shadow-sm">
+                Giriş yap <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="min-h-screen relative z-10 flex flex-col justify-center px-8 md:px-16 lg:px-24 pt-24 pb-12">
+<div class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center h-full flex-grow">
+<!-- Hero Content (Left) -->
+<div class="col-span-1 lg:col-span-8 flex flex-col gap-6 max-w-2xl opacity-0 motion-safe:animate-[fade-up_0.8s_ease-out_forwards]">
+<div class="flex items-center gap-3">
+<div class="w-8 h-[1px] bg-primary-fixed-dim"></div>
+<span class="font-overline text-overline text-primary-fixed-dim uppercase tracking-widest">DOCTİCK · ONLİNE RANDEVU</span>
+</div>
+<h1 class="font-display text-display text-white leading-[1.1]">
+                Doktorunuza giden yol,<br>birkaç dokunuş uzağınızda.
+            </h1>
+<p class="font-body-lg text-body-lg text-white/80 max-w-lg mt-2">
+                Bölümü seçin, doktorunuzu ve saatinizi ayırın. Onay ve hatırlatma e-postaları otomatik gelir — telefon beklemeden, kuyruk olmadan.
+            </p>
+</div>
+<!-- Vertical Navigation (Right) -->
+<div class="col-span-1 lg:col-span-4 flex justify-end opacity-0 motion-safe:animate-[fade-up_1s_ease-out_0.3s_forwards] hidden lg:flex">
+<div class="flex flex-col gap-8 text-right border-r border-white/20 pr-6 relative">
+<div class="flex items-center justify-end gap-4 group cursor-pointer">
+<span class="font-overline text-overline text-white tracking-widest">GİRİŞ</span>
+<div class="w-2.5 h-2.5 rounded-full bg-primary-fixed-dim ring-4 ring-primary-fixed-dim/30 relative -right-[29px]"></div>
+</div>
+<div class="flex items-center justify-end gap-4 group cursor-pointer opacity-60 hover:opacity-100 transition-opacity">
+<span class="font-overline text-overline text-white tracking-widest">YÖNLENDİRME</span>
+<div class="w-2 h-2 rounded-full border border-white relative -right-[28px] bg-transparent"></div>
+</div>
+<div class="flex items-center justify-end gap-4 group cursor-pointer opacity-60 hover:opacity-100 transition-opacity">
+<span class="font-overline text-overline text-white tracking-widest">ANLIK</span>
+<div class="w-2 h-2 rounded-full border border-white relative -right-[28px] bg-transparent"></div>
+</div>
+<div class="flex items-center justify-end gap-4 group cursor-pointer opacity-60 hover:opacity-100 transition-opacity">
+<span class="font-overline text-overline text-white tracking-widest">HATIRLATMA</span>
+<div class="w-2 h-2 rounded-full border border-white relative -right-[28px] bg-transparent"></div>
+</div>
+<div class="flex items-center justify-end gap-4 group cursor-pointer opacity-60 hover:opacity-100 transition-opacity">
+<span class="font-overline text-overline text-white tracking-widest">ONAY</span>
+<div class="w-2 h-2 rounded-full border border-white relative -right-[28px] bg-transparent"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Action Bar -->
+<div class="mt-auto pt-16 flex items-center gap-6 max-w-7xl mx-auto w-full opacity-0 motion-safe:animate-[fade-up_0.8s_ease-out_0.6s_forwards]">
+<div class="flex items-center bg-[#1e293b]/80 backdrop-blur-md border border-white/10 rounded-full p-1 pl-2 pr-6 gap-6">
+<button class="bg-white text-[#0f172a] rounded-full py-2 px-5 flex items-center gap-2 font-label text-label hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">play_arrow</span> Turu başlat
+            </button>
+<div class="flex items-center gap-3">
+<span class="font-time text-[13px] text-white">1x</span>
+<div class="w-16 h-1 bg-white/20 rounded-full overflow-hidden">
+<div class="w-0 h-full bg-primary-fixed-dim"></div>
+</div>
+<span class="font-time text-[13px] text-white/60">0%</span>
+</div>
+</div>
+</div>
+</main>
+</body></html>

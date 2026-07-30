@@ -1,0 +1,283 @@
+<!DOCTYPE html><html lang="tr" class="light"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@600&amp;family=IBM+Plex+Sans:wght@400;600&amp;family=Sora:wght@600;700&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet"><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">try{
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "tertiary-fixed": "#d3e3ff",
+                        "on-error-container": "#93000a",
+                        "brand-soft": "#EEF4FB",
+                        "primary-fixed-dim": "#a6c8ff",
+                        "outline-variant": "#c2c6d2",
+                        "outline": "#727781",
+                        "border-soft": "#E3E9EE",
+                        "on-error": "#ffffff",
+                        "primary": "#003d73",
+                        "surface-card": "#FFFFFF",
+                        "status-pending": "#A16814",
+                        "on-tertiary-fixed": "#001c39",
+                        "on-primary-container": "#a7c9ff",
+                        "tertiary": "#003d70",
+                        "surface-container-high": "#d9eafc",
+                        "secondary-container": "#9cc3ff",
+                        "surface-variant": "#d4e4f6",
+                        "primary-container": "#1b5493",
+                        "secondary-fixed": "#d4e3ff",
+                        "text-secondary": "#51626F",
+                        "surface-dim": "#cbdcee",
+                        "secondary": "#375f95",
+                        "on-secondary": "#ffffff",
+                        "surface-page": "#F7F9FB",
+                        "surface": "#f7f9ff",
+                        "inverse-surface": "#223240",
+                        "tertiary-container": "#005498",
+                        "status-cancelled": "#C03B36",
+                        "status-cancelled-bg": "#F9E4E3",
+                        "surface-container-lowest": "#ffffff",
+                        "error": "#ba1a1a",
+                        "surface-tint": "#2a5f9f",
+                        "on-secondary-fixed": "#001c3a",
+                        "tertiary-fixed-dim": "#a3c9ff",
+                        "status-neutral": "#51626F",
+                        "secondary-fixed-dim": "#a6c8ff",
+                        "on-background": "#0d1d2a",
+                        "border-default": "#CAD4DC",
+                        "surface-sunken": "#EEF2F6",
+                        "status-pending-bg": "#FAEEDA",
+                        "status-confirmed": "#1B8354",
+                        "brand-line": "#AFCCEE",
+                        "on-tertiary": "#ffffff",
+                        "surface-container": "#e2efff",
+                        "status-confirmed-bg": "#DCF2E7",
+                        "on-secondary-container": "#255084",
+                        "on-surface-variant": "#424750",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed-variant": "#1b477c",
+                        "text-muted": "#70808C",
+                        "surface-bright": "#f7f9ff",
+                        "primary-fixed": "#d4e3ff",
+                        "background": "#f7f9ff",
+                        "inverse-on-surface": "#e7f2ff",
+                        "surface-container-low": "#ecf4ff",
+                        "on-primary-fixed-variant": "#014786",
+                        "on-tertiary-fixed-variant": "#004883",
+                        "inverse-primary": "#a6c8ff",
+                        "error-container": "#ffdad6",
+                        "surface-container-highest": "#d4e4f6",
+                        "on-tertiary-container": "#a4c9ff",
+                        "status-neutral-bg": "#E3E9EE",
+                        "on-surface": "#0d1d2a",
+                        "on-primary-fixed": "#001c3a"
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.25rem",
+                        lg: "0.5rem",
+                        xl: "0.75rem",
+                        full: "9999px"
+                    },
+                    spacing: {
+                        "sidebar-width": "220px",
+                        base: "4px",
+                        "page-pad": "24px",
+                        "max-width-patient": "1080px",
+                        "max-width-admin": "1200px",
+                        "stack-gap": "16px",
+                        "card-pad": "20px"
+                    },
+                    fontFamily: {
+                        h2: ["Sora"],
+                        "time-lg": ["IBM Plex Mono"],
+                        label: ["IBM Plex Sans"],
+                        h1: ["Sora"],
+                        "body-sm": ["IBM Plex Sans"],
+                        display: ["Sora"],
+                        "body-md": ["IBM Plex Sans"],
+                        time: ["IBM Plex Mono"],
+                        overline: ["IBM Plex Sans"],
+                        "body-lg": ["IBM Plex Sans"],
+                        h3: ["Sora"]
+                    },
+                    fontSize: {
+                        h2: ["19px", { lineHeight: "1.3", fontWeight: "600" }],
+                        "time-lg": ["22px", { lineHeight: "1.0", fontWeight: "600" }],
+                        label: ["13px", { lineHeight: "1.2", fontWeight: "600" }],
+                        h1: ["24px", { lineHeight: "1.25", fontWeight: "700" }],
+                        "body-sm": ["13px", { lineHeight: "1.45", fontWeight: "400" }],
+                        display: ["32px", { lineHeight: "1.15", letterSpacing: "-0.02em", fontWeight: "700" }],
+                        "body-md": ["14.5px", { lineHeight: "1.5", fontWeight: "400" }],
+                        time: ["15px", { lineHeight: "1.0", fontWeight: "600" }],
+                        overline: ["11px", { lineHeight: "1.2", letterSpacing: "0.08em", fontWeight: "600" }],
+                        "body-lg": ["16px", { lineHeight: "1.55", fontWeight: "400" }],
+                        h3: ["16px", { lineHeight: "1.35", fontWeight: "600" }]
+                    }
+                }
+            }
+        }
+    }catch(_e){}</script></head><body class="bg-surface-page min-h-screen font-body-md text-on-surface antialiased flex">
+<!-- SideNavBar -->
+<nav class="fixed left-0 top-0 h-screen w-[220px] bg-[#164478] flex flex-col py-6 px-4 z-50">
+<div class="mb-8 px-4 flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center overflow-hidden">
+<span class="material-symbols-outlined text-white text-sm" style="font-variation-settings: 'FILL' 1;" data-original-icon="admin_panel_settings">admin_panel_settings</span>
+</div>
+<div>
+<h1 class="font-h1 text-h1 text-white font-bold leading-tight">DocTick</h1>
+<p class="text-white/70 font-label text-[10px] uppercase tracking-wider mt-0.5">Yönetim Paneli</p>
+</div>
+</div>
+<div class="flex flex-col gap-1 flex-1">
+<a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors font-label text-label">
+<span class="material-symbols-outlined text-lg">dashboard</span>
+                Genel Bakış
+            </a>
+<a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors font-label text-label">
+<span class="material-symbols-outlined text-lg">account_tree</span>
+                Bölümler
+            </a>
+<a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors font-label text-label">
+<span class="material-symbols-outlined text-lg">medical_services</span>
+                Doktorlar
+            </a>
+<a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-white/14 text-white font-bold font-label text-label scale-[0.98] transition-transform">
+<span class="material-symbols-outlined text-lg">group</span>
+                Kullanıcılar
+            </a>
+<a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors font-label text-label mt-auto">
+<span class="material-symbols-outlined text-lg">settings</span>
+                Ayarlar
+            </a>
+</div>
+</nav>
+<!-- TopNavBar -->
+<header class="fixed top-0 right-0 left-[220px] h-16 bg-surface-page border-b border-border-soft flex justify-between items-center px-page-pad z-40">
+<div class="flex-1"></div> <!-- Spacer for search if needed -->
+<div class="flex items-center gap-6">
+<button class="text-text-muted hover:text-primary transition-colors flex items-center justify-center h-10 w-10 rounded-full hover:bg-surface-sunken">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-text-muted hover:text-primary transition-colors flex items-center justify-center h-10 w-10 rounded-full hover:bg-surface-sunken">
+<span class="material-symbols-outlined">help</span>
+</button>
+<div class="h-8 w-8 rounded-full bg-[#164478] text-white flex items-center justify-center font-bold text-sm ml-2 cursor-pointer border border-border-soft">
+                A
+            </div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 ml-[220px] mt-16 p-page-pad max-w-max-width-admin mx-auto w-full">
+<div class="mb-8">
+<h1 class="font-h1 text-h1 text-on-surface">Kullanıcılar</h1>
+</div>
+<div class="bg-surface-card rounded-lg shadow-dual border border-border-soft overflow-hidden">
+<!-- Table Header -->
+<div class="grid grid-cols-[1fr_auto_auto] gap-6 px-card-pad py-4 border-b border-border-soft bg-surface-bright/50">
+<div class="font-overline text-overline text-text-muted uppercase">KULLANICI</div>
+<div class="font-overline text-overline text-text-muted uppercase w-32">DURUM</div>
+<div class="font-overline text-overline text-text-muted uppercase w-56 text-right">İŞLEMLER</div>
+</div>
+<!-- Row 1 -->
+<div class="grid grid-cols-[1fr_auto_auto] gap-6 px-card-pad py-4 items-center border-b border-border-soft hover:bg-surface-bright transition-colors">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-[#D8E6F7] text-primary flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-xl">person</span>
+</div>
+<div>
+<div class="font-h3 text-h3 text-on-surface">Elif Yurt</div>
+<div class="font-body-sm text-body-sm text-text-muted mt-0.5">elif.yurt@gmail.com</div>
+</div>
+</div>
+<div class="w-32 flex items-center">
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-status-pending-bg text-status-pending font-label text-label">
+<div class="w-1.5 h-1.5 rounded-full bg-status-pending"></div>
+                        Onay bekliyor
+                    </div>
+</div>
+<div class="w-56 flex items-center justify-end gap-2">
+<button class="bg-primary-container text-white px-3 py-1.5 rounded font-label text-label flex items-center gap-1 hover:bg-primary transition-colors">
+<span class="material-symbols-outlined text-[16px]">check</span>
+                        Onayla
+                    </button>
+<button class="bg-status-cancelled text-white px-3 py-1.5 rounded font-label text-label hover:bg-[#A3302C] transition-colors">
+                        Reddet
+                    </button>
+</div>
+</div>
+<!-- Row 2 -->
+<div class="grid grid-cols-[1fr_auto_auto] gap-6 px-card-pad py-4 items-center border-b border-border-soft hover:bg-surface-bright transition-colors">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-[#D8E6F7] text-primary flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-xl">person</span>
+</div>
+<div>
+<div class="font-h3 text-h3 text-on-surface">Ahmet Can</div>
+<div class="font-body-sm text-body-sm text-text-muted mt-0.5">ahmet.can@gmail.com</div>
+</div>
+</div>
+<div class="w-32 flex items-center">
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-status-confirmed-bg text-status-confirmed font-label text-label">
+<div class="w-1.5 h-1.5 rounded-full bg-status-confirmed"></div>
+                        Aktif
+                    </div>
+</div>
+<div class="w-56 flex items-center justify-end gap-2">
+<button class="bg-white border border-border-default text-on-surface px-3 py-1.5 rounded font-label text-label hover:bg-surface-sunken transition-colors">
+                        Pasife çek
+                    </button>
+<button class="text-status-cancelled hover:bg-status-cancelled-bg p-1.5 rounded transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</div>
+<!-- Row 3 -->
+<div class="grid grid-cols-[1fr_auto_auto] gap-6 px-card-pad py-4 items-center border-b border-border-soft hover:bg-surface-bright transition-colors">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-[#D8E6F7] text-primary flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-xl">person</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-h3 text-h3 text-on-surface">Taha Keskin</span>
+<span class="font-overline text-overline text-text-muted bg-surface-sunken px-1.5 py-0.5 rounded">· ADMİN</span>
+</div>
+<div class="font-body-sm text-body-sm text-text-muted mt-0.5">tahakeskin06@hotmail.com</div>
+</div>
+</div>
+<div class="w-32 flex items-center">
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-status-confirmed-bg text-status-confirmed font-label text-label">
+<div class="w-1.5 h-1.5 rounded-full bg-status-confirmed"></div>
+                        Aktif
+                    </div>
+</div>
+<div class="w-56 flex items-center justify-end gap-2">
+<!-- Actions: None (no delete on self) -->
+</div>
+</div>
+<!-- Row 4 -->
+<div class="grid grid-cols-[1fr_auto_auto] gap-6 px-card-pad py-4 items-center hover:bg-surface-bright transition-colors">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-[#D8E6F7] text-primary flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-xl">person</span>
+</div>
+<div>
+<div class="font-h3 text-h3 text-on-surface">Zeynep Ak</div>
+<div class="font-body-sm text-body-sm text-text-muted mt-0.5">zeynep.ak@gmail.com</div>
+</div>
+</div>
+<div class="w-32 flex items-center">
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-status-cancelled-bg text-status-cancelled font-label text-label">
+<div class="w-1.5 h-1.5 rounded-full bg-status-cancelled"></div>
+                        Reddedildi
+                    </div>
+</div>
+<div class="w-56 flex items-center justify-end gap-2">
+<button class="bg-primary-container text-white px-3 py-1.5 rounded font-label text-label hover:bg-primary transition-colors">
+                        Aktifleştir
+                    </button>
+<button class="text-status-cancelled hover:bg-status-cancelled-bg p-1.5 rounded transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+</body></html>

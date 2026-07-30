@@ -14,13 +14,7 @@
 
 ## Ön koşullar
 
-Çalışma ağacı şu an kirli (`feat/landing-booking-redesign` üzerinde commit'lenmemiş değişiklikler var). Başlamadan önce:
-
-```bash
-git status --short
-# Mevcut işi commit'le veya stash'le, sonra:
-git checkout -b perf/login-to-home
-```
+✅ **Tamamlandı (2026-07-29):** Önceki iş `6c1bd56 feat(admin): randevular sayfasi + Azure deploy kurulumu` olarak commit'lendi, `perf/login-to-home` dalı ondan açıldı. Plandaki tüm "mevcut kod" alıntıları bu commit'in içeriğine göre yazıldı.
 
 Backend testlerinin şu an geçtiğini doğrula — bu plan mevcut testlerden birini (`AuthAuditTests`) kasıtlı olarak bozup düzeltecek, o yüzden başlangıç durumu net olmalı:
 
@@ -37,6 +31,7 @@ dotnet test backend.Tests/DocTick.Api.Tests.csproj
 |---|---|---|
 | `frontend/index.html` | Bundle inmeden auth + randevu isteklerini başlatan önyükleme scripti | 1 |
 | `frontend/src/api/client.ts` | Önyüklenmiş `Response`'u tek seferlik tüketen `api()` parametresi | 1 |
+| `frontend/src/api/boot.test.ts` | **Yeni** — `takeBoot` tek seferlik tüketim testi (`node` ile doğrudan) | 1 |
 | `backend/Program.cs` | Yanıt sıkıştırma + hash'li varlıklara `immutable` cache; `UserGate` kaydı | 2, 5 |
 | `frontend/src/components/display/LayoutSkeleton.tsx` | **Yeni** — hasta ve admin kabuğunun iskelet karşılıkları | 3 |
 | `frontend/src/styles/styles.css` | İskelet nabız animasyonu (`@keyframes dt-pulse`) | 3 |
@@ -87,6 +82,33 @@ dotnet test backend.Tests/DocTick.Api.Tests.csproj
 
 Script `type="module"` **değil** — modüller ertelenir (defer), klasik inline script ise anında çalışır. Vite'ın enjekte ettiği module script'ten önce çalışması bu yüzden garanti.
 
+- [ ] **Step 2a: `ApiError`'ı Node'un çalıştırabileceği hâle getir**
+
+Projenin test deseni `.ts` dosyalarını Node ile **doğrudan** çalıştırıyor (tip-sıyırma modu). Bu mod TypeScript'in constructor parameter property kısayolunu desteklemiyor, dolayısıyla `client.ts`'i import eden hiçbir test çalışamaz:
+
+```
+SyntaxError [ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX]: TypeScript parameter property is not supported in strip-only mode
+```
+
+`frontend/src/api/client.ts` içinde mevcut:
+
+```ts
+export class ApiError extends Error {
+  constructor(public status: number, message: string) { super(message); }
+}
+```
+
+Şununla değiştir (davranış birebir aynı — `new ApiError(401, '…')` ve `e.status` değişmeden çalışır):
+
+```ts
+export class ApiError extends Error {
+  status: number;
+  // Not: `constructor(public status: ...)` kısayolu kullanılmıyor — Node'un tip-sıyırma modu
+  // (test dosyaları .ts'i doğrudan çalıştırıyor) parameter property'yi desteklemiyor.
+  constructor(status: number, message: string) { super(message); this.status = status; }
+}
+```
+
 - [ ] **Step 2: `api()` fonksiyonunu hazır `Response` kabul eder hâle getir**
 
 `frontend/src/api/client.ts` içinde `api` fonksiyonunun ilk satırlarını değiştir. Mevcut:
@@ -105,7 +127,8 @@ Yeni:
 
 ```ts
 // index.html'de başlatılan önyükleme isteğini tek seferlik devral (yoksa undefined).
-function takeBoot(key: 'me' | 'appts'): Promise<Response> | undefined {
+// export: Response gövdesi bir kez okunabildiği için "tek seferlik" garantisi test edilir (boot.test.ts).
+export function takeBoot(key: 'me' | 'appts'): Promise<Response> | undefined {
   const b = (window as unknown as { __boot?: Record<string, Promise<Response> | undefined> }).__boot;
   if (!b) return undefined;
   const p = b[key];
@@ -147,7 +170,54 @@ Yeni:
 
 İlk çağrı önyüklenmiş isteği devralır; sonraki çağrılar (`refresh()`, react-query refetch) `undefined` alıp normal `fetch` yapar. `Auth.tsx` ve `Home.tsx` **hiç değişmiyor**.
 
-- [ ] **Step 4: Derle ve önyüklemenin doğru yerde olduğunu doğrula**
+- [ ] **Step 4: `takeBoot`'un tek seferlik olduğunu test et**
+
+Projede yerleşik desen: framework yok, düz assert, Node doğrudan çalıştırır (bkz. `frontend/src/pages/admin/periodRange.test.ts`). Aynı deseni izleyerek `frontend/src/api/boot.test.ts` oluştur:
+
+```ts
+// Çalıştır: node src/api/boot.test.ts   (Node 24 .ts'i doğrudan çalıştırır)
+// Bilerek import'suz assert — periodRange.test.ts ile aynı desen.
+import { takeBoot } from './client.ts';
+
+let fails = 0;
+function eq(actual: unknown, expected: unknown, what: string) {
+  if (actual === expected) return;
+  fails++;
+  console.error(`FAIL ${what}: beklenen ${String(expected)}, gelen ${String(actual)}`);
+}
+
+const g = globalThis as unknown as { window?: unknown; __boot?: unknown };
+g.window = g; // client.ts window üzerinden okuyor; Node'da kendimizi window yap
+
+// 1) __boot yoksa undefined döner (dev/SSR/eski önbellek senaryosu — çökmemeli)
+eq(takeBoot('me'), undefined, '__boot yokken undefined');
+
+// 2) İlk çağrı promise'i verir, İKİNCİ çağrı vermez.
+//    Response gövdesi bir kez okunabilir; iki tüketici olursa "body already read" hatası çıkar.
+const fake = Promise.resolve('yerine-gecen' as unknown as Response);
+g.__boot = { me: fake, appts: undefined };
+eq(takeBoot('me'), fake, 'ilk cagri promise doner');
+eq(takeBoot('me'), undefined, 'ikinci cagri undefined doner');
+
+// 3) Anahtarlar birbirinden bagimsiz
+const a = Promise.resolve('appts' as unknown as Response);
+g.__boot = { me: fake, appts: a };
+eq(takeBoot('appts'), a, 'appts kendi promise ini doner');
+eq(takeBoot('me'), fake, 'me hala tuketilebilir');
+
+console.log(fails === 0 ? 'OK: takeBoot tek seferlik' : `${fails} test basarisiz`);
+process.exit(fails === 0 ? 0 : 1);
+```
+
+Çalıştır:
+
+```bash
+cd frontend && node src/api/boot.test.ts
+```
+
+Beklenen: `OK: takeBoot tek seferlik`, çıkış kodu 0. `takeBoot` `export` edilmediyse import hatası verir — Step 2'deki `export` anahtar sözcüğünü unutma.
+
+- [ ] **Step 5: Derle ve önyüklemenin doğru yerde olduğunu doğrula**
 
 ```bash
 cd frontend && npm run build
@@ -163,7 +233,7 @@ node -e "const h=require('fs').readFileSync('dist/index.html','utf8');const b=h.
 
 Beklenen: `OK: onyukleme scripti module scriptinden once, offset ... < ...`
 
-- [ ] **Step 5: Tarayıcıda şelaleyi doğrula**
+- [ ] **Step 6: Tarayıcıda şelaleyi doğrula**
 
 ```bash
 # 1. terminal
@@ -176,10 +246,10 @@ cd frontend && npm run preview
 
 Beklenen: `auth/me` ve `appointments` istekleri, `index-*.js` isteğiyle **aynı anda** başlar (waterfall'da yan yana, art arda değil). Öncesinde `me` bundle'dan sonra başlıyordu.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 7: Commit**
 
 ```bash
-git add frontend/index.html frontend/src/api/client.ts
+git add frontend/index.html frontend/src/api/client.ts frontend/src/api/boot.test.ts
 git commit -m "perf: auth+randevu isteklerini bundle indirmesiyle paralelle"
 ```
 
@@ -872,4 +942,4 @@ PYTHONUTF8=1 .venv/Scripts/python.exe -c "from memkraft import MemKraft; mk=MemK
 
 **Bu planın bozabileceği tek davranış** admin onay/red akışının anındalığı — Task 5 Step 9 bunu açıkça test ediyor.
 
-**Frontend tarafında test dosyası yok** çünkü projede frontend test koşucusu kurulu değil (yalnız `oxlint`). Sırf bu değişiklikler için vitest eklemek yeni bir bağımlılık ve yapılandırma yükü demek; onun yerine her frontend görevi çalıştırılabilir bir kontrol bırakıyor (Task 1 Step 4'teki `node -e` kontrolü, Task 2'deki `curl` başlık kontrolleri, Task 3'teki derleme + lint).
+**Frontend testleri projenin mevcut desenini izliyor:** framework yok, düz assert, Node dosyayı doğrudan çalıştırıyor (`frontend/src/pages/admin/periodRange.test.ts` bu deseni kuruyor). Task 1 saf mantık içerdiği için gerçek bir test alıyor (`boot.test.ts` — "tek seferlik tüketim" garantisi). Task 2 ve 3'te saf mantık yok (biri HTTP başlığı, diğeri görsel kabuk), o yüzden çalıştırılabilir kontrolleri `curl` ve derleme/lint biçiminde: `npm run build` + `npm run lint` + Task 2'deki başlık `curl`'leri.

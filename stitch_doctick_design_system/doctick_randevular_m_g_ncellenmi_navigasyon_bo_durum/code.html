@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+
+<html lang="tr"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;600&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet"/><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">try{
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface-variant": "#424750",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed-variant": "#1b477c",
+                        "status-neutral": "#51626F",
+                        "secondary-fixed-dim": "#a6c8ff",
+                        "on-background": "#0d1d2a",
+                        "border-default": "#CAD4DC",
+                        "tertiary-fixed-dim": "#a3c9ff",
+                        "brand-line": "#AFCCEE",
+                        "on-tertiary": "#ffffff",
+                        "surface-sunken": "#EEF2F6",
+                        "status-pending-bg": "#FAEEDA",
+                        "status-confirmed": "#1B8354",
+                        "status-confirmed-bg": "#DCF2E7",
+                        "on-secondary-container": "#255084",
+                        "surface-container": "#e2efff",
+                        "surface-container-highest": "#d4e4f6",
+                        "status-neutral-bg": "#E3E9EE",
+                        "on-tertiary-container": "#a4c9ff",
+                        "on-surface": "#0d1d2a",
+                        "on-primary-fixed": "#001c3a",
+                        "background": "#f7f9ff",
+                        "text-muted": "#70808C",
+                        "surface-bright": "#f7f9ff",
+                        "primary-fixed": "#d4e3ff",
+                        "inverse-on-surface": "#e7f2ff",
+                        "surface-container-low": "#ecf4ff",
+                        "on-tertiary-fixed-variant": "#004883",
+                        "on-primary-fixed-variant": "#014786",
+                        "inverse-primary": "#a6c8ff",
+                        "error-container": "#ffdad6",
+                        "on-primary-container": "#a7c9ff",
+                        "tertiary": "#003d70",
+                        "surface-variant": "#d4e4f6",
+                        "surface-container-high": "#d9eafc",
+                        "secondary-container": "#9cc3ff",
+                        "primary-fixed-dim": "#a6c8ff",
+                        "tertiary-fixed": "#d3e3ff",
+                        "on-error-container": "#93000a",
+                        "brand-soft": "#EEF4FB",
+                        "outline-variant": "#c2c6d2",
+                        "outline": "#727781",
+                        "border-soft": "#E3E9EE",
+                        "on-error": "#ffffff",
+                        "surface-card": "#FFFFFF",
+                        "status-pending": "#A16814",
+                        "on-tertiary-fixed": "#001c39",
+                        "primary": "#003d73",
+                        "tertiary-container": "#005498",
+                        "status-cancelled": "#C03B36",
+                        "surface-container-lowest": "#ffffff",
+                        "error": "#ba1a1a",
+                        "status-cancelled-bg": "#F9E4E3",
+                        "on-secondary-fixed": "#001c3a",
+                        "surface-tint": "#2a5f9f",
+                        "primary-container": "#1b5493",
+                        "secondary-fixed": "#d4e3ff",
+                        "text-secondary": "#51626F",
+                        "surface-dim": "#cbdcee",
+                        "secondary": "#375f95",
+                        "surface": "#f7f9ff",
+                        "inverse-surface": "#223240",
+                        "on-secondary": "#ffffff",
+                        "surface-page": "#F7F9FB"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "max-width-patient": "1080px",
+                        "max-width-admin": "1200px",
+                        "stack-gap": "16px",
+                        "card-pad": "20px",
+                        "page-pad": "24px",
+                        "sidebar-width": "220px",
+                        "base": "4px"
+                    },
+                    "fontFamily": {
+                        "body-sm": ["IBM Plex Sans"],
+                        "display": ["Sora"],
+                        "body-md": ["IBM Plex Sans"],
+                        "time": ["IBM Plex Mono"],
+                        "h3": ["Sora"],
+                        "overline": ["IBM Plex Sans"],
+                        "body-lg": ["IBM Plex Sans"],
+                        "time-lg": ["IBM Plex Mono"],
+                        "h2": ["Sora"],
+                        "label": ["IBM Plex Sans"],
+                        "h1": ["Sora"]
+                    },
+                    "fontSize": {
+                        "body-sm": ["13px", {"lineHeight": "1.45", "fontWeight": "400"}],
+                        "display": ["32px", {"lineHeight": "1.15", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-md": ["14.5px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "time": ["15px", {"lineHeight": "1.0", "fontWeight": "600"}],
+                        "h3": ["16px", {"lineHeight": "1.35", "fontWeight": "600"}],
+                        "overline": ["11px", {"lineHeight": "1.2", "letterSpacing": "0.08em", "fontWeight": "600"}],
+                        "body-lg": ["16px", {"lineHeight": "1.55", "fontWeight": "400"}],
+                        "time-lg": ["22px", {"lineHeight": "1.0", "fontWeight": "600"}],
+                        "h2": ["19px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                        "label": ["13px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                        "h1": ["24px", {"lineHeight": "1.25", "fontWeight": "700"}]
+                    }
+                }
+            }
+        }
+    }catch(_e){}</script></head><body class="bg-surface-page text-on-surface antialiased min-h-screen flex flex-col font-body-md">
+<!-- TopNavBar -->
+<header class="sticky top-0 w-full z-50 bg-[#164478] h-[58px] flex items-center">
+<div class="flex justify-between items-center w-full px-page-pad max-w-max-width-patient mx-auto">
+<div class="flex items-center gap-8">
+<!-- Brand Logo -->
+<a class="flex items-center gap-2 text-white font-h1 text-h1 font-bold" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">task_alt</span>
+<span style="font-weight: 800;">DocTick</span>
+</a>
+<!-- Navigation Links -->
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-white/80 font-label hover:text-white transition-colors" href="#">Ana sayfa</a>
+<a class="text-white/80 font-label hover:text-white transition-colors" href="#">Randevu al</a>
+<a class="text-white font-bold font-label px-3 py-1.5 bg-white/14 rounded-full transition-opacity opacity-90" href="#">Randevularım</a>
+<a class="text-white/80 font-label hover:text-white transition-colors" href="#">İletişim</a>
+</nav>
+</div>
+<!-- User Profile & Logout -->
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-white">account_circle</span>
+<span class="text-white font-label hidden sm:block">Elif Yurt</span>
+</div>
+<button class="flex items-center text-white hover:opacity-80 transition-opacity">
+<span class="material-symbols-outlined">logout</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow w-full max-w-max-width-patient mx-auto px-page-pad py-8">
+<!-- Page Title -->
+<div class="mb-stack-gap">
+<h1 class="font-h1 text-h1 text-on-surface">Randevularım</h1>
+</div>
+<!-- Main Card -->
+<div class="bg-surface-card rounded-[10px] patient-shadow overflow-hidden flex flex-col min-h-[500px]">
+<!-- Tab Bar -->
+<div class="flex items-center border-b border-border-soft px-card-pad pt-2 bg-surface-card">
+<button class="px-4 py-3 font-label text-primary-container border-b-[3px] border-primary-container -mb-[1.5px] transition-colors relative z-10">Yaklaşan</button>
+<button class="px-4 py-3 font-label text-text-muted hover:text-on-surface-variant transition-colors border-b-[3px] border-transparent -mb-[1.5px]">Geçmiş</button>
+<button class="px-4 py-3 font-label text-text-muted hover:text-on-surface-variant transition-colors border-b-[3px] border-transparent -mb-[1.5px]">İptal edilen</button>
+</div>
+<!-- Empty State Area -->
+<div class="flex-grow flex flex-col items-center justify-center p-12 text-center bg-surface-card">
+<!-- Large amount of whitespace implied by flex-grow and padding -->
+<span class="material-symbols-outlined text-[48px] text-border-default mb-4" style="font-variation-settings: 'FILL' 0;">
+                    calendar_today
+                </span>
+<p class="font-body-md text-body-md text-text-muted max-w-md">Bu görünümde randevu yok.</p>
+<div class="mt-8">
+<button class="bg-primary-container text-on-primary font-label text-label px-6 py-2.5 rounded hover:opacity-90 transition-opacity">
+                        Yeni Randevu Al
+                    </button>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+</body></html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html><html lang="tr"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>DocTick - Giriş Yap</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&amp;family=IBM+Plex+Sans:wght@400;600&amp;family=Sora:wght@600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-highest": "#d4e4f6",
+                        "background": "#f7f9ff",
+                        "secondary-container": "#9cc3ff",
+                        "outline-variant": "#c2c6d2",
+                        "on-secondary-container": "#255084",
+                        "tertiary-fixed": "#d3e3ff",
+                        "primary-fixed-dim": "#a6c8ff",
+                        "on-background": "#0d1d2a",
+                        "surface-container": "#e2efff",
+                        "primary": "#003d73",
+                        "inverse-surface": "#223240",
+                        "inverse-primary": "#a6c8ff",
+                        "status-pending": "#A16814",
+                        "on-tertiary": "#ffffff",
+                        "border-soft": "#E3E9EE",
+                        "primary-fixed": "#d4e3ff",
+                        "on-primary-container": "#a7c9ff",
+                        "primary-container": "#1b5493",
+                        "secondary-fixed": "#d4e3ff",
+                        "brand-soft": "#EEF4FB",
+                        "surface-bright": "#f7f9ff",
+                        "on-tertiary-fixed-variant": "#004883",
+                        "text-muted": "#70808C",
+                        "inverse-on-surface": "#e7f2ff",
+                        "status-neutral-bg": "#E3E9EE",
+                        "surface-container-high": "#d9eafc",
+                        "outline": "#727781",
+                        "surface-tint": "#2a5f9f",
+                        "surface-sunken": "#EEF2F6",
+                        "surface-page": "#F7F9FB",
+                        "on-primary": "#ffffff",
+                        "status-confirmed": "#1B8354",
+                        "tertiary-fixed-dim": "#a3c9ff",
+                        "border-default": "#CAD4DC",
+                        "status-neutral": "#51626F",
+                        "tertiary": "#003d70",
+                        "on-surface": "#0d1d2a",
+                        "on-secondary-fixed": "#001c3a",
+                        "on-surface-variant": "#424750",
+                        "on-primary-fixed": "#001c3a",
+                        "surface-card": "#FFFFFF",
+                        "on-error-container": "#93000a",
+                        "text-secondary": "#51626F",
+                        "status-cancelled": "#C03B36",
+                        "on-secondary-fixed-variant": "#1b477c",
+                        "on-primary-fixed-variant": "#014786",
+                        "error": "#ba1a1a",
+                        "on-error": "#ffffff",
+                        "surface-container-low": "#ecf4ff",
+                        "surface-variant": "#d4e4f6",
+                        "tertiary-container": "#005498",
+                        "surface-container-lowest": "#ffffff",
+                        "surface": "#f7f9ff",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed": "#001c39",
+                        "surface-dim": "#cbdcee",
+                        "status-pending-bg": "#FAEEDA",
+                        "status-cancelled-bg": "#F9E4E3",
+                        "on-secondary": "#ffffff",
+                        "brand-line": "#AFCCEE",
+                        "status-confirmed-bg": "#DCF2E7",
+                        "secondary": "#375f95",
+                        "secondary-fixed-dim": "#a6c8ff",
+                        "on-tertiary-container": "#a4c9ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-gap": "16px",
+                        "page-pad": "24px",
+                        "max-width-patient": "1080px",
+                        "base": "4px",
+                        "max-width-admin": "1200px",
+                        "sidebar-width": "220px",
+                        "card-pad": "20px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["IBM Plex Sans"],
+                        "body-sm": ["IBM Plex Sans"],
+                        "body-lg": ["IBM Plex Sans"],
+                        "h2": ["Sora"],
+                        "display": ["Sora"],
+                        "time": ["IBM Plex Mono"],
+                        "h3": ["Sora"],
+                        "time-lg": ["IBM Plex Mono"],
+                        "h1": ["Sora"],
+                        "overline": ["IBM Plex Sans"],
+                        "label": ["IBM Plex Sans"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14.5px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "body-sm": ["13px", { "lineHeight": "1.45", "fontWeight": "400" }],
+                        "body-lg": ["16px", { "lineHeight": "1.55", "fontWeight": "400" }],
+                        "h2": ["19px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "display": ["32px", { "lineHeight": "1.15", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "time": ["15px", { "lineHeight": "1.0", "fontWeight": "600" }],
+                        "h3": ["16px", { "lineHeight": "1.35", "fontWeight": "600" }],
+                        "time-lg": ["22px", { "lineHeight": "1.0", "fontWeight": "600" }],
+                        "h1": ["24px", { "lineHeight": "1.25", "fontWeight": "700" }],
+                        "overline": ["11px", { "lineHeight": "1.2", "letterSpacing": "0.08em", "fontWeight": "600" }],
+                        "label": ["13px", { "lineHeight": "1.2", "fontWeight": "600" }]
+                    },
+                    boxShadow: {
+                        'clinical-card': '0 1px 2px rgba(14,42,74,.05), 0 4px 14px rgba(14,42,74,.07)'
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-surface-page min-h-screen flex items-center justify-center font-body-md text-on-surface p-page-pad antialiased">
+<!-- Card Container -->
+<main class="w-full max-w-[400px] bg-surface-card rounded-[10px] shadow-clinical-card p-8 flex flex-col items-center text-center">
+<!-- Logo -->
+<div class="mb-6 w-16 h-16 rounded-full overflow-hidden border border-border-soft flex items-center justify-center bg-brand-soft">
+<img alt="DocTick Logo" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida/AP1WRLs6amilMNk73ULUn695M2VKMTtJ9AoQzxwbcKZTd-S601iekT7aH9FyE8r7GwXBw6jXrmT3jzutnEjXLg6XIa8cIr6kszT78JC-M4vaCm8WQFWiloDG6eovNJNyjvNHrYj7Kb0K8Rok04x68g9qYQ7ItXolSN9s62W97V1Lfk1OM5Z4WwiYaeGcuovbhl24ILS8X-sVw1RUPTIH_u3mtsHNUxmnE2GdN8ic9RdQ5RoKcW6fZ_AMSuRXl9w">
+</div>
+<!-- Typography -->
+<h1 class="font-h1 text-h1 text-primary-container mb-2">DocTick'e giriş yapın</h1>
+<p class="font-body-md text-body-md text-text-secondary mb-8">
+            Randevularınızı yönetmek için hesabınızla devam edin.
+        </p>
+<!-- Action Button -->
+<button class="w-full flex items-center justify-center gap-3 bg-surface-card border border-border-default rounded-lg py-3 px-4 font-label text-label text-on-surface hover:bg-surface-sunken transition-colors duration-200 focus:outline-none focus:ring-[3px] focus:ring-primary-container/28 mb-6">
+<!-- Google G Icon (Simplified via SVG for pure HTML without external font dependencies for this specific brand icon) -->
+<svg class="w-5 h-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
+<path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path>
+<path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"></path>
+<path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"></path>
+</svg>
+            Google ile giriş yap
+        </button>
+<!-- Footer -->
+<p class="font-body-sm text-body-sm text-text-muted">
+            Devam ederek kullanım koşullarını kabul edersiniz.
+        </p>
+</main>
+</body></html>

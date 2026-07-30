@@ -1,0 +1,243 @@
+<!DOCTYPE html><html lang="tr"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocTick - Randevularım</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&amp;family=IBM+Plex+Sans:wght@400;600&amp;family=Sora:wght@600;700&amp;display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed-dim": "#a3c9ff",
+                        "surface-tint": "#2a5f9f",
+                        "surface-variant": "#d4e4f6",
+                        "border-default": "#CAD4DC",
+                        "on-primary-fixed-variant": "#014786",
+                        "surface-sunken": "#EEF2F6",
+                        "surface-container-high": "#d9eafc",
+                        "status-neutral": "#51626F",
+                        "status-cancelled-bg": "#F9E4E3",
+                        "secondary-container": "#9cc3ff",
+                        "on-secondary-fixed-variant": "#1b477c",
+                        "border-soft": "#E3E9EE",
+                        "inverse-primary": "#a6c8ff",
+                        "status-confirmed": "#1B8354",
+                        "error-container": "#ffdad6",
+                        "surface-bright": "#f7f9ff",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed": "#d3e3ff",
+                        "surface-container": "#e2efff",
+                        "error": "#ba1a1a",
+                        "on-background": "#0d1d2a",
+                        "status-confirmed-bg": "#DCF2E7",
+                        "inverse-surface": "#223240",
+                        "on-secondary-fixed": "#001c3a",
+                        "on-tertiary": "#ffffff",
+                        "background": "#f7f9ff",
+                        "surface": "#f7f9ff",
+                        "text-muted": "#70808C",
+                        "primary": "#003d73",
+                        "surface-dim": "#cbdcee",
+                        "on-secondary": "#ffffff",
+                        "surface-container-highest": "#d4e4f6",
+                        "surface-card": "#FFFFFF",
+                        "outline-variant": "#c2c6d2",
+                        "secondary-fixed": "#d4e3ff",
+                        "status-neutral-bg": "#E3E9EE",
+                        "status-pending": "#A16814",
+                        "on-tertiary-fixed": "#001c39",
+                        "on-tertiary-container": "#a4c9ff",
+                        "tertiary-container": "#005498",
+                        "tertiary": "#003d70",
+                        "surface-container-lowest": "#ffffff",
+                        "brand-line": "#AFCCEE",
+                        "status-pending-bg": "#FAEEDA",
+                        "on-secondary-container": "#255084",
+                        "on-primary-container": "#a7c9ff",
+                        "inverse-on-surface": "#e7f2ff",
+                        "status-cancelled": "#C03B36",
+                        "primary-fixed-dim": "#a6c8ff",
+                        "on-surface": "#0d1d2a",
+                        "outline": "#727781",
+                        "primary-container": "#1b5493",
+                        "on-tertiary-fixed-variant": "#004883",
+                        "brand-soft": "#EEF4FB",
+                        "secondary-fixed-dim": "#a6c8ff",
+                        "secondary": "#375f95",
+                        "primary-fixed": "#d4e3ff",
+                        "on-error-container": "#93000a",
+                        "on-surface-variant": "#424750",
+                        "text-secondary": "#51626F",
+                        "on-primary-fixed": "#001c3a",
+                        "surface-page": "#F7F9FB",
+                        "on-primary": "#ffffff",
+                        "surface-container-low": "#ecf4ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "sidebar-width": "220px",
+                        "max-width-admin": "1200px",
+                        "card-pad": "20px",
+                        "stack-gap": "16px",
+                        "page-pad": "24px",
+                        "max-width-patient": "1080px",
+                        "base": "4px"
+                    },
+                    "fontFamily": {
+                        "h1": ["Sora"],
+                        "overline": ["IBM Plex Sans"],
+                        "body-lg": ["IBM Plex Sans"],
+                        "display": ["Sora"],
+                        "label": ["IBM Plex Sans"],
+                        "h2": ["Sora"],
+                        "time-lg": ["IBM Plex Mono"],
+                        "time": ["IBM Plex Mono"],
+                        "body-sm": ["IBM Plex Sans"],
+                        "h3": ["Sora"],
+                        "body-md": ["IBM Plex Sans"]
+                    },
+                    "fontSize": {
+                        "h1": ["24px", { "lineHeight": "1.25", "fontWeight": "700" }],
+                        "overline": ["11px", { "lineHeight": "1.2", "letterSpacing": "0.08em", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "1.55", "fontWeight": "400" }],
+                        "display": ["32px", { "lineHeight": "1.15", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label": ["13px", { "lineHeight": "1.2", "fontWeight": "600" }],
+                        "h2": ["19px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "time-lg": ["22px", { "lineHeight": "1.0", "fontWeight": "600" }],
+                        "time": ["15px", { "lineHeight": "1.0", "fontWeight": "600" }],
+                        "body-sm": ["13px", { "lineHeight": "1.45", "fontWeight": "400" }],
+                        "h3": ["16px", { "lineHeight": "1.35", "fontWeight": "600" }],
+                        "body-md": ["14.5px", { "lineHeight": "1.5", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-surface-page min-h-screen text-on-surface font-body-md antialiased">
+<!-- TopNavBar (Patient Shell) -->
+<header class="bg-[#164478] w-full sticky top-0 z-50 shadow-sm">
+<div class="max-w-max-width-patient mx-auto px-page-pad h-16 flex items-center justify-between">
+<!-- Brand -->
+<div class="flex items-center gap-8">
+<a href="#" class="font-display text-on-primary text-[24px] font-bold tracking-tight">DocTick</a>
+<!-- Navigation Links -->
+<nav class="hidden md:flex items-center gap-2">
+<a href="#" class="px-3 py-1.5 rounded-full text-on-primary/80 font-label text-label hover:text-on-primary hover:bg-white/5 transition-colors">Ana sayfa</a>
+<a href="#" class="px-3 py-1.5 rounded-full text-on-primary/80 font-label text-label hover:text-on-primary hover:bg-white/5 transition-colors">Randevu al</a>
+<a href="#" class="px-3 py-1.5 rounded-full bg-white/14 text-on-primary font-label text-label transition-colors">Randevularım</a>
+<a href="#" class="px-3 py-1.5 rounded-full text-on-primary/80 font-label text-label hover:text-on-primary hover:bg-white/5 transition-colors">İletişim</a>
+</nav>
+</div>
+<!-- User Actions -->
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 text-on-primary cursor-pointer hover:opacity-80 transition-opacity">
+<span class="material-symbols-outlined text-xl" data-icon="account_circle">account_circle</span>
+<span class="font-label text-label hidden sm:block">Elif Yurt</span>
+</div>
+<button class="text-on-primary/80 hover:text-on-primary transition-colors flex items-center" aria-label="Çıkış yap">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="max-w-max-width-patient mx-auto px-page-pad py-8 md:py-12">
+<!-- Header Section -->
+<div class="mb-stack-gap">
+<h1 class="font-h1 text-h1 text-on-surface">Randevularım</h1>
+<p class="font-body-md text-body-md text-text-muted mt-1">Gelecek ve geçmiş tüm randevu kayıtlarınız.</p>
+</div>
+<!-- Content Card -->
+<div class="bg-surface-card rounded-[10px] shadow-sm border border-border-soft overflow-hidden">
+<!-- Tabs -->
+<div class="flex border-b border-border-soft px-4 bg-white">
+<button class="px-6 py-4 border-b-2 border-primary-container text-primary-container font-label text-label font-bold transition-colors">Yaklaşan</button>
+<button class="px-6 py-4 border-b-2 border-transparent text-text-muted font-label text-label hover:text-on-surface transition-colors">Geçmiş</button>
+<button class="px-6 py-4 border-b-2 border-transparent text-text-muted font-label text-label hover:text-on-surface transition-colors">İptal edilen</button>
+</div>
+<!-- List Container -->
+<div class="flex flex-col bg-white">
+<!-- Appointment Row 1 -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between p-card-pad border-b border-border-soft hover:bg-surface-sunken/50 transition-colors gap-4 sm:gap-6">
+<div class="flex items-start sm:items-center gap-4 sm:gap-6 flex-1">
+<!-- Time Slot -->
+<div class="flex-shrink-0 w-20 pt-1 sm:pt-0">
+<span class="font-time text-time text-primary-container block">09:30</span>
+</div>
+<!-- Details -->
+<div class="flex flex-col flex-1">
+<div class="flex flex-wrap items-center gap-3 mb-1">
+<h3 class="font-h3 text-h3 text-on-surface">Uzm. Dr. Ayşe Demir</h3>
+<!-- Status Badge -->
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-status-confirmed-bg text-status-confirmed font-label text-[11px] font-bold uppercase tracking-wider">
+<span class="w-1.5 h-1.5 rounded-full bg-status-confirmed"></span>
+                                    Onaylandı
+                                </span>
+</div>
+<div class="font-body-sm text-body-sm text-text-muted flex items-center flex-wrap gap-2">
+<span>Kardiyoloji</span>
+<span class="w-1 h-1 rounded-full bg-border-default"></span>
+<span>24 Tem 2026</span>
+<span class="w-1 h-1 rounded-full bg-border-default"></span>
+<span class="font-time text-[13px]">RND-2026-0007</span>
+</div>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex-shrink-0 flex items-center justify-end">
+<button class="px-4 py-2 bg-[#C03B36] hover:bg-[#A3322E] text-white font-label text-label rounded transition-colors shadow-sm whitespace-nowrap">
+                            İptal et
+                        </button>
+</div>
+</div>
+<!-- Appointment Row 2 -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between p-card-pad hover:bg-surface-sunken/50 transition-colors gap-4 sm:gap-6">
+<div class="flex items-start sm:items-center gap-4 sm:gap-6 flex-1">
+<!-- Time Slot -->
+<div class="flex-shrink-0 w-20 pt-1 sm:pt-0">
+<span class="font-time text-time text-primary-container block">11:00</span>
+</div>
+<!-- Details -->
+<div class="flex flex-col flex-1">
+<div class="flex flex-wrap items-center gap-3 mb-1">
+<h3 class="font-h3 text-h3 text-on-surface">Doç. Dr. Mehmet Kaya</h3>
+<!-- Status Badge -->
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-status-confirmed-bg text-status-confirmed font-label text-[11px] font-bold uppercase tracking-wider">
+<span class="w-1.5 h-1.5 rounded-full bg-status-confirmed"></span>
+                                    Onaylandı
+                                </span>
+</div>
+<div class="font-body-sm text-body-sm text-text-muted flex items-center flex-wrap gap-2">
+<span>Dermatoloji</span>
+<span class="w-1 h-1 rounded-full bg-border-default"></span>
+<span>27 Tem 2026</span>
+<span class="w-1 h-1 rounded-full bg-border-default"></span>
+<span class="font-time text-[13px]">RND-2026-0011</span>
+</div>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex-shrink-0 flex items-center justify-end">
+<button class="px-4 py-2 bg-[#C03B36] hover:bg-[#A3322E] text-white font-label text-label rounded transition-colors shadow-sm whitespace-nowrap">
+                            İptal et
+                        </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

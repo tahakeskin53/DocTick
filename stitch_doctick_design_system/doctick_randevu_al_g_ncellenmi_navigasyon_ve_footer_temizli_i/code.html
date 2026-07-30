@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+
+<html class="light" lang="tr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DocTick - Randevu Al - Adım 2</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&amp;family=IBM+Plex+Sans:wght@400;600&amp;family=Sora:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "status-confirmed": "#1B8354",
+                        "border-default": "#CAD4DC",
+                        "primary-container": "#1b5493",
+                        "tertiary-fixed-dim": "#a3c9ff",
+                        "primary-fixed-dim": "#a6c8ff",
+                        "status-cancelled": "#C03B36",
+                        "secondary-fixed-dim": "#a6c8ff",
+                        "text-secondary": "#51626F",
+                        "surface-sunken": "#EEF2F6",
+                        "surface-dim": "#cbdcee",
+                        "tertiary-container": "#005498",
+                        "inverse-on-surface": "#e7f2ff",
+                        "outline-variant": "#c2c6d2",
+                        "on-primary-container": "#a7c9ff",
+                        "text-muted": "#70808C",
+                        "surface": "#f7f9ff",
+                        "on-tertiary": "#ffffff",
+                        "surface-page": "#F7F9FB",
+                        "primary-fixed": "#d4e3ff",
+                        "on-tertiary-container": "#a4c9ff",
+                        "surface-container-low": "#ecf4ff",
+                        "status-confirmed-bg": "#DCF2E7",
+                        "surface-bright": "#f7f9ff",
+                        "on-background": "#0d1d2a",
+                        "surface-card": "#FFFFFF",
+                        "error": "#ba1a1a",
+                        "status-pending": "#A16814",
+                        "surface-tint": "#2a5f9f",
+                        "surface-container-high": "#d9eafc",
+                        "on-secondary-container": "#255084",
+                        "on-error": "#ffffff",
+                        "on-primary-fixed": "#001c3a",
+                        "on-primary": "#ffffff",
+                        "secondary-container": "#9cc3ff",
+                        "on-tertiary-fixed": "#001c39",
+                        "status-cancelled-bg": "#F9E4E3",
+                        "on-secondary-fixed-variant": "#1b477c",
+                        "status-pending-bg": "#FAEEDA",
+                        "tertiary-fixed": "#d3e3ff",
+                        "inverse-primary": "#a6c8ff",
+                        "on-secondary": "#ffffff",
+                        "on-surface-variant": "#424750",
+                        "background": "#f7f9ff",
+                        "tertiary": "#003d70",
+                        "on-primary-fixed-variant": "#014786",
+                        "secondary": "#375f95",
+                        "on-secondary-fixed": "#001c3a",
+                        "surface-container-highest": "#d4e4f6",
+                        "primary": "#003d73",
+                        "surface-variant": "#d4e4f6",
+                        "status-neutral-bg": "#E3E9EE",
+                        "status-neutral": "#51626F",
+                        "error-container": "#ffdad6",
+                        "on-error-container": "#93000a",
+                        "border-soft": "#E3E9EE",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container": "#e2efff",
+                        "inverse-surface": "#223240",
+                        "outline": "#727781",
+                        "brand-soft": "#EEF4FB",
+                        "on-tertiary-fixed-variant": "#004883",
+                        "on-surface": "#0d1d2a",
+                        "brand-line": "#AFCCEE",
+                        "secondary-fixed": "#d4e3ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "card-pad": "20px",
+                        "page-pad": "24px",
+                        "stack-gap": "16px",
+                        "sidebar-width": "220px",
+                        "max-width-patient": "1080px",
+                        "base": "4px",
+                        "max-width-admin": "1200px"
+                    },
+                    "fontFamily": {
+                        "h2": ["Sora"],
+                        "display": ["Sora"],
+                        "time-lg": ["IBM Plex Mono"],
+                        "body-md": ["IBM Plex Sans"],
+                        "h1": ["Sora"],
+                        "label": ["IBM Plex Sans"],
+                        "h3": ["Sora"],
+                        "body-sm": ["IBM Plex Sans"],
+                        "time": ["IBM Plex Mono"],
+                        "body-lg": ["IBM Plex Sans"],
+                        "overline": ["IBM Plex Sans"]
+                    },
+                    "fontSize": {
+                        "h2": ["19px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "display": ["32px", { "lineHeight": "1.15", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "time-lg": ["22px", { "lineHeight": "1.0", "fontWeight": "600" }],
+                        "body-md": ["14.5px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "h1": ["24px", { "lineHeight": "1.25", "fontWeight": "700" }],
+                        "label": ["13px", { "lineHeight": "1.2", "fontWeight": "600" }],
+                        "h3": ["16px", { "lineHeight": "1.35", "fontWeight": "600" }],
+                        "body-sm": ["13px", { "lineHeight": "1.45", "fontWeight": "400" }],
+                        "time": ["15px", { "lineHeight": "1.0", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "1.55", "fontWeight": "400" }],
+                        "overline": ["11px", { "lineHeight": "1.2", "letterSpacing": "0.08em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Custom scrollbar for horizontal lists */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-surface-page text-on-surface antialiased min-h-screen flex flex-col font-body-md">
+<!-- TopNavBar -->
+<nav class="bg-[#164478] h-[58px] w-full sticky top-0 z-50 flex items-center px-page-pad shadow-sm">
+<div class="flex justify-between items-center w-full max-w-max-width-patient mx-auto">
+<div class="flex items-center gap-8">
+<!-- Brand -->
+<div class="flex items-center gap-2 text-white font-h1 text-h1 font-bold">
+<span class="material-symbols-outlined">task_alt</span>
+<span>DocTick</span>
+</div>
+<!-- Navigation Links -->
+<div class="hidden md:flex items-center gap-4">
+<a class="text-white font-label px-3 py-1.5 hover:opacity-80 transition-opacity" href="#">Ana sayfa</a>
+<a class="text-white font-label px-3 py-1.5 bg-white/10 rounded-full" href="#">Randevu al</a>
+<a class="text-white font-label px-3 py-1.5 hover:opacity-80 transition-opacity" href="#">Randevularım</a>
+<a class="text-white font-label px-3 py-1.5 hover:opacity-80 transition-opacity" href="#">İletişim</a>
+</div>
+</div>
+<!-- User Profile -->
+<div class="flex items-center gap-4 text-white">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined">account_circle</span>
+<span class="font-label">Elif Yurt</span>
+</div>
+<button class="flex items-center justify-center border border-white/40 rounded-full p-1 hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-[20px]">logout</span>
+</button>
+</div>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-grow w-full max-w-max-width-patient mx-auto px-page-pad py-12 flex flex-col gap-8">
+<!-- Page Header -->
+<header class="flex flex-col gap-2">
+<h1 class="font-display text-display text-primary">Randevu al</h1>
+<p class="font-body-lg text-body-lg text-text-secondary">Birkaç adımda bölümünüzü, doktorunuzu ve saatinizi belirleyin.</p>
+</header>
+<!-- Stepper -->
+<div class="w-full max-w-3xl mx-auto flex items-center py-4">
+<!-- Step 1: Completed -->
+<div class="flex flex-col items-center gap-2 relative">
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center z-10 relative">
+<span class="material-symbols-outlined" style="font-size: 18px;">check</span>
+</div>
+<span class="font-label text-label text-primary">Bölüm &amp; doktor</span>
+</div>
+<!-- Connector 1-2 -->
+<div class="flex-grow h-[2px] bg-primary-container/30 mx-2 -mt-6"></div>
+<!-- Step 2: Active -->
+<div class="flex flex-col items-center gap-2 relative">
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center z-10 relative shadow-sm ring-4 ring-primary-fixed/50">
+<span class="font-label text-label">2</span>
+</div>
+<span class="font-label text-label text-primary font-bold">Tarih &amp; saat</span>
+</div>
+<!-- Connector 2-3 -->
+<div class="flex-grow h-[2px] bg-border-soft mx-2 -mt-6"></div>
+<!-- Step 3: Inactive -->
+<div class="flex flex-col items-center gap-2 relative">
+<div class="w-8 h-8 rounded-full bg-surface-sunken text-text-muted border border-border-default flex items-center justify-center z-10 relative">
+<span class="font-label text-label">3</span>
+</div>
+<span class="font-label text-label text-text-muted">Onay</span>
+</div>
+</div>
+<!-- Booking Card -->
+<section class="bg-surface-card rounded-xl shadow-sm border border-border-soft overflow-hidden">
+<!-- Card Header -->
+<div class="px-card-pad py-5 border-b border-border-soft flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white">
+<h2 class="font-h2 text-h2 text-on-surface">Uygun saatler — Uzm. Dr. Ayşe Demir</h2>
+<span class="inline-flex items-center gap-1.5 px-3 py-1 bg-surface-container-low text-primary rounded-full font-label text-label">
+<span class="material-symbols-outlined text-[16px]">stethoscope</span>
+                    Kardiyoloji
+                </span>
+</div>
+<!-- Card Body -->
+<div class="p-card-pad flex flex-col gap-8 bg-white">
+<!-- Date Selection -->
+<div class="flex flex-col gap-4">
+<label class="font-label text-label text-text-muted uppercase tracking-wider">Gün seçin</label>
+<div class="relative flex items-center group">
+<!-- Left Nav -->
+<button class="absolute left-0 w-8 h-full bg-gradient-to-r from-white to-transparent flex items-center justify-start z-10 text-text-muted hover:text-primary">
+<span class="material-symbols-outlined bg-white rounded-full shadow-sm border border-border-soft">chevron_left</span>
+</button>
+<!-- Dates Scroll Strip -->
+<div class="flex items-center gap-3 overflow-x-auto hide-scrollbar py-1 px-8 w-full scroll-smooth">
+<!-- Day Chip: Neutral -->
+<button class="flex flex-col items-center justify-center min-w-[80px] h-[72px] rounded-lg border border-border-default bg-white text-text-secondary hover:border-primary-container transition-colors">
+<span class="font-overline text-overline">PZT</span>
+<span class="font-label text-label mt-1 text-on-surface">24 Tem</span>
+</button>
+<!-- Day Chip: Selected -->
+<button class="flex flex-col items-center justify-center min-w-[80px] h-[72px] rounded-lg bg-primary-container text-on-primary shadow-sm ring-2 ring-primary-container ring-offset-1">
+<span class="font-overline text-overline opacity-90">SAL</span>
+<span class="font-label text-label mt-1">25 Tem</span>
+</button>
+<!-- Day Chip: Neutral -->
+<button class="flex flex-col items-center justify-center min-w-[80px] h-[72px] rounded-lg border border-border-default bg-white text-text-secondary hover:border-primary-container transition-colors">
+<span class="font-overline text-overline">ÇAR</span>
+<span class="font-label text-label mt-1 text-on-surface">26 Tem</span>
+</button>
+<!-- Day Chip: Neutral -->
+<button class="flex flex-col items-center justify-center min-w-[80px] h-[72px] rounded-lg border border-border-default bg-white text-text-secondary hover:border-primary-container transition-colors">
+<span class="font-overline text-overline">PER</span>
+<span class="font-label text-label mt-1 text-on-surface">27 Tem</span>
+</button>
+<!-- Day Chip: Neutral -->
+<button class="flex flex-col items-center justify-center min-w-[80px] h-[72px] rounded-lg border border-border-default bg-white text-text-secondary hover:border-primary-container transition-colors">
+<span class="font-overline text-overline">CUM</span>
+<span class="font-label text-label mt-1 text-on-surface">28 Tem</span>
+</button>
+<!-- Day Chip: Neutral -->
+<button class="flex flex-col items-center justify-center min-w-[80px] h-[72px] rounded-lg border border-border-default bg-white text-text-secondary hover:border-primary-container transition-colors">
+<span class="font-overline text-overline">CMT</span>
+<span class="font-label text-label mt-1 text-on-surface">29 Tem</span>
+</button>
+</div>
+<!-- Right Nav -->
+<button class="absolute right-0 w-8 h-full bg-gradient-to-l from-white to-transparent flex items-center justify-end z-10 text-text-muted hover:text-primary">
+<span class="material-symbols-outlined bg-white rounded-full shadow-sm border border-border-soft">chevron_right</span>
+</button>
+</div>
+</div>
+<div class="h-px bg-border-soft w-full"></div>
+<!-- Time Selection -->
+<div class="flex flex-col gap-4">
+<!-- Header & Legend -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<label class="font-label text-label text-text-muted uppercase tracking-wider">Saat seçin</label>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-1.5">
+<div class="w-3 h-3 rounded-full border border-border-default bg-white"></div>
+<span class="font-body-sm text-body-sm text-text-secondary">Müsait</span>
+</div>
+<div class="flex items-center gap-1.5">
+<div class="w-3 h-3 rounded-full bg-primary-container"></div>
+<span class="font-body-sm text-body-sm text-text-secondary">Seçili</span>
+</div>
+<div class="flex items-center gap-1.5">
+<div class="w-3 h-3 rounded-full bg-surface-sunken border border-border-soft"></div>
+<span class="font-body-sm text-body-sm text-text-muted">Dolu</span>
+</div>
+</div>
+</div>
+<!-- Time Slots Grid -->
+<div class="flex flex-wrap gap-3">
+<!-- Available -->
+<button class="px-5 py-2.5 rounded-full border border-border-default bg-white font-time text-time text-on-surface hover:border-primary-container hover:text-primary transition-colors">
+                            09:00
+                        </button>
+<!-- Selected -->
+<button class="px-5 py-2.5 rounded-full bg-primary-container font-time text-time text-white shadow-sm ring-2 ring-primary-container ring-offset-1">
+                            09:30
+                        </button>
+<!-- Available -->
+<button class="px-5 py-2.5 rounded-full border border-border-default bg-white font-time text-time text-on-surface hover:border-primary-container hover:text-primary transition-colors">
+                            10:00
+                        </button>
+<!-- Available -->
+<button class="px-5 py-2.5 rounded-full border border-border-default bg-white font-time text-time text-on-surface hover:border-primary-container hover:text-primary transition-colors">
+                            10:30
+                        </button>
+<!-- Available -->
+<button class="px-5 py-2.5 rounded-full border border-border-default bg-white font-time text-time text-on-surface hover:border-primary-container hover:text-primary transition-colors">
+                            11:00
+                        </button>
+<!-- Available -->
+<button class="px-5 py-2.5 rounded-full border border-border-default bg-white font-time text-time text-on-surface hover:border-primary-container hover:text-primary transition-colors">
+                            11:30
+                        </button>
+<!-- Break -->
+<div class="w-full h-2"></div>
+<!-- Available -->
+<button class="px-5 py-2.5 rounded-full border border-border-default bg-white font-time text-time text-on-surface hover:border-primary-container hover:text-primary transition-colors">
+                            13:30
+                        </button>
+<!-- Full (Disabled) -->
+<div class="px-5 py-2.5 rounded-full bg-surface-sunken border border-border-soft font-time text-time text-text-muted line-through cursor-not-allowed opacity-70">
+                            14:00
+                        </div>
+<!-- Available -->
+<button class="px-5 py-2.5 rounded-full border border-border-default bg-white font-time text-time text-on-surface hover:border-primary-container hover:text-primary transition-colors">
+                            14:30
+                        </button>
+<!-- Available -->
+<button class="px-5 py-2.5 rounded-full border border-border-default bg-white font-time text-time text-on-surface hover:border-primary-container hover:text-primary transition-colors">
+                            15:00
+                        </button>
+</div>
+</div>
+</div>
+<!-- Footer Bar (Inside Card) -->
+<div class="px-card-pad py-4 bg-surface-page border-t border-border-soft flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-text-secondary">Adım 2 / 3</span>
+<div class="flex items-center gap-3">
+<button class="px-4 py-2 rounded-DEFAULT bg-white border border-border-default font-label text-label text-on-surface hover:bg-surface-sunken transition-colors">
+                        Geri
+                    </button>
+<button class="px-6 py-2 rounded-DEFAULT bg-primary-container font-label text-label text-on-primary hover:opacity-90 transition-opacity">
+                        Devam et
+                    </button>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+</body></html>
