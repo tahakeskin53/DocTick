@@ -31,7 +31,7 @@ public static class PublicEndpoints
                                          && (deptId == null || d.DepartmentId == deptId)
                                          && (active == null || d.IsActive == active)
                                       orderby d.Name
-                                      select new DoctorDto(d.Id, d.Name, d.DepartmentId, d.Department!.Name, d.IsActive, d.PhotoUrl, d.Bio, d.Education, d.Interests, d.IsChief)).ToListAsync(ct);
+                                      select new DoctorDto(d.Id, d.Name, d.DepartmentId, d.Department!.Name, d.IsActive, d.PhotoUrl ?? "", d.Bio ?? "", d.Education ?? "", d.Interests ?? "", d.IsChief)).ToListAsync(ct);
             return Results.Ok(list);
         }).AllowAnonymous();
 

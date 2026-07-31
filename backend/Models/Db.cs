@@ -48,10 +48,10 @@ public class Doctor
     public int DepartmentId { get; set; }
     public Department? Department { get; set; }
     public bool IsActive { get; set; } = true;
-    public string PhotoUrl { get; set; } = "";
-    public string Bio { get; set; } = "";
-    public string Education { get; set; } = "";
-    public string Interests { get; set; } = "";
+    public string? PhotoUrl { get; set; }
+    public string? Bio { get; set; }
+    public string? Education { get; set; }
+    public string? Interests { get; set; }
     public bool IsChief { get; set; }
     // Silinen doktor satırı DB'de kalır: Appointments.DoctorId FK'si ON DELETE CASCADE olduğu için
     // gerçek DELETE hastaların randevu geçmişini de silerdi. Listelerden gizlenir, randevu

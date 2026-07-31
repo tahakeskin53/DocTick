@@ -60,10 +60,14 @@ public static class AdminEndpoints
 
         // ---- Doktorlar ----
         grp.MapGet("/doctors", async (AppDb db, CancellationToken ct) =>
-            Results.Ok(await (from d in db.Doctors.AsNoTracking().Include(x => x.Department)
-                              where !d.IsDeleted
-                              orderby d.Name
-                              select new { d.Id, d.Name, d.DepartmentId, DepartmentName = d.Department!.Name, d.IsActive, d.PhotoUrl, d.Bio, d.Education, d.Interests, d.IsChief }).ToListAsync(ct)));
+        {
+            var list = await db.Doctors.AsNoTracking().Include(d => d.Department).Where(d => !d.IsDeleted).OrderBy(d => d.Name).ToListAsync(ct);
+            return Results.Ok(list.Select(d => new
+            {
+                d.Id, d.Name, d.DepartmentId, DepartmentName = d.Department!.Name, d.IsActive, 
+                PhotoUrl = d.PhotoUrl ?? "", Bio = d.Bio ?? "", Education = d.Education ?? "", Interests = d.Interests ?? "", d.IsChief
+            }));
+        });
 
         grp.MapPost("/doctors", async (DoctorUpsertRequest req, AppDb db, CancellationToken ct) =>
         {
