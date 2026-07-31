@@ -4,6 +4,7 @@ import { Icon } from '../../components/display/Icon.jsx';
 import { Logo } from '../../components/display/Logo.jsx';
 import { IconButton } from '../../components/forms/IconButton.jsx';
 import { Footer } from '../../components/display/Footer.jsx';
+import { WhatsAppWidget } from '../../components/WhatsAppWidget';
 import { ProfileModal } from '../../components/feedback/ProfileModal';
 import { useAuth } from '../../auth/Auth';
 
@@ -74,6 +75,7 @@ export function HastaLayout() {
       </main>
       <Footer />
       <ProfileModal open={profileOpen} onClose={() => setProfileOpen(false)} />
+      <WhatsAppWidget />
     </div>
   );
 }
