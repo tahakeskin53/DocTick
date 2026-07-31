@@ -12,13 +12,15 @@ tier: core
 - **Started:** 2026-07-21
 - **Last Update:** 2026-07-31
 - **Last Accessed:** 2026-07-21 14:59:18
-- **Update Count:** 47
+- **Update Count:** 49
 - **Source:** setup
 
 ## Current State
 - **Status:** not_started. DNS'te resend._domainkey.doctick.me ve send.doctick.me NXDOMAIN. Kod ve Azure app settings DOGRU (RedirectTo bos, FromEmail=randevu@doctick.me, ApiKey dolu) - sorun yalnizca domain dogrul
 
 ## Recent Activity
+- **2026-07-31** | Doktor rolu ozelliginin backend uclari eksik deploy edildi; bugfix plani docs/superpowers/plans/2026-07-31-doktor-paneli-bugfix.md [Source: bugfix-plan]
+- **2026-07-31** | CI artik dotnet test calistiriyor ve deploy sonrasi /api/auth/me 401 bekleyen smoke check yapiyor — baslangicta olen uygulama artik yesil deploy olarak gecemez. [Source: ci-hardening]
 - **2026-07-31** | Deploy pipeline bosluğu: .github/workflows/azure-deploy.yml dotnet test CALISTIRMIYOR ve deploy sonrasi smoke check YOK — baslangicta olen bir uygulama prod'a sorunsuz gidebiliyor. [Source: incident-2026-07-31]
 - **2026-07-31** | Doktor rolu (UserRole.Doctor), Tahlil/Goruntuleme veri modeli, Doktorlarimiz sayfasi ve O2/O3 route-based lazy loading kod bolmesi uygulandi. [Source: manual]
 - **2026-07-31** | E-posta artik uyelere dogrudan gidiyor (doctick.me dogrulandi). Yerel gelistirmede Development override ile posta yine sahibin kutusuna dusuyor. [Source: config]
@@ -86,6 +88,10 @@ NOT: PublicEndpoints adina ragmen .RequireAuthorization() iceriyor — /api/depa
 ---
 
 ## Timeline (Full Record)
+
+- **2026-07-31** | Doktor rolu ozelliginin backend uclari eksik deploy edildi; bugfix plani docs/superpowers/plans/2026-07-31-doktor-paneli-bugfix.md [Source: bugfix-plan]
+
+- **2026-07-31** | CI artik dotnet test calistiriyor ve deploy sonrasi /api/auth/me 401 bekleyen smoke check yapiyor — baslangicta olen uygulama artik yesil deploy olarak gecemez. [Source: ci-hardening]
 
 - **2026-07-31** | Deploy pipeline bosluğu: .github/workflows/azure-deploy.yml dotnet test CALISTIRMIYOR ve deploy sonrasi smoke check YOK — baslangicta olen bir uygulama prod'a sorunsuz gidebiliyor. [Source: incident-2026-07-31]
 

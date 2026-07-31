@@ -48,6 +48,14 @@ var photoDir = builder.Configuration["Photos:Dir"]
     ?? Path.Combine(builder.Environment.ContentRootPath, "photos");
 builder.Services.AddSingleton(new PhotoStore(photoDir));
 
+// --- Tıbbi sonuç dosyaları ---
+// photos/ ile kardeş ama BİLEREK statik servis edilmiyor: tahlil/görüntüleme dosyası
+// tahmin edilebilir bir URL'den açılırsa hasta verisi yetkisiz kişiye gider.
+// Tek erişim yolu /api/results/.../file — yetki kontrolünden sonra.
+var resultDir = builder.Configuration["Results:Dir"]
+    ?? Path.Combine(builder.Environment.ContentRootPath, "results");
+builder.Services.AddSingleton(new ResultFileStore(resultDir));
+
 // --- Kimlik doğrulama (cookie) ---
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(o =>
@@ -166,7 +174,16 @@ if (app.Environment.IsDevelopment())
 app.MapAuthEndpoints(builder.Configuration);
 app.MapPublicEndpoints();
 app.MapPatientEndpoints();
+app.MapDoctorEndpoints();
+app.MapResultsEndpoints();
 app.MapAdminEndpoints();
+
+// Eşleşmeyen /api/* yolu SPA fallback'ine DÜŞMESİN — 404 dönsün.
+// Aksi hâlde MapFallbackToFile bu isteği yakalar, istemciye 200 + text/html gider ve
+// client.ts JSON olmayan yanıtı sessizce undefined'a çevirir: eksik bir uç "boş liste"
+// gibi görünür, ne konsolda ne ekranda iz bırakır. Catch-all olduğu için gerçek uçların
+// route önceliği bundan yüksektir; yalnızca hiçbirine uymayan istekler buraya düşer.
+app.Map("/api/{*rest}", () => Results.NotFound());
 
 // Kök yol: prod'da SPA (wwwroot/index.html → UseDefaultFiles servis eder);
 // dev'de wwwroot yoksa API sağlık mesajı. MapGet("/") UseDefaultFiles ile çakıştığı için

@@ -12,7 +12,10 @@ public record AuthResponse(
     int Id, string Email, string Name, string FirstName, string LastName, string PhoneNumber,
     string IdentityNumber, string DateOfBirth, string Gender, string BloodType,
     string EmergencyContactName, string EmergencyContactPhone,
-    string Role, string Status);
+    string Role, string Status,
+    // Doktor rolündeki kullanıcının bağlandığı Doctor kaydının adı ("Uzm. Dr. Ayşe Demir").
+    // Google hesabındaki ad ile aynı olmak zorunda değil — doktor panelinde bağlayıcı olan budur.
+    string DoctorName);
 
 public static class AuthEndpoints
 {
@@ -104,7 +107,7 @@ public static class AuthEndpoints
 
             // Giriş anında ctx.User henüz dolmaz (SignInAsync yalnız cookie yazar) — e-postayı burada geç.
             AuditLog.Event(ctx, "login_success", user.Email);
-            return Results.Ok(ToDto(user));
+            return Results.Ok(ToDto(user, await DoctorNameAsync(db, user, ctx.RequestAborted)));
         });
 
         grp.MapGet("/me", async (ClaimsPrincipal p, AppDb db, CancellationToken ct) =>
@@ -112,7 +115,7 @@ public static class AuthEndpoints
             if (p.Identity?.IsAuthenticated != true) return Results.Unauthorized();
             // DB'den güncel durum/rol — admin onayı/reddi oturum süresince anında yansır.
             var u = await db.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == CurrentUser.Uid(p), ct);
-            return u is null ? Results.Unauthorized() : Results.Ok(ToDto(u));
+            return u is null ? Results.Unauthorized() : Results.Ok(ToDto(u, await DoctorNameAsync(db, u, ct)));
         });
 
         grp.MapPost("/logout", async (HttpContext ctx) =>
@@ -170,13 +173,23 @@ public static class AuthEndpoints
                 new ClaimsPrincipal(identity),
                 new AuthenticationProperties { IsPersistent = true, ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7) });
 
-            return Results.Ok(ToDto(user));
+            // Profil kaydından sonra da doktor adı taşınmalı — aksi hâlde başlık boşalırdı.
+            return Results.Ok(ToDto(user, await DoctorNameAsync(db, user, ct)));
         });
 
         return app;
     }
 
-    private static AuthResponse ToDto(User u)
+    /// <summary>
+    /// Kullanıcı bir Doctor kaydına bağlıysa o kaydın adını getirir, değilse boş string.
+    /// ToDto senkron olduğu için isim çağrı yerinde çözülüp içeri verilir.
+    /// </summary>
+    private static async Task<string> DoctorNameAsync(AppDb db, User u, CancellationToken ct) =>
+        u.DoctorId is int did
+            ? await db.Doctors.AsNoTracking().Where(d => d.Id == did).Select(d => d.Name).FirstOrDefaultAsync(ct) ?? ""
+            : "";
+
+    private static AuthResponse ToDto(User u, string doctorName = "")
     {
         var fn = u.FirstName;
         var ln = u.LastName;
@@ -190,7 +203,7 @@ public static class AuthEndpoints
             u.Id, u.Email, u.Name, fn, ln, u.PhoneNumber ?? "",
             u.IdentityNumber ?? "", u.DateOfBirth ?? "", u.Gender ?? "", u.BloodType ?? "",
             u.EmergencyContactName ?? "", u.EmergencyContactPhone ?? "",
-            u.Role.ToString(), u.Status.ToString());
+            u.Role.ToString(), u.Status.ToString(), doctorName);
     }
 }
 

@@ -148,7 +148,8 @@ public static class PatientEndpoints
         return app;
     }
 
-    private static string DisplayStatus(Appointment a)
+    // internal: doktor tarafı da aynı "geçmişse done" kuralını kullanır (DoctorEndpoints).
+    internal static string DisplayStatus(Appointment a)
     {
         if (a.Status == ApptStatus.Cancelled) return "cancelled";
         var start = DateTime.ParseExact(a.Date + " " + a.Time, "yyyy-MM-dd HH:mm", null);

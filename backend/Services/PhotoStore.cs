@@ -9,6 +9,10 @@ public class PhotoStore(string dir) : FileStore(dir, "/uploads/doctors/")
     public new const string UrlPrefix = "/uploads/doctors/";
 }
 
+// Tıbbi sonuç dosyaları. Önek boş: kaydedilen değer bir URL değil, yalnızca dosya adı —
+// bu dosyalar statik servis edilmediği için tarayıcının çözebileceği bir yolu yok.
+public class ResultFileStore(string dir) : FileStore(dir, "");
+
 public class FileStore(string dir, string urlPrefix)
 {
     public const int MaxBytes = 5 * 1024 * 1024;
@@ -68,27 +72,31 @@ public class FileStore(string dir, string urlPrefix)
         return $"{UrlPrefix}{filename}";
     }
 
-    public void Delete(string url)
+    /// <summary>
+    /// Kaydedilmiş değeri diskteki tam yola çevirir. Bize ait olmayan, dizin dışına çıkmaya
+    /// çalışan veya dosyası bulunmayan girdilerde null döner.
+    /// Hem silme hem indirme buradan geçer — yol doğrulaması tek yerde.
+    /// </summary>
+    public string? Resolve(string url)
     {
-        if (string.IsNullOrWhiteSpace(url) || (UrlPrefix != "" && !url.StartsWith(UrlPrefix, StringComparison.OrdinalIgnoreCase)))
-        {
-            return;
-        }
+        if (string.IsNullOrWhiteSpace(url)) return null;
+        if (UrlPrefix != "" && !url.StartsWith(UrlPrefix, StringComparison.OrdinalIgnoreCase)) return null;
 
         string filename = url[UrlPrefix.Length..];
-        // Security check: ensure no directory traversal in filename
-        if (filename.Contains('/') || filename.Contains('\\') || filename.Contains(".."))
-        {
-            return;
-        }
+        // Dizin dolaşımı koruması: dosya adı düz bir ad olmalı.
+        if (filename.Contains('/') || filename.Contains('\\') || filename.Contains("..")) return null;
 
         string fullPath = Path.Combine(dir, filename);
+        return File.Exists(fullPath) ? fullPath : null;
+    }
+
+    public void Delete(string url)
+    {
+        var fullPath = Resolve(url);
+        if (fullPath is null) return;
         try
         {
-            if (File.Exists(fullPath))
-            {
-                File.Delete(fullPath);
-            }
+            File.Delete(fullPath);
         }
         catch
         {

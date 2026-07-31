@@ -16,6 +16,12 @@ export interface Me {
   emergencyContactPhone?: string;
   role: 'Admin' | 'Patient' | 'Doctor';
   status: 'Pending' | 'Active' | 'Rejected';
+  /**
+   * Doctor rolündeki kullanıcının bağlandığı Doctor kaydının adı — unvan dahil
+   * ("Uzm. Dr. Ayşe Demir"). Google hesabındaki `name` ile aynı olmak zorunda değil;
+   * doktor panelinde gösterilecek olan budur. Diğer rollerde boş string.
+   */
+  doctorName: string;
 }
 
 
@@ -44,6 +50,17 @@ export interface LabValue { id: number; testName: string; value: number; unit: s
 export interface LabResult { id: number; patientId: number; doctorId: number; doctorName: string; appointmentId: number | null; panelName: string; status: 'Requested' | 'Reported'; requestedAt: string; reportedAt: string | null; doctorNote: string; filePath: string; values: LabValue[] }
 export interface ImagingStudy { id: number; patientId: number; doctorId: number; doctorName: string; appointmentId: number | null; modality: string; bodyPart: string; status: 'Requested' | 'Reported'; requestedAt: string; reportedAt: string | null; reportText: string; filePath: string }
 export interface DoctorPatient { id: number; name: string; email: string }
+/**
+ * Doktorun gördüğü randevu. Appointment'tan farkı hasta alanlarını taşıması:
+ * sonuç kaydı doğru kişiye bağlanabilsin diye `patientId` şart.
+ */
+export interface DoctorAppointment {
+  id: number; code: string;
+  patientId: number; patientName: string; patientEmail: string;
+  departmentName: string;
+  date: string; dateLabel: string; time: string;
+  status: 'confirmed' | 'done' | 'cancelled';
+}
 export interface PatientResults { labs: LabResult[]; imaging: ImagingStudy[] }
 
 export class ApiError extends Error {
@@ -123,7 +140,8 @@ export const Api = {
   downloadLabFile: (id: number) => `/api/results/lab/${id}/file`,
   downloadImagingFile: (id: number) => `/api/results/imaging/${id}/file`,
 
-  doctorAppointments: (date?: string) => api<Appointment[]>(`/api/doctor/appointments${date ? `?date=${date}` : ''}`),
+  // date boş bırakılırsa tüm randevular döner; verilirse o güne filtrelenir.
+  doctorAppointments: (date?: string) => api<DoctorAppointment[]>(`/api/doctor/appointments${date ? `?date=${date}` : ''}`),
   doctorPatients: () => api<{id: number; name: string; email: string}[]>('/api/doctor/patients'),
   doctorPatientResults: (patientId: number) => api<PatientResults>(`/api/doctor/patients/${patientId}/results`),
   createLab: (data: any) => api('/api/doctor/lab', { method: 'POST', body: JSON.stringify(data) }),

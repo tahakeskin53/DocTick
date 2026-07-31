@@ -8,6 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Yetki predicate'i ve DTO eşlemesi internal kalsın ama test edilebilsin.
+         Alternatifi (HTTP test host + Mvc.Testing paketi) tek bir saf fonksiyon için fazla. -->
+    <InternalsVisibleTo Include="DocTick.Api.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Google.Apis.Auth" Version="1.75.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.10" />

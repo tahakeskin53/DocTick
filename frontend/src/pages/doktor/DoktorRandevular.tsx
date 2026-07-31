@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Api, type Appointment } from '../../api/client';
+import { Api, type DoctorAppointment } from '../../api/client';
 import { Card } from '../../components/display/Card.jsx';
 import { Button } from '../../components/forms/Button.jsx';
 import { Input } from '../../components/forms/Input.jsx';
@@ -11,9 +11,9 @@ import { useToast } from '../../components/ToastProvider';
 export function DoktorRandevular() {
   const qc = useQueryClient();
   const { toast } = useToast();
-  const todayIso = new Date().toISOString().split('T')[0];
-  const [date, setDate] = useState(todayIso);
-  const [activeAppt, setActiveAppt] = useState<Appointment | null>(null);
+  // Boş = filtre yok, tüm randevular. Tarih seçilirse yalnız o gün.
+  const [date, setDate] = useState('');
+  const [activeAppt, setActiveAppt] = useState<DoctorAppointment | null>(null);
   const [resultType, setResultType] = useState<'lab' | 'imaging'>('lab');
 
   // Lab form state
@@ -75,7 +75,7 @@ export function DoktorRandevular() {
       }] : [];
 
       createLab.mutate({
-        patientId: activeAppt.id, // backend reads patient via appointment or direct id
+        patientId: activeAppt.patientId, // hastanın kimliği — randevu Id'si DEĞİL
         appointmentId: activeAppt.id,
         panelName,
         status: 'Reported',
@@ -85,7 +85,7 @@ export function DoktorRandevular() {
     } else {
       if (!bodyPart.trim()) return toast('error', 'Vücut bölgesi zorunludur.');
       createImaging.mutate({
-        patientId: activeAppt.id,
+        patientId: activeAppt.patientId, // hastanın kimliği — randevu Id'si DEĞİL
         appointmentId: activeAppt.id,
         modality,
         bodyPart,
@@ -101,15 +101,21 @@ export function DoktorRandevular() {
         <div>
           <h1 style={{ font: 'var(--text-h1)', margin: '0 0 8px' }}>Randevularım</h1>
           <p style={{ font: 'var(--text-body)', color: 'var(--text-muted)', margin: 0 }}>
-            Seçilen tarihteki hasta randevularınız ve sonuç ekleme işlemleri.
+            {date ? 'Seçilen tarihteki hasta randevularınız.' : 'Tüm hasta randevularınız.'} Karttan sonuç ekleyebilirsiniz.
           </p>
         </div>
-        <div style={{ width: 180 }}>
-          <Input
-            type="date"
-            value={date}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDate(e.target.value)}
-          />
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8 }}>
+          <div style={{ width: 180 }}>
+            <Input
+              type="date"
+              value={date}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDate(e.target.value)}
+            />
+          </div>
+          {/* Filtreyi temizler — varsayılan görünüm zaten filtresiz. */}
+          <Button variant="secondary" size="sm" disabled={!date} onClick={() => setDate('')}>
+            Tümü
+          </Button>
         </div>
       </div>
 
@@ -118,7 +124,7 @@ export function DoktorRandevular() {
       ) : appts?.length === 0 ? (
         <Card padded>
           <div style={{ textAlign: 'center', padding: 20, color: 'var(--text-muted)' }}>
-            Bu tarihte randevunuz bulunmuyor.
+            {date ? 'Bu tarihte randevunuz bulunmuyor.' : 'Henüz randevunuz bulunmuyor.'}
           </div>
         </Card>
       ) : (
@@ -127,9 +133,13 @@ export function DoktorRandevular() {
             <Card key={a.id} padded>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                  <b style={{ font: 'var(--text-h3)', display: 'block' }}>{a.code} • {a.time}</b>
+                  {/* Hasta adı başta: liste artık filtresiz, doktorun kimi gördüğü ilk bilgi olmalı. */}
+                  <b style={{ font: 'var(--text-h3)', display: 'block' }}>{a.patientName}</b>
                   <div style={{ font: 'var(--text-body-sm)', color: 'var(--text-muted)' }}>
-                    {a.departmentName}
+                    {a.dateLabel} · {a.time} · {a.departmentName}
+                  </div>
+                  <div style={{ font: 'var(--text-caption)', color: 'var(--text-muted)', marginTop: 2 }}>
+                    {a.code}{a.status === 'cancelled' && ' · İptal edildi'}
                   </div>
                 </div>
                 <Button size="sm" onClick={() => { setActiveAppt(a); resetForms(); }}>
@@ -143,7 +153,7 @@ export function DoktorRandevular() {
 
       <Dialog
         open={!!activeAppt}
-        title={`Sonuç Ekle - ${activeAppt?.code}`}
+        title={`Sonuç Ekle — ${activeAppt?.patientName ?? ''}`}
         onClose={() => setActiveAppt(null)}
         footer={<>
           <Button variant="secondary" onClick={() => setActiveAppt(null)}>Vazgeç</Button>

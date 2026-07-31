@@ -31,14 +31,16 @@ export function DoktorLayout() {
       <header style={{ position: 'sticky', top: 0, zIndex: 20, background: 'var(--surface-brand)', color: '#fff' }}>
         <div style={{ maxWidth: 'var(--page-max)', margin: '0 auto', padding: '0 var(--page-pad)', height: 58, display: 'flex', alignItems: 'center', gap: 24 }}>
           <Logo size={30} onDark onClick={() => nav('/doktor')} />
-          <span style={{ fontSize: 13, background: 'rgba(255,255,255,0.15)', padding: '2px 8px', borderRadius: 4, fontWeight: 600 }}>DOKTOR PANALİ</span>
+          <span style={{ fontSize: 13, background: 'rgba(255,255,255,0.15)', padding: '2px 8px', borderRadius: 4, fontWeight: 600 }}>DOKTOR PANELİ</span>
           <nav style={{ display: 'flex', gap: 4 }}>
             {tab('/doktor', 'Randevularım', true)}
             {tab('/doktor/hastalarim', 'Hastalarım')}
             {tab('/doktor/sonuclarim', 'Sonuçlarım')}
           </nav>
           <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ font: 'var(--text-body-sm)', color: '#fff', fontWeight: 500 }}>Dr. {user?.name}</span>
+            {/* Bağlandığı Doctor kaydının adı — hesabın Google adı değil, ikisi farklı olabilir.
+                Unvan (Uzm. Dr. / Prof. Dr.) zaten Doctor.Name içinde, ayrıca "Dr." eklenmez. */}
+            <span style={{ font: 'var(--text-body-sm)', color: '#fff', fontWeight: 500 }}>{user?.doctorName}</span>
             <IconButton label="Çıkış yap" onClick={doLogout} variant="outline" size="sm">
               <Icon name="logout" size={15} />
             </IconButton>

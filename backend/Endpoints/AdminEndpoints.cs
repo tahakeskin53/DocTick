@@ -284,18 +284,10 @@ public static class AdminEndpoints
             return Results.NoContent();
         });
 
+        // Admin kapsamı sınırsız — hasta seçilir, sonuçlar salt okunur gelir.
+        // Şekil ResultsEndpoints.LoadAsync'te: hasta/doktor/admin üçü de aynı JSON'u görür.
         grp.MapGet("/users/{id}/results", async (int id, AppDb db, CancellationToken ct) =>
-        {
-            var labs = await db.LabResults.AsNoTracking().Include(r => r.Doctor).Include(r => r.Values)
-                .Where(r => r.PatientId == id).OrderByDescending(r => r.RequestedAt).ToListAsync(ct);
-            var imaging = await db.ImagingStudies.AsNoTracking().Include(s => s.Doctor)
-                .Where(s => s.PatientId == id).OrderByDescending(s => s.RequestedAt).ToListAsync(ct);
-                
-            return Results.Ok(new {
-                labs = labs.Select(r => new { r.Id, r.PanelName, Status = r.Status.ToString(), r.RequestedAt, r.ReportedAt, r.DoctorNote, r.FilePath, DoctorName = r.Doctor!.Name, Values = r.Values.Select(v => new { v.TestName, v.Value, v.Unit, v.RefLow, v.RefHigh }) }),
-                imaging = imaging.Select(s => new { s.Id, s.Modality, s.BodyPart, Status = s.Status.ToString(), s.RequestedAt, s.ReportedAt, s.ReportText, s.FilePath, DoctorName = s.Doctor!.Name })
-            });
-        });
+            Results.Ok(await ResultsEndpoints.LoadAsync(db, id, ct)));
 
         // ---- Genel bakış ----
         grp.MapGet("/overview", async (AppDb db, CancellationToken ct) =>
