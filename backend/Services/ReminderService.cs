@@ -82,3 +82,15 @@ public static class ReminderWindow
     public static bool IsDue(DateTime start, DateTime now, int hoursBefore) =>
         start > now && start <= now.AddHours(hoursBefore);
 }
+
+// Doktor silinirken hangi randevunun iptal edileceğine karar veren saf yardımcı.
+// Kural: yalnızca HENÜZ GERÇEKLEŞMEMİŞ randevu iptal edilir; geçmiş randevular
+// tarihçe olarak olduğu gibi korunur. Bozuk tarih/saat metni iptal ettirmez.
+public static class DoctorRemoval
+{
+    public static bool ShouldCancel(string date, string time, ApptStatus status, DateTime now) =>
+        status == ApptStatus.Confirmed
+        && DateTime.TryParseExact($"{date} {time}", "yyyy-MM-dd HH:mm", null,
+               System.Globalization.DateTimeStyles.None, out var start)
+        && start > now;
+}

@@ -26,6 +26,8 @@ export function Doctors() {
   const [name, setName] = useState('');
   const [dept, setDept] = useState('');
   const [edit, setEdit] = useState<EditState | null>(null);
+  // Silme artık randevu iptal edip hastalara e-posta gönderiyor — tek tıkla olmamalı.
+  const [confirmDel, setConfirmDel] = useState<{ id: number; name: string } | null>(null);
 
   const upd = useMutation({
     mutationFn: (v: { id: number; name: string; deptId: number; isActive: boolean }) => Api.updateDoctor(v.id, v.name, v.deptId, v.isActive),
@@ -33,7 +35,14 @@ export function Doctors() {
   });
   const del = useMutation({
     mutationFn: (id: number) => Api.deleteDoctor(id),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['admin', 'doctors'] }); toast('info', 'Doktor silindi.'); },
+    onSuccess: (r) => {
+      qc.invalidateQueries({ queryKey: ['admin', 'doctors'] });
+      toast('info', r.cancelled
+        ? `Doktor silindi. ${r.cancelled} yaklaşan randevu iptal edildi, ${r.notified} hastaya e-posta gönderildi.`
+        : 'Doktor silindi.');
+    },
+    // onError olmadan backend hatası sessizce yutuluyor ve tıklama hiçbir şey yapmıyor gibi görünüyordu.
+    onError: (e) => toast('error', e instanceof Error ? e.message : 'Doktor silinemedi.'),
   });
   const addM = useMutation({
     mutationFn: (v: { name: string; deptId: number }) => Api.addDoctor(v.name, v.deptId),
@@ -65,7 +74,7 @@ export function Doctors() {
             <span style={{ display: 'flex', gap: 4 }}>
               <IconButton size="sm" label="Fotoğraf Yükle" onClick={() => nav('/admin/fotograflar')}><Icon name="camera" size={15} /></IconButton>
               <IconButton size="sm" label="Düzenle" onClick={() => setEdit({ id: r.id, name: r.name, deptId: r.departmentId, isActive: r.isActive })}><Icon name="pencil" size={15} /></IconButton>
-              <IconButton size="sm" label="Sil" onClick={() => del.mutate(r.id)}><Icon name="trash" size={15} /></IconButton>
+              <IconButton size="sm" label="Sil" onClick={() => setConfirmDel({ id: r.id, name: r.name })}><Icon name="trash" size={15} /></IconButton>
             </span>
           </div>
         ))}
@@ -81,6 +90,19 @@ export function Doctors() {
           <Select label="Bölüm" placeholder="Bölüm seçin" value={dept} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setDept(e.target.value)}
             options={(depts || []).map(d => ({ value: String(d.id), label: d.name }))} />
         </div>
+      </Dialog>
+
+      <Dialog open={!!confirmDel} title="Doktoru sil" onClose={() => setConfirmDel(null)}
+        footer={<>
+          <Button variant="secondary" onClick={() => setConfirmDel(null)}>Vazgeç</Button>
+          <Button variant="danger" disabled={del.isPending}
+            onClick={() => { if (confirmDel) del.mutate(confirmDel.id); setConfirmDel(null); }}>Sil</Button>
+        </>}>
+        <p style={{ margin: 0, lineHeight: 1.65 }}>
+          <b>{confirmDel?.name}</b> listelerden kaldırılacak. Geçmiş randevular kayıtlarda kalır;
+          <b> henüz gerçekleşmemiş randevular iptal edilir</b> ve ilgili hastalara bilgilendirme
+          e-postası gönderilir. Bu işlem geri alınamaz.
+        </p>
       </Dialog>
 
       <Dialog open={!!edit} title="Doktoru düzenle" onClose={() => setEdit(null)}

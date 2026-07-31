@@ -55,7 +55,7 @@ public static class PatientEndpoints
             if (userConflict) return Results.Conflict("Bu saatte zaten bir randevunuz var.");
 
             var doctor = await db.Doctors.Include(d => d.Department).FirstOrDefaultAsync(d => d.Id == req.DoctorId, ct);
-            if (doctor is null || !doctor.IsActive) return Results.BadRequest("Doktor bulunamadı.");
+            if (doctor is null || doctor.IsDeleted || !doctor.IsActive) return Results.BadRequest("Doktor bulunamadı.");
 
             var appt = new Appointment
             {

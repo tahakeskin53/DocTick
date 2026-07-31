@@ -27,7 +27,7 @@ public static class AdminEndpoints
         // ---- Departmanlar ----
         grp.MapGet("/departments", async (AppDb db, CancellationToken ct) =>
             Results.Ok(await db.Departments.AsNoTracking().OrderBy(d => d.Name)
-                .Select(d => new { d.Id, d.Name, d.IsActive, Doctors = d.Doctors.Count }).ToListAsync(ct)));
+                .Select(d => new { d.Id, d.Name, d.IsActive, Doctors = d.Doctors.Count(x => !x.IsDeleted) }).ToListAsync(ct)));
 
         grp.MapPost("/departments", async (DeptUpsertRequest req, AppDb db, CancellationToken ct) =>
         {
@@ -48,7 +48,7 @@ public static class AdminEndpoints
 
         grp.MapDelete("/departments/{id}", async (int id, AppDb db, CancellationToken ct) =>
         {
-            if (await db.Doctors.AnyAsync(d => d.DepartmentId == id, ct))
+            if (await db.Doctors.AnyAsync(d => d.DepartmentId == id && !d.IsDeleted, ct))
                 return Results.Conflict("Bu bölüme bağlı doktorlar var; önce onları taşıyın veya silin.");
             var d = await db.Departments.FindAsync([id], ct);
             if (d is null) return Results.NotFound();
@@ -60,6 +60,7 @@ public static class AdminEndpoints
         // ---- Doktorlar ----
         grp.MapGet("/doctors", async (AppDb db, CancellationToken ct) =>
             Results.Ok(await (from d in db.Doctors.AsNoTracking().Include(x => x.Department)
+                              where !d.IsDeleted
                               orderby d.Name
                               select new { d.Id, d.Name, d.DepartmentId, DepartmentName = d.Department!.Name, d.IsActive, d.PhotoUrl }).ToListAsync(ct)));
 
@@ -85,15 +86,44 @@ public static class AdminEndpoints
             return Results.Ok(new { doc.Id, doc.Name, doc.DepartmentId, doc.IsActive, doc.PhotoUrl });
         });
 
-        grp.MapDelete("/doctors/{id}", async (int id, AppDb db, CancellationToken ct) =>
+        // Silme = yumuşak silme. Gerçek DELETE, Appointments FK'si ON DELETE CASCADE olduğu için
+        // hastaların randevu geçmişini de silerdi. Bunun yerine: doktor listelerden kaybolur,
+        // geçmiş randevular olduğu gibi kalır, henüz gerçekleşmemiş randevular iptal edilip
+        // sahiplerine bilgilendirme e-postası gider.
+        grp.MapDelete("/doctors/{id}", async (int id, AppDb db, EmailService email, ILogger<Program> log, CancellationToken ct) =>
         {
-            if (await db.Appointments.AnyAsync(a => a.DoctorId == id, ct))
-                return Results.Conflict("Bu doktora ait randevu geçmişi var; silmek yerine pasifleştirin.");
-            var doc = await db.Doctors.FindAsync([id], ct);
+            var doc = await db.Doctors.Include(d => d.Department).FirstOrDefaultAsync(d => d.Id == id && !d.IsDeleted, ct);
             if (doc is null) return Results.NotFound();
-            db.Doctors.Remove(doc);
+
+            var now = DateTime.Now;
+            var confirmed = await db.Appointments.Include(a => a.User)
+                .Where(a => a.DoctorId == id && a.Status == ApptStatus.Confirmed).ToListAsync(ct);
+            var toCancel = confirmed.Where(a => DoctorRemoval.ShouldCancel(a.Date, a.Time, a.Status, now)).ToList();
+
+            foreach (var a in toCancel) a.Status = ApptStatus.Cancelled;
+            doc.IsDeleted = true;
+            doc.IsActive = false; // yeni randevu alınamasın
             await db.SaveChangesAsync(ct);
-            return Results.NoContent();
+
+            // Bilgilendirme best-effort: gönderim hatası iptali geri almaz (PatientEndpoints ile aynı kural).
+            var sent = 0;
+            foreach (var a in toCancel)
+            {
+                if (a.User is null) continue;
+                try
+                {
+                    await email.SendAsync(a.User.Email, "DocTick — Randevunuz iptal edildi",
+                        EmailTemplates.Disruption(a.User.Name, a.Time, doc.Name, doc.Department!.Name,
+                            ReminderService.FormatDate(a.Date), a.Code));
+                    sent++;
+                }
+                catch (Exception ex)
+                {
+                    log.LogWarning(ex, "İptal bildirimi gönderilemedi (randevu {Id}).", a.Id);
+                }
+            }
+
+            return Results.Ok(new { cancelled = toCancel.Count, notified = sent });
         });
 
         grp.MapPut("/doctors/{id}/photo", async (int id, DoctorPhotoRequest req, AppDb db, PhotoStore store, CancellationToken ct) =>

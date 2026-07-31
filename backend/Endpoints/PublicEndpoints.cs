@@ -27,7 +27,8 @@ public static class PublicEndpoints
         {
             var q = db.Doctors.AsNoTracking().Include(x => x.Department);
             var list = await (from d in q
-                              where (deptId == null || d.DepartmentId == deptId)
+                              where !d.IsDeleted
+                                         && (deptId == null || d.DepartmentId == deptId)
                                          && (active == null || d.IsActive == active)
                                       orderby d.Name
                                       select new DoctorDto(d.Id, d.Name, d.DepartmentId, d.Department!.Name, d.IsActive, d.PhotoUrl)).ToListAsync(ct);

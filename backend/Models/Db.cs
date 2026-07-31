@@ -47,6 +47,10 @@ public class Doctor
     public Department? Department { get; set; }
     public bool IsActive { get; set; } = true;
     public string PhotoUrl { get; set; } = "";
+    // Silinen doktor satırı DB'de kalır: Appointments.DoctorId FK'si ON DELETE CASCADE olduğu için
+    // gerçek DELETE hastaların randevu geçmişini de silerdi. Listelerden gizlenir, randevu
+    // okumaları (a.Doctor!.Name) çalışmaya devam eder.
+    public bool IsDeleted { get; set; }
 }
 #line 51 "C:\Users\tahak\OneDrive\Masaüstü\STAJ\staj projeler\DocTick\backend\Models\Db.cs"
 
@@ -150,7 +154,8 @@ public static class DbSeeder
             ("Users", "BloodType", "TEXT NOT NULL DEFAULT ''"),
             ("Users", "EmergencyContactName", "TEXT NOT NULL DEFAULT ''"),
             ("Users", "EmergencyContactPhone", "TEXT NOT NULL DEFAULT ''"),
-            ("Doctors", "PhotoUrl", "TEXT NOT NULL DEFAULT ''")
+            ("Doctors", "PhotoUrl", "TEXT NOT NULL DEFAULT ''"),
+            ("Doctors", "IsDeleted", "INTEGER NOT NULL DEFAULT 0")
         };
 
         foreach (var (table, colName, colType) in cols)

@@ -122,6 +122,14 @@ public static class EmailTemplates
         Shell("Randevunuz iptal edildi",
             $"<p>Sayın {name},</p><p>Aşağıdaki randevunuz iptal edilmiştir.</p>{Appt(time, doctor, dept, date)}");
 
+    // Kurum kaynaklı zorunlu iptal (ör. doktorun kadrodan çıkarılması). Sebep bilerek
+    // genel tutulur — hastaya iç işleyiş anlatılmaz, kurumla iletişime yönlendirilir.
+    public static string Disruption(string name, string time, string doctor, string dept, string date, string code) =>
+        Shell("Randevunuz iptal edildi",
+            $"<p>Sayın {name},</p><p>Yaşanan bir aksaklık nedeniyle aşağıdaki randevunuz <b>iptal edilmiştir</b>. Oluşan olumsuzluk için özür dileriz.</p>{Appt(time, doctor, dept, date)}" +
+            $"<p style='font-size:13px;color:#51626F;margin:0 0 10px'>Randevu kodunuz: <b style='font-family:IBM Plex Mono,monospace;color:#1B5493;font-size:14px'>{code}</b></p>" +
+            "<p style='font-size:14px'>Yeni bir randevu planlamak ve ayrıntılı bilgi almak için lütfen <b>kurumumuzla iletişime geçin</b>.</p>");
+
     public static string Reminder(string name, string time, string doctor, string dept, string date) =>
         Shell("Randevu hatırlatması",
             $"<p>Sayın {name}, randevunuz yaklaşıyor.</p>{Appt(time, doctor, dept, date)}");

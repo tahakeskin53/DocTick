@@ -126,7 +126,8 @@ export const Api = {
   adminDoctors: () => api<Doctor[]>('/api/admin/doctors'),
   addDoctor: (name: string, departmentId: number) => api('/api/admin/doctors', { method: 'POST', body: JSON.stringify({ name, departmentId, isActive: true }) }),
   updateDoctor: (id: number, name: string, departmentId: number, isActive: boolean) => api(`/api/admin/doctors/${id}`, { method: 'PUT', body: JSON.stringify({ name, departmentId, isActive }) }),
-  deleteDoctor: (id: number) => api(`/api/admin/doctors/${id}`, { method: 'DELETE' }),
+  // cancelled: iptal edilen (henüz gerçekleşmemiş) randevu sayısı, notified: e-posta gideni.
+  deleteDoctor: (id: number) => api<{ cancelled: number; notified: number }>(`/api/admin/doctors/${id}`, { method: 'DELETE' }),
   setDoctorPhoto: (id: number, body: { dataUrl?: string; url?: string }) => api<{ id: number; photoUrl: string }>(`/api/admin/doctors/${id}/photo`, { method: 'PUT', body: JSON.stringify(body) }),
   resetDoctorPhoto: (id: number) => api<{ id: number; photoUrl: string }>(`/api/admin/doctors/${id}/photo`, { method: 'DELETE' }),
   getSchedule: (doctorId: number) => api<Schedule>(`/api/admin/schedule?doctorId=${doctorId}`),
