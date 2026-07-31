@@ -47,6 +47,41 @@ public static class DoctorEndpoints
             return Results.Ok(list.Select(ToDto));
         });
 
+        // Doktor kendi randevusunu iptal eder. Hastaya bilgi e-postası gider —
+        // iptali hasta değil doktor yaptığı için haberdar edilmesi şart.
+        grp.MapPost("/appointments/{id}/cancel", async (int id, AppDb db, UserGate gate, ClaimsPrincipal p, EmailService email, HttpContext ctx, CancellationToken ct) =>
+        {
+            var docId = await MyDoctorIdAsync(gate, p, ct);
+            var appt = await db.Appointments
+                .Include(a => a.User)
+                .Include(a => a.Doctor!).ThenInclude(d => d!.Department)
+                .FirstOrDefaultAsync(a => a.Id == id && a.DoctorId == docId, ct);
+            if (appt is null) return Results.NotFound();
+            if (appt.Status != ApptStatus.Confirmed) return Results.BadRequest("Randevu zaten iptal edilmiş.");
+            // Geçmiş randevu iptal edilmez — olan olmuş, kayıt tarihçe olarak kalmalı.
+            if (!DateTime.TryParseExact($"{appt.Date} {appt.Time}", "yyyy-MM-dd HH:mm", null,
+                    System.Globalization.DateTimeStyles.None, out var start) || start <= DateTime.Now)
+                return Results.BadRequest("Geçmiş randevu iptal edilemez.");
+
+            AuditLog.Event(ctx, "appt_cancel_doctor", $"{appt.Code} · {appt.Doctor!.Name} · {appt.Date} {appt.Time}");
+
+            appt.Status = ApptStatus.Cancelled;
+            await db.SaveChangesAsync(ct);
+
+            if (appt.User is not null)
+            {
+                try
+                {
+                    await email.SendAsync(appt.User.Email, "DocTick — Randevu iptali",
+                        EmailTemplates.Cancellation(appt.User.Name, appt.Time, appt.Doctor!.Name,
+                            appt.Doctor!.Department!.Name, ReminderService.FormatDate(appt.Date)));
+                }
+                catch { /* e-posta başarısızlığı iptali geri almaz */ }
+            }
+
+            return Results.Ok(ToDto(appt));
+        });
+
         // Kendi hastaları — bölüm 5'teki yetki predicate'inin liste hâli.
         grp.MapGet("/patients", async (AppDb db, UserGate gate, ClaimsPrincipal p, CancellationToken ct) =>
         {
@@ -109,9 +144,7 @@ public static class DoctorEndpoints
             var row = await db.LabResults.Include(r => r.Values).FirstOrDefaultAsync(r => r.Id == id && r.DoctorId == docId, ct);
             if (row is null) return Results.NotFound();
 
-            var panel = (req.PanelName ?? "").Trim();
-            if (panel.Length is 0 or > 100) return Results.BadRequest("Panel adı 1-100 karakter olmalı.");
-            if (BadValues(req.Values) is string err) return Results.BadRequest(err);
+            if (MergeLab(row, req) is string err) return Results.BadRequest(err);
 
             // Yeni dosya gönderilmediyse mevcut dosya korunur.
             var (fileErr, filePath) = SaveUpload(store, row.PatientId, req.FileDataUrl, LabExts, "Tahlil için yalnız PDF");
@@ -122,15 +155,11 @@ public static class DoctorEndpoints
                 row.FilePath = filePath;
             }
 
-            row.PanelName = panel;
-            row.DoctorNote = (req.DoctorNote ?? "").Trim();
-            // Değerler toptan değiştirilir — satır satır eşleştirme, kazandırdığından çok karmaşıklık getirirdi.
-            db.LabValues.RemoveRange(row.Values);
-            row.Values = ToValues(req.Values);
-            if (!string.Equals(req.Status, "Requested", StringComparison.OrdinalIgnoreCase))
+            if (req.Values is not null)
             {
-                row.Status = ResultStatus.Reported;
-                row.ReportedAt ??= DateTime.UtcNow;
+                // Değerler toptan değiştirilir — satır satır eşleştirme, kazandırdığından çok karmaşıklık getirirdi.
+                db.LabValues.RemoveRange(row.Values);
+                row.Values = ToValues(req.Values);
             }
             await db.SaveChangesAsync(ct);
             return Results.Ok(new { row.Id });
@@ -188,9 +217,18 @@ public static class DoctorEndpoints
             var row = await db.ImagingStudies.FirstOrDefaultAsync(s => s.Id == id && s.DoctorId == docId, ct);
             if (row is null) return Results.NotFound();
 
-            var body = (req.BodyPart ?? "").Trim();
-            if (body.Length is 0 or > 100) return Results.BadRequest("Vücut bölgesi 1-100 karakter olmalı.");
-            if (!Modalities.Contains(req.Modality)) return Results.BadRequest("Geçersiz görüntüleme türü.");
+            // Kısmi güncelleme — gönderilmeyen alan korunur (bkz. PUT /lab/{id}).
+            if (req.BodyPart is not null)
+            {
+                var body = req.BodyPart.Trim();
+                if (body.Length is 0 or > 100) return Results.BadRequest("Vücut bölgesi 1-100 karakter olmalı.");
+                row.BodyPart = body;
+            }
+            if (req.Modality is not null)
+            {
+                if (!Modalities.Contains(req.Modality)) return Results.BadRequest("Geçersiz görüntüleme türü.");
+                row.Modality = req.Modality;
+            }
 
             var (fileErr, filePath) = SaveUpload(store, row.PatientId, req.FileDataUrl, ImagingExts, "Görüntüleme için yalnız görsel (PNG, JPG, WEBP, GIF)");
             if (fileErr is not null) return Results.BadRequest(fileErr);
@@ -200,10 +238,8 @@ public static class DoctorEndpoints
                 row.FilePath = filePath;
             }
 
-            row.Modality = req.Modality!;
-            row.BodyPart = body;
-            row.ReportText = (req.ReportText ?? "").Trim();
-            if (!string.Equals(req.Status, "Requested", StringComparison.OrdinalIgnoreCase))
+            if (req.ReportText is not null) row.ReportText = req.ReportText.Trim();
+            if (req.Status is not null && !string.Equals(req.Status, "Requested", StringComparison.OrdinalIgnoreCase))
             {
                 row.Status = ResultStatus.Reported;
                 row.ReportedAt ??= DateTime.UtcNow;
@@ -261,6 +297,30 @@ public static class DoctorEndpoints
         if (ext is null || !allowed.Contains(ext)) return ($"{kindLabel} kabul edilir.", null);
 
         return (null, store.Save(patientId, bytes, ext, ""));
+    }
+
+    /// <summary>
+    /// Tahlil güncellemesinin kısmi birleştirme kuralı: <b>null gelen alan korunur.</b>
+    /// Yalnız dosya iliştirmek isteyen bir çağrı panel adını ve notu tekrar yollamak
+    /// zorunda değil — yollamazsa silinmezler. Hata varsa mesaj, yoksa null döner.
+    /// (Değer listesi DbContext gerektirdiği için uçta kalır; kararı burası verir.)
+    /// </summary>
+    internal static string? MergeLab(LabResult row, LabInput req)
+    {
+        if (req.PanelName is not null)
+        {
+            var panel = req.PanelName.Trim();
+            if (panel.Length is 0 or > 100) return "Panel adı 1-100 karakter olmalı.";
+            row.PanelName = panel;
+        }
+        if (BadValues(req.Values) is string err) return err;
+        if (req.DoctorNote is not null) row.DoctorNote = req.DoctorNote.Trim();
+        if (req.Status is not null && !string.Equals(req.Status, "Requested", StringComparison.OrdinalIgnoreCase))
+        {
+            row.Status = ResultStatus.Reported;
+            row.ReportedAt ??= DateTime.UtcNow;
+        }
+        return null;
     }
 
     private static string? BadValues(List<LabValueInput>? values)

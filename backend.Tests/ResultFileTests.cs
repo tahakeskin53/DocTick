@@ -1,4 +1,5 @@
 using DocTick.Api.Endpoints;
+using DocTick.Api.Models;
 using DocTick.Api.Services;
 
 namespace DocTick.Api.Tests;
@@ -107,6 +108,44 @@ public class ResultFileTests : IDisposable
         Assert.Null(err);
         Assert.Null(path);
     }
+
+    // ---- Kısmi güncelleme ----
+    // Asıl risk: "sadece dosya iliştir" çağrısı panel adını ve notu silmemeli.
+
+    private static LabResult Mevcut() => new()
+    {
+        Id = 3, PatientId = 7, DoctorId = 2,
+        PanelName = "Hemogram", DoctorNote = "Aç karnına alındı",
+        Status = ResultStatus.Reported, ReportedAt = new DateTime(2026, 7, 30, 9, 0, 0),
+    };
+
+    [Fact]
+    public void SadeceDosya_DigerAlanlariSilmez()
+    {
+        var row = Mevcut();
+        // Yalnız FileDataUrl dolu; diğer her şey null (gönderilmemiş).
+        var err = DoctorEndpoints.MergeLab(row, new LabInput(7, null, null, null, null, null, "data:..."));
+
+        Assert.Null(err);
+        Assert.Equal("Hemogram", row.PanelName);
+        Assert.Equal("Aç karnına alındı", row.DoctorNote);
+        Assert.Equal(new DateTime(2026, 7, 30, 9, 0, 0), row.ReportedAt); // ilk raporlama anı korunur
+    }
+
+    [Fact]
+    public void GonderilenAlan_Guncellenir()
+    {
+        var row = Mevcut();
+        var err = DoctorEndpoints.MergeLab(row, new LabInput(7, null, "Biyokimya", null, "", null, null));
+
+        Assert.Null(err);
+        Assert.Equal("Biyokimya", row.PanelName);
+        Assert.Equal("", row.DoctorNote); // boş string "sil" demektir; null "dokunma"
+    }
+
+    [Fact]
+    public void BosPanelAdi_Reddedilir() =>
+        Assert.NotNull(DoctorEndpoints.MergeLab(Mevcut(), new LabInput(7, null, "   ", null, null, null, null)));
 
     // Tanınmayan içerik (ne PDF ne görsel) her iki kapıdan da geçmemeli.
     [Fact]

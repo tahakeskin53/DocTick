@@ -76,3 +76,5 @@
 - photo_store_di: PhotoStore (AddSingleton, Program.cs) — endpointler dogrudan PhotoStore alir, wrapper record yok <!-- valid:[2026-07-31..) recorded:2026-07-31T11:52 -->
 - audit_log: AuditLog middleware — tum mutasyon /api istekleri, AUTH_AUDIT_DIR/auth-YYYY-MM-DD.log <!-- valid:[2026-07-31..) recorded:2026-07-31T14:23 -->
 - api_fallback_maskeleme: MapFallbackToFile /api/* isteklerini de yakaliyor: eksik uc 200+text/html doner, client.ts JSON olmayani sessizce undefined yapar, hata gorunmez <!-- valid:[2026-07-31..) recorded:2026-07-31T14:26 -->
+- smoke_api_scripti: scripts/smoke-api.sh: kimliksiz istekte korumali uc 401 dönmeli. 404=uc kaydedilmemis, 200+text/html=SPA fallback yutuyor <!-- valid:[2026-07-31..) recorded:2026-07-31T15:05 -->
+- sonuc_dosyasi_kisiti: Tahlil=PDF, Goruntuleme=PNG/JPG/WEBP/GIF; karar FileStore.SniffExt ile ilk baytlardan verilir, uzantiya guvenilmez <!-- valid:[2026-07-31..) recorded:2026-07-31T15:20 -->

@@ -13,9 +13,12 @@
 BASE="${1:-http://localhost:5080}"
 fail=0
 
+# check <beklenen-kod> <yol> [metot]
+# Not: yanlış metotla istenen bir uç 405 değil 404 döner — /api/{*rest} yakalayıcısı
+# tüm metotları kapsar. O yüzden POST uçları POST ile sınanmalı.
 check() {
-  want="$1"; path="$2"
-  out=$(curl -s -o /dev/null -w "%{http_code} %{content_type}" "$BASE$path")
+  want="$1"; path="$2"; method="${3:-GET}"
+  out=$(curl -s -o /dev/null -w "%{http_code} %{content_type}" -X "$method" "$BASE$path")
   code=${out%% *}; ctype=${out#* }
   case "$ctype" in
     text/html*) echo "FAIL  $path -> $code $ctype  (SPA fallback yutuyor)"; fail=1; return;;
@@ -35,6 +38,7 @@ check 404 /api/kesinlikle-olmayan-bir-uc
 
 # Korumalı uçlar: kimliksiz 401. 404 gelirse o uç hiç kaydedilmemiştir.
 check 401 /api/doctor/appointments
+check 401 /api/doctor/appointments/1/cancel POST
 check 401 /api/doctor/patients
 check 401 /api/doctor/patients/1/results
 check 401 /api/results

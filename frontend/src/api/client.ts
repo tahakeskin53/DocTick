@@ -142,6 +142,7 @@ export const Api = {
 
   // date boş bırakılırsa tüm randevular döner; verilirse o güne filtrelenir.
   doctorAppointments: (date?: string) => api<DoctorAppointment[]>(`/api/doctor/appointments${date ? `?date=${date}` : ''}`),
+  cancelDoctorAppointment: (id: number) => api<DoctorAppointment>(`/api/doctor/appointments/${id}/cancel`, { method: 'POST' }),
   doctorPatients: () => api<{id: number; name: string; email: string}[]>('/api/doctor/patients'),
   doctorPatientResults: (patientId: number) => api<PatientResults>(`/api/doctor/patients/${patientId}/results`),
   createLab: (data: any) => api('/api/doctor/lab', { method: 'POST', body: JSON.stringify(data) }),

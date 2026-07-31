@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Api, type DoctorPatient } from '../../api/client';
 import { Card } from '../../components/display/Card.jsx';
 import { Input } from '../../components/forms/Input.jsx';
 import { ResultsView } from '../../components/display/ResultsView';
 
 export function DoktorHastalar() {
+  const qc = useQueryClient();
   const [search, setSearch] = useState('');
   const [selectedPatient, setSelectedPatient] = useState<DoctorPatient | null>(null);
 
@@ -81,6 +82,7 @@ export function DoktorHastalar() {
                     labs={patientResults.labs}
                     imaging={patientResults.imaging}
                     canEdit={true}
+                    onUpdate={() => qc.invalidateQueries({ queryKey: ['doctor', 'patientResults'] })}
                   />
                 ) : (
                   <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-muted)' }}>Yükleniyor...</div>

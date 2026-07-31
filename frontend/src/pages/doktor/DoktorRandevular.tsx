@@ -14,6 +14,7 @@ export function DoktorRandevular() {
   // Boş = filtre yok, tüm randevular. Tarih seçilirse yalnız o gün.
   const [date, setDate] = useState('');
   const [activeAppt, setActiveAppt] = useState<DoctorAppointment | null>(null);
+  const [cancelTarget, setCancelTarget] = useState<DoctorAppointment | null>(null);
   const [resultType, setResultType] = useState<'lab' | 'imaging'>('lab');
 
   // Lab form state
@@ -81,6 +82,16 @@ export function DoktorRandevular() {
       resetForms();
     },
     onError: () => toast('error', 'Görüntüleme sonucu eklenemedi.'),
+  });
+
+  const cancelAppt = useMutation({
+    mutationFn: (id: number) => Api.cancelDoctorAppointment(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['doctor'] });
+      toast('success', 'Randevu iptal edildi, hastaya bilgi e-postası gönderildi.');
+      setCancelTarget(null);
+    },
+    onError: (e: unknown) => toast('error', e instanceof Error && e.message ? e.message : 'Randevu iptal edilemedi.'),
   });
 
   const resetForms = () => {
@@ -171,14 +182,43 @@ export function DoktorRandevular() {
                     {a.code}{a.status === 'cancelled' && ' · İptal edildi'}
                   </div>
                 </div>
-                <Button size="sm" onClick={() => { setActiveAppt(a); resetForms(); }}>
-                  Sonuç ekle
-                </Button>
+                <div style={{ display: 'flex', gap: 8, flex: 'none' }}>
+                  {/* İptal yalnız gelecekteki onaylı randevuda anlamlı; 'done' ve 'cancelled' gizlenir. */}
+                  {a.status === 'confirmed' && (
+                    <Button variant="secondary" size="sm" onClick={() => setCancelTarget(a)}>
+                      İptal et
+                    </Button>
+                  )}
+                  <Button size="sm" onClick={() => { setActiveAppt(a); resetForms(); }}>
+                    Sonuç ekle
+                  </Button>
+                </div>
               </div>
             </Card>
           ))}
         </div>
       )}
+
+      <Dialog
+        open={!!cancelTarget}
+        title="Randevuyu iptal et"
+        onClose={() => setCancelTarget(null)}
+        footer={<>
+          <Button variant="secondary" onClick={() => setCancelTarget(null)}>Vazgeç</Button>
+          <Button
+            disabled={cancelAppt.isPending}
+            onClick={() => cancelTarget && cancelAppt.mutate(cancelTarget.id)}
+          >
+            {cancelAppt.isPending ? 'İptal ediliyor…' : 'Randevuyu iptal et'}
+          </Button>
+        </>}
+      >
+        <p style={{ font: 'var(--text-body)', margin: 0 }}>
+          <b>{cancelTarget?.patientName}</b> adlı hastanın{' '}
+          <b>{cancelTarget?.dateLabel} · {cancelTarget?.time}</b> randevusu iptal edilecek.
+          Hastaya bilgilendirme e-postası gönderilir. Bu işlem geri alınamaz.
+        </p>
+      </Dialog>
 
       <Dialog
         open={!!activeAppt}

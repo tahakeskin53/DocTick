@@ -5,6 +5,13 @@ calendar:[['rect',{x:3,y:4,width:18,height:18,rx:2}],['path',{d:'M16 2v4M8 2v4M3
 clock:[['circle',{cx:12,cy:12,r:10}],['path',{d:'M12 6v6l4 2'}]],
 'chevron-right':[['path',{d:'m9 18 6-6-6-6'}]],
 'chevron-left':[['path',{d:'m15 18-6-6 6-6'}]],
+// Sonuç görünümü bunları kullanıyordu ama tanımlı değillerdi: P[name]||[] boş SVG
+// bastığı için hata vermeden görünmez kalıyorlardı (açılır ok, yüksek/düşük, PDF).
+'chevron-up':[['path',{d:'m18 15-6-6-6 6'}]],
+'chevron-down':[['path',{d:'m6 9 6 6 6-6'}]],
+'arrow-up':[['path',{d:'M12 19V5M5 12l7-7 7 7'}]],
+'arrow-down':[['path',{d:'M12 5v14M19 12l-7 7-7-7'}]],
+file:[['path',{d:'M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z'}],['path',{d:'M14 2v4a2 2 0 0 0 2 2h4'}]],
 mail:[['rect',{x:2,y:4,width:20,height:16,rx:2}],['path',{d:'m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7'}]],
 user:[['path',{d:'M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2'}],['circle',{cx:12,cy:7,r:4}]],
 plus:[['path',{d:'M5 12h14M12 5v14'}]],
