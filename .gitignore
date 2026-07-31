@@ -82,7 +82,12 @@ doctick-publish-profile.xml
 publish/
 publish-*/
 publish*.zip
+app.zip
+deploy-clean.zip
 backend/wwwroot/
+
+# Azure log indirmeleri (az webapp log download)
+azure-logs.zip
 
 # Gecici / arac ciktilari
 .scratch/
@@ -90,3 +95,6 @@ repomix-output.txt
 deploy-resp.txt
 dep-latest.json
 nul
+backend/_probe.py
+# MemKraft'in yanlis yola yazdigi digest (uzantisiz, repo kokunde) - gercek indeks memory/ altinda
+/DocTick

@@ -10,15 +10,19 @@ tier: core
 ## Tracking Config
 - **Type:** project
 - **Started:** 2026-07-21
-- **Last Update:** 2026-07-30
+- **Last Update:** 2026-07-31
 - **Last Accessed:** 2026-07-21 14:59:18
-- **Update Count:** 41
+- **Update Count:** 45
 - **Source:** setup
 
 ## Current State
 - **Status:** not_started. DNS'te resend._domainkey.doctick.me ve send.doctick.me NXDOMAIN. Kod ve Azure app settings DOGRU (RedirectTo bos, FromEmail=randevu@doctick.me, ApiKey dolu) - sorun yalnizca domain dogrul
 
 ## Recent Activity
+- **2026-07-31** | E-posta artik uyelere dogrudan gidiyor (doctick.me dogrulandi). Yerel gelistirmede Development override ile posta yine sahibin kutusuna dusuyor. [Source: config]
+- **2026-07-31** | Doktor silme artik randevu gecmisini koruyor; yaklasan randevular iptal edilip hastaya bilgilendirme e-postasi gonderiliyor. Testler: backend.Tests/DoctorRemovalTests.cs (9 test), frontend src/api/deleteDoctor.test.ts. [Source: feature]
+- **2026-07-31** | Admin doktor silme hata mesaji artik kullaniciya gosteriliyor (onError toast). Bilinen kalinti: ScheduleSlots yetim kayitlari ve api() hata metninde JSON tirnaklari. [Source: bugfix]
+- **2026-07-30** | SEO temel kurulumu tamam: meta description, canonical, OG, JSON-LD Organization, robots.txt, sitemap.xml. Favicon icin index.html hem SVG hem ICO (48x48) link ediyor. Kritik SPA tuzagi: scroll ile tetiklenen animasyonlar (GSAP ScrollTrigger) Googlebot icin hic calismaz, bu yuzden ilk DOM her zaman gercek icerigi tasimali. backend/wwwroot git-ignored yerel build ciktisi; frontend/dist oraya elle kopyalaniyor. [Source: seo-fix]
 - **2026-07-30** | Mobil cihazlarda dikey ekranda 9:16 oranında video göstermek uzere video encode edildi, Login.tsx guncellendi. [Source: manual]
 - **2026-07-30** | Doktor profil fotoğraflarının sunucu tarafına taşındığı, Photos__Dir config ile /home/photos yoluna yazıldığı, /uploads/doctors yolu üzerinden PhysicalFileProvider ile statik servis edildiği ve wwwroot/media ile çakışma tuzağının /uploads/doctors seçilerek aşıldığı. [Source: manual]
 - **2026-07-30** | EPOSTA KOK NEDEN BULUNDU (2026-07-30): Resend'de doctick.me status=not_started. DNS'te resend._domainkey.doctick.me ve send.doctick.me NXDOMAIN. Kod ve Azure app settings DOGRU (RedirectTo bos, FromEmail=randevu@doctick.me, ApiKey dolu) - sorun yalnizca domain dogrulamasi. Cozum 3 DNS kaydi: TXT resend._domainkey (DKIM, 392 karakter), TXT send (v=spf1 include:amazonses.com ~all), MX send feedback-smtp.ap-northeast-1.amazonses.com pri 10. NAMECHEAP TUZAGI: domain Namecheap BasicDNS'te ve Email Forwarding modunda (@ uzerinde 5 adet eforward1-5.registrar-servers.com MX, pri 10/10/10/15/20). send alt alanina MX eklemek icin Custom MX moduna gecmek gerekir, bu @ forwarding kayitlarini temizler - 5 eforward kaydi birebir geri eklenmeli yoksa @doctick.me'ye gelen posta kaybolur. Kokteki mevcut SPF (include:spf.efwd.registrar-servers.com) Resend'inkiyle CAKISMAZ, cunku Resend'in SPF'i send alt alaninda. Domain ap-northeast-1 (Tokyo) bolgesinde - DNS henuz eklenmediginden bolgeyi eu-west-1'e cevirmek SIMDI bedava, sonra DKIM bastan eklenmek zorunda kalir. HATIRLATMA SERVISI IKI GERCEK KUSUR: (1) ReminderService.cs:40-44 filtresiz - her gecmis randevu sonsuza dek 5 dakikada bir cekilip join'leniyor; (2) ReminderWindow.IsDue yarin icin alinan randevuya ANINDA hatirlatma gonderiyor cunku randevu alindigi anda 24 saatlik pencerenin icinde. Duzeltme: IsDue'ya createdAtLocal parametresi. DIKKAT Appointment.CreatedAt UTC yazilir (PatientEndpoints.cs:67) ama start/now yerel; Azure TZ=Europe/Istanbul, 3 saat kayar. EF/SQLite okumada Kind=Unspecified donebilir, DateTime.SpecifyKind gerekir. DOKTOR FOTOLARI: tamamen localStorage (doctick_doctor_photos), Doctor tablosunda foto kolonu YOK, backend ucu YOK, DoctorPhotos.tsx'teki yukleme sahte (setTimeout ilerleme cubugu). Varsayilanlar Unsplash hotlink + doktor ID 1-6 frontend'de SABIT (uretim ID'leri farkli olabilir = sessiz hata). Plan: Doctor.PhotoUrl TEXT kolonu, dosya /home/photos (Photos__Dir app setting), ikinci PhysicalFileProvider ile /uploads/doctors altindan statik servis, dosya adinda rastgele surum damgasi -> immutable cache. YOL TUZAGI: /media KULLANMA, wwwroot/media/doctick-hero.mp4 var. STATIK DOSYA TUZAGI: Program.cs:75-95'teki DI StaticFileOptions'a DOKUNMA (MapFallbackToFile onu okur), foto icin AYRI UseStaticFiles cagrisi. UPLOAD TUZAGI: .NET 8+ IFormFile minimal API uclari varsayilan antiforgery ister (.DisableAntiforgery() gerekir) - bu yuzden data URL + JSON secildi, DoctorPhotos.tsx zaten FileReader ile data URL uretiyor. SEMA TUZAGI: DbSeeder.EnsureSchemaAsync tabloyu SABIT yaziyor (ALTER TABLE Users, Db.cs:157), Doctors icin (table,col,type) uclusune cevrilmeli. C# TUZAGI: ASCII olmayan magic byte'i u8 literaliyle yazma - PNG imzasi u8 ile 0xC2 0x89 olur, 0x89 degil; acik byte dizisi kullan. [Source: planning]
@@ -80,6 +84,14 @@ NOT: PublicEndpoints adina ragmen .RequireAuthorization() iceriyor — /api/depa
 ---
 
 ## Timeline (Full Record)
+
+- **2026-07-31** | E-posta artik uyelere dogrudan gidiyor (doctick.me dogrulandi). Yerel gelistirmede Development override ile posta yine sahibin kutusuna dusuyor. [Source: config]
+
+- **2026-07-31** | Doktor silme artik randevu gecmisini koruyor; yaklasan randevular iptal edilip hastaya bilgilendirme e-postasi gonderiliyor. Testler: backend.Tests/DoctorRemovalTests.cs (9 test), frontend src/api/deleteDoctor.test.ts. [Source: feature]
+
+- **2026-07-31** | Admin doktor silme hata mesaji artik kullaniciya gosteriliyor (onError toast). Bilinen kalinti: ScheduleSlots yetim kayitlari ve api() hata metninde JSON tirnaklari. [Source: bugfix]
+
+- **2026-07-30** | SEO temel kurulumu tamam: meta description, canonical, OG, JSON-LD Organization, robots.txt, sitemap.xml. Favicon icin index.html hem SVG hem ICO (48x48) link ediyor. Kritik SPA tuzagi: scroll ile tetiklenen animasyonlar (GSAP ScrollTrigger) Googlebot icin hic calismaz, bu yuzden ilk DOM her zaman gercek icerigi tasimali. backend/wwwroot git-ignored yerel build ciktisi; frontend/dist oraya elle kopyalaniyor. [Source: seo-fix]
 
 - **2026-07-30** | Mobil cihazlarda dikey ekranda 9:16 oranında video göstermek uzere video encode edildi, Login.tsx guncellendi. [Source: manual]
 
