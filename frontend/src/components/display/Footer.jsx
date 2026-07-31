@@ -40,6 +40,7 @@ export function Footer() {
           <nav style={{ display: 'flex', flexDirection: 'column' }}>
             <h3 style={colTitle}>Hızlı bağlantılar</h3>
             <Link to="/" style={link}>Ana sayfa</Link>
+            <Link to="/#dt-ch-hakkimizda" style={link}>Hakkımızda</Link>
             <Link to="/randevu-al" style={link}>Randevu al</Link>
             <Link to="/randevularim" style={link}>Randevularım</Link>
             <Link to="/iletisim" style={link}>İletişim</Link>

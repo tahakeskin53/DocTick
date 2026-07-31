@@ -4,16 +4,22 @@ using System.Security.Cryptography;
 
 namespace DocTick.Api.Services;
 
-public sealed class PhotoStore(string dir)
+public class PhotoStore(string dir) : FileStore(dir, "/uploads/doctors/")
+{
+    public new const string UrlPrefix = "/uploads/doctors/";
+}
+
+public class FileStore(string dir, string urlPrefix)
 {
     public const int MaxBytes = 5 * 1024 * 1024;
-    public const string UrlPrefix = "/uploads/doctors/";
+    public string UrlPrefix { get; } = urlPrefix;
 
     private static readonly byte[] Png = [0x89, 0x50, 0x4E, 0x47];
     private static readonly byte[] Jpeg = [0xFF, 0xD8, 0xFF];
 
     public static string? SniffExt(ReadOnlySpan<byte> b) =>
-        b.Length >= 4 && b[..4].SequenceEqual(Png) ? ".png"
+        b.Length >= 4 && b[..4].SequenceEqual("%PDF"u8) ? ".pdf"
+        : b.Length >= 4 && b[..4].SequenceEqual(Png) ? ".png"
         : b.Length >= 3 && b[..3].SequenceEqual(Jpeg) ? ".jpg"
         : b.Length >= 12 && b[..4].SequenceEqual("RIFF"u8) && b[8..12].SequenceEqual("WEBP"u8) ? ".webp"
         : b.Length >= 4 && b[..4].SequenceEqual("GIF8"u8) ? ".gif"
@@ -45,16 +51,16 @@ public sealed class PhotoStore(string dir)
         }
     }
 
-    public string Save(int doctorId, byte[] bytes, string ext, string oldUrl)
+    public string Save(int entityId, byte[] bytes, string ext, string oldUrl)
     {
         Directory.CreateDirectory(dir);
 
         // Delete old photo if it exists and is ours
         Delete(oldUrl);
 
-        // Generate a random suffix: {doctorId}-{8 hex}{ext}
+        // Generate a random suffix: {entityId}-{8 hex}{ext}
         string randomHex = Convert.ToHexString(RandomNumberGenerator.GetBytes(4)).ToLowerInvariant();
-        string filename = $"{doctorId}-{randomHex}{ext}";
+        string filename = $"{entityId}-{randomHex}{ext}";
         string fullPath = Path.Combine(dir, filename);
 
         File.WriteAllBytes(fullPath, bytes);
@@ -64,7 +70,7 @@ public sealed class PhotoStore(string dir)
 
     public void Delete(string url)
     {
-        if (string.IsNullOrWhiteSpace(url) || !url.StartsWith(UrlPrefix, StringComparison.OrdinalIgnoreCase))
+        if (string.IsNullOrWhiteSpace(url) || (UrlPrefix != "" && !url.StartsWith(UrlPrefix, StringComparison.OrdinalIgnoreCase)))
         {
             return;
         }
@@ -90,3 +96,6 @@ public sealed class PhotoStore(string dir)
         }
     }
 }
+
+public record PhotoFileStore(FileStore Store);
+public record ResultFileStore(FileStore Store);

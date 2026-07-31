@@ -14,14 +14,14 @@ export interface Me {
   bloodType?: string;
   emergencyContactName?: string;
   emergencyContactPhone?: string;
-  role: 'Admin' | 'Patient';
+  role: 'Admin' | 'Patient' | 'Doctor';
   status: 'Pending' | 'Active' | 'Rejected';
 }
 
 
 
 export interface Department { id: number; name: string; isActive: boolean; doctors?: number }
-export interface Doctor { id: number; name: string; departmentId: number; departmentName: string; isActive: boolean; photoUrl: string }
+export interface Doctor { id: number; name: string; departmentId: number; departmentName: string; isActive: boolean; photoUrl: string; bio?: string; education?: string; interests?: string; isChief?: boolean }
 export interface Appointment {
   id: number; code: string; doctorId: number; doctorName: string; departmentName: string;
   date: string; dateLabel: string; time: string; status: 'confirmed' | 'done' | 'cancelled'; rating: number | null;
@@ -38,7 +38,13 @@ export interface Overview {
 export interface ScheduleCell { dayOfWeek: number; time: string; isOpen: boolean }
 export interface Schedule { doctorId: number; slots: ScheduleCell[] }
 export interface Settings { reminderEnabled: boolean; reminderHoursBefore: number }
-export interface UserRow { id: number; email: string; name: string; role: string; status: string; createdAt: string }
+export interface UserRow { id: number; email: string; name: string; role: string; status: string; createdAt: string; doctorId?: number }
+
+export interface LabValue { id: number; testName: string; value: number; unit: string; refLow: number | null; refHigh: number | null }
+export interface LabResult { id: number; patientId: number; doctorId: number; doctorName: string; appointmentId: number | null; panelName: string; status: 'Requested' | 'Reported'; requestedAt: string; reportedAt: string | null; doctorNote: string; filePath: string; values: LabValue[] }
+export interface ImagingStudy { id: number; patientId: number; doctorId: number; doctorName: string; appointmentId: number | null; modality: string; bodyPart: string; status: 'Requested' | 'Reported'; requestedAt: string; reportedAt: string | null; reportText: string; filePath: string }
+export interface DoctorPatient { id: number; name: string; email: string }
+export interface PatientResults { labs: LabResult[]; imaging: ImagingStudy[] }
 
 export class ApiError extends Error {
   status: number;
@@ -113,19 +119,35 @@ export const Api = {
   cancelAppointment: (id: number) => api<Appointment>(`/api/appointments/${id}/cancel`, { method: 'POST' }),
   rateAppointment: (id: number, stars: number) => api(`/api/appointments/${id}/rating`, { method: 'POST', body: JSON.stringify({ stars }) }),
 
+  myResults: () => api<PatientResults>('/api/results'),
+  downloadLabFile: (id: number) => `/api/results/lab/${id}/file`,
+  downloadImagingFile: (id: number) => `/api/results/imaging/${id}/file`,
+
+  doctorAppointments: (date?: string) => api<Appointment[]>(`/api/doctor/appointments${date ? `?date=${date}` : ''}`),
+  doctorPatients: () => api<{id: number; name: string; email: string}[]>('/api/doctor/patients'),
+  doctorPatientResults: (patientId: number) => api<PatientResults>(`/api/doctor/patients/${patientId}/results`),
+  createLab: (data: any) => api('/api/doctor/lab', { method: 'POST', body: JSON.stringify(data) }),
+  updateLab: (id: number, data: any) => api(`/api/doctor/lab/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteLab: (id: number) => api(`/api/doctor/lab/${id}`, { method: 'DELETE' }),
+  createImaging: (data: any) => api('/api/doctor/imaging', { method: 'POST', body: JSON.stringify(data) }),
+  updateImaging: (id: number, data: any) => api(`/api/doctor/imaging/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteImaging: (id: number) => api(`/api/doctor/imaging/${id}`, { method: 'DELETE' }),
+
   adminOverview: () => api<Overview>('/api/admin/overview'),
   adminAppointments: (date?: string) => api<AdminAppt[]>(`/api/admin/appointments${date ? `?date=${date}` : ''}`),
   adminUsers: () => api<UserRow[]>('/api/admin/users'),
   approveUser: (id: number) => api(`/api/admin/users/${id}/approve`, { method: 'POST' }),
   rejectUser: (id: number) => api(`/api/admin/users/${id}/reject`, { method: 'POST' }),
   deleteUser: (id: number) => api(`/api/admin/users/${id}`, { method: 'DELETE' }),
+  setUserRole: (id: number, role: string, doctorId?: number) => api(`/api/admin/users/${id}/role`, { method: 'POST', body: JSON.stringify({ role, doctorId }) }),
+  adminUserResults: (id: number) => api<PatientResults>(`/api/admin/users/${id}/results`),
   adminDepartments: () => api<(Department & { doctors: number })[]>('/api/admin/departments'),
   addDepartment: (name: string) => api('/api/admin/departments', { method: 'POST', body: JSON.stringify({ name, isActive: true }) }),
   updateDepartment: (id: number, name: string, isActive: boolean) => api(`/api/admin/departments/${id}`, { method: 'PUT', body: JSON.stringify({ name, isActive }) }),
   deleteDepartment: (id: number) => api(`/api/admin/departments/${id}`, { method: 'DELETE' }),
   adminDoctors: () => api<Doctor[]>('/api/admin/doctors'),
   addDoctor: (name: string, departmentId: number) => api('/api/admin/doctors', { method: 'POST', body: JSON.stringify({ name, departmentId, isActive: true }) }),
-  updateDoctor: (id: number, name: string, departmentId: number, isActive: boolean) => api(`/api/admin/doctors/${id}`, { method: 'PUT', body: JSON.stringify({ name, departmentId, isActive }) }),
+  updateDoctor: (id: number, name: string, departmentId: number, isActive: boolean, bio?: string, education?: string, interests?: string, isChief?: boolean) => api(`/api/admin/doctors/${id}`, { method: 'PUT', body: JSON.stringify({ name, departmentId, isActive, bio, education, interests, isChief }) }),
   // cancelled: iptal edilen (henüz gerçekleşmemiş) randevu sayısı, notified: e-posta gideni.
   deleteDoctor: (id: number) => api<{ cancelled: number; notified: number }>(`/api/admin/doctors/${id}`, { method: 'DELETE' }),
   setDoctorPhoto: (id: number, body: { dataUrl?: string; url?: string }) => api<{ id: number; photoUrl: string }>(`/api/admin/doctors/${id}/photo`, { method: 'PUT', body: JSON.stringify(body) }),

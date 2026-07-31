@@ -88,6 +88,10 @@
 .dt-stat__n{font:700 clamp(30px,4vw,44px)/1 var(--font-display);color:#fff;letter-spacing:-.02em;}
 .dt-stat__l{font:var(--text-caption);letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-top:7px;}
 
+/* --- Hakkımızda metni --- */
+.dt-about-text{font:var(--text-body-lg);color:rgba(255,255,255,.82);margin-top:24px;display:flex;flex-direction:column;gap:16px;max-width:540px;}
+.dt-about-text p{margin:0;}
+
 /* --- Enstrüman tarzı ek açıklamalar --- */
 .dt-ann{margin:26px 0 0;display:flex;flex-direction:column;gap:12px;}
 .dt-ann__row{display:flex;align-items:baseline;gap:14px;}

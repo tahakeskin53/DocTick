@@ -38,4 +38,12 @@ public static class ActiveGuard
         if (u is null || u.Role != UserRole.Admin) return Results.Forbid();
         return await next(ctx);
     }
+
+    public static async ValueTask<object?> Doctor(EndpointFilterInvocationContext ctx, EndpointFilterDelegate next)
+    {
+        var gate = ctx.HttpContext.RequestServices.GetRequiredService<UserGate>();
+        var u = await gate.GetAsync(CurrentUser.Uid(ctx.HttpContext.User), ctx.HttpContext.RequestAborted);
+        if (u is null || u.Role != UserRole.Doctor || u.Status != UserStatus.Active || u.DoctorId is null) return Results.Forbid();
+        return await next(ctx);
+    }
 }

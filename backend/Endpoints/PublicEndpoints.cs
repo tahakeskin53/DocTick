@@ -6,7 +6,7 @@ using DocTick.Api.Services;
 namespace DocTick.Api.Endpoints;
 
 public record DepartmentDto(int Id, string Name, bool IsActive);
-public record DoctorDto(int Id, string Name, int DepartmentId, string DepartmentName, bool IsActive, string PhotoUrl);
+public record DoctorDto(int Id, string Name, int DepartmentId, string DepartmentName, bool IsActive, string PhotoUrl, string Bio, string Education, string Interests, bool IsChief);
 public record ContactRequest(string Subject, string Message);
 
 public static class PublicEndpoints
@@ -31,7 +31,7 @@ public static class PublicEndpoints
                                          && (deptId == null || d.DepartmentId == deptId)
                                          && (active == null || d.IsActive == active)
                                       orderby d.Name
-                                      select new DoctorDto(d.Id, d.Name, d.DepartmentId, d.Department!.Name, d.IsActive, d.PhotoUrl)).ToListAsync(ct);
+                                      select new DoctorDto(d.Id, d.Name, d.DepartmentId, d.Department!.Name, d.IsActive, d.PhotoUrl, d.Bio, d.Education, d.Interests, d.IsChief)).ToListAsync(ct);
             return Results.Ok(list);
         }).AllowAnonymous();
 

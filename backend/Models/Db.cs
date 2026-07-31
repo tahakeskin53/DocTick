@@ -2,9 +2,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DocTick.Api.Models;
 
-public enum UserRole { Patient, Admin }
+public enum UserRole { Patient, Doctor, Admin }
 public enum UserStatus { Pending, Active, Rejected }
 public enum ApptStatus { Confirmed, Cancelled }
+public enum ResultStatus { Requested, Reported }
 
 // "Done" durumu DB'de tutulmaz; okuma sırasında randevu tarihi+saati geçmişse hesaplanır.
 // ponytail: bir durum sütunu yerine türetilmiş görünüm — daha az tutarsızlık yüzeyi.
@@ -26,6 +27,7 @@ public class User
     public string EmergencyContactPhone { get; set; } = "";
     public UserRole Role { get; set; } = UserRole.Patient;
     public UserStatus Status { get; set; } = UserStatus.Pending;
+    public int? DoctorId { get; set; }
     public DateTime CreatedAt { get; set; }
 }
 
@@ -47,6 +49,10 @@ public class Doctor
     public Department? Department { get; set; }
     public bool IsActive { get; set; } = true;
     public string PhotoUrl { get; set; } = "";
+    public string Bio { get; set; } = "";
+    public string Education { get; set; } = "";
+    public string Interests { get; set; } = "";
+    public bool IsChief { get; set; }
     // Silinen doktor satırı DB'de kalır: Appointments.DoctorId FK'si ON DELETE CASCADE olduğu için
     // gerçek DELETE hastaların randevu geçmişini de silerdi. Listelerden gizlenir, randevu
     // okumaları (a.Doctor!.Name) çalışmaya devam eder.
@@ -87,6 +93,51 @@ public class Setting
     public int ReminderHoursBefore { get; set; } = 24;
 }
 
+public class LabResult
+{
+    public int Id { get; set; }
+    public int PatientId { get; set; }
+    public User? Patient { get; set; }
+    public int DoctorId { get; set; }
+    public Doctor? Doctor { get; set; }
+    public int? AppointmentId { get; set; }
+    public string PanelName { get; set; } = "";
+    public ResultStatus Status { get; set; } = ResultStatus.Requested;
+    public DateTime RequestedAt { get; set; }
+    public DateTime? ReportedAt { get; set; }
+    public string DoctorNote { get; set; } = "";
+    public string FilePath { get; set; } = "";
+    public List<LabValue> Values { get; set; } = new();
+}
+
+public class LabValue
+{
+    public int Id { get; set; }
+    public int LabResultId { get; set; }
+    public string TestName { get; set; } = "";
+    public double Value { get; set; }
+    public string Unit { get; set; } = "";
+    public double? RefLow { get; set; }
+    public double? RefHigh { get; set; }
+}
+
+public class ImagingStudy
+{
+    public int Id { get; set; }
+    public int PatientId { get; set; }
+    public User? Patient { get; set; }
+    public int DoctorId { get; set; }
+    public Doctor? Doctor { get; set; }
+    public int? AppointmentId { get; set; }
+    public string Modality { get; set; } = ""; // Rontgen, MR, BT, USG, Diger
+    public string BodyPart { get; set; } = "";
+    public ResultStatus Status { get; set; } = ResultStatus.Requested;
+    public DateTime RequestedAt { get; set; }
+    public DateTime? ReportedAt { get; set; }
+    public string ReportText { get; set; } = "";
+    public string FilePath { get; set; } = "";
+}
+
 // Tüm randevu saatleri tek bir yerde — admin ızgarası ve müsaitlik buradan beslenir.
 public static class Slots
 {
@@ -106,6 +157,9 @@ public class AppDb(DbContextOptions<AppDb> options) : DbContext(options)
     public DbSet<ScheduleSlot> ScheduleSlots => Set<ScheduleSlot>();
     public DbSet<Appointment> Appointments => Set<Appointment>();
     public DbSet<Setting> Settings => Set<Setting>();
+    public DbSet<LabResult> LabResults => Set<LabResult>();
+    public DbSet<LabValue> LabValues => Set<LabValue>();
+    public DbSet<ImagingStudy> ImagingStudies => Set<ImagingStudy>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -113,8 +167,11 @@ public class AppDb(DbContextOptions<AppDb> options) : DbContext(options)
         b.Entity<User>().Property(u => u.Role).HasConversion<string>();
         b.Entity<User>().Property(u => u.Status).HasConversion<string>();
         b.Entity<Appointment>().Property(a => a.Status).HasConversion<string>();
+        b.Entity<LabResult>().Property(r => r.Status).HasConversion<string>();
+        b.Entity<ImagingStudy>().Property(s => s.Status).HasConversion<string>();
 
         b.Entity<User>().HasIndex(u => u.GoogleSub).IsUnique();
+        b.Entity<User>().HasIndex(u => u.DoctorId).IsUnique().HasFilter("\"DoctorId\" IS NOT NULL");
         b.Entity<ScheduleSlot>().HasIndex(s => new { s.DoctorId, s.DayOfWeek, s.Time }).IsUnique();
 
         // Çifte rezervasyonun sert garantisi: aynı doktor+tarih+saat için yalnızca tek Confirmed.
@@ -154,7 +211,12 @@ public static class DbSeeder
             ("Users", "BloodType", "TEXT NOT NULL DEFAULT ''"),
             ("Users", "EmergencyContactName", "TEXT NOT NULL DEFAULT ''"),
             ("Users", "EmergencyContactPhone", "TEXT NOT NULL DEFAULT ''"),
+            ("Users", "DoctorId", "INTEGER"),
             ("Doctors", "PhotoUrl", "TEXT NOT NULL DEFAULT ''"),
+            ("Doctors", "Bio", "TEXT NOT NULL DEFAULT ''"),
+            ("Doctors", "Education", "TEXT NOT NULL DEFAULT ''"),
+            ("Doctors", "Interests", "TEXT NOT NULL DEFAULT ''"),
+            ("Doctors", "IsChief", "INTEGER NOT NULL DEFAULT 0"),
             ("Doctors", "IsDeleted", "INTEGER NOT NULL DEFAULT 0")
         };
 
@@ -169,6 +231,52 @@ public static class DbSeeder
                 // Kolon zaten var, geç.
             }
         }
+
+        try { await db.Database.ExecuteSqlRawAsync("CREATE UNIQUE INDEX IF NOT EXISTS IX_Users_DoctorId ON \"Users\"(\"DoctorId\") WHERE \"DoctorId\" IS NOT NULL;"); } catch { }
+
+        await db.Database.ExecuteSqlRawAsync(@"
+            CREATE TABLE IF NOT EXISTS ""LabResults"" (
+                ""Id"" INTEGER NOT NULL CONSTRAINT ""PK_LabResults"" PRIMARY KEY AUTOINCREMENT,
+                ""PatientId"" INTEGER NOT NULL,
+                ""DoctorId"" INTEGER NOT NULL,
+                ""AppointmentId"" INTEGER NULL,
+                ""PanelName"" TEXT NOT NULL DEFAULT '',
+                ""Status"" TEXT NOT NULL DEFAULT 'Requested',
+                ""RequestedAt"" TEXT NOT NULL,
+                ""ReportedAt"" TEXT NULL,
+                ""DoctorNote"" TEXT NOT NULL DEFAULT '',
+                ""FilePath"" TEXT NOT NULL DEFAULT '',
+                CONSTRAINT ""FK_LabResults_Users_PatientId"" FOREIGN KEY (""PatientId"") REFERENCES ""Users"" (""Id"") ON DELETE CASCADE,
+                CONSTRAINT ""FK_LabResults_Doctors_DoctorId"" FOREIGN KEY (""DoctorId"") REFERENCES ""Doctors"" (""Id"") ON DELETE CASCADE,
+                CONSTRAINT ""FK_LabResults_Appointments_AppointmentId"" FOREIGN KEY (""AppointmentId"") REFERENCES ""Appointments"" (""Id"") ON DELETE CASCADE
+            );
+            CREATE TABLE IF NOT EXISTS ""LabValues"" (
+                ""Id"" INTEGER NOT NULL CONSTRAINT ""PK_LabValues"" PRIMARY KEY AUTOINCREMENT,
+                ""LabResultId"" INTEGER NOT NULL,
+                ""TestName"" TEXT NOT NULL DEFAULT '',
+                ""Value"" REAL NOT NULL,
+                ""Unit"" TEXT NOT NULL DEFAULT '',
+                ""RefLow"" REAL NULL,
+                ""RefHigh"" REAL NULL,
+                CONSTRAINT ""FK_LabValues_LabResults_LabResultId"" FOREIGN KEY (""LabResultId"") REFERENCES ""LabResults"" (""Id"") ON DELETE CASCADE
+            );
+            CREATE TABLE IF NOT EXISTS ""ImagingStudies"" (
+                ""Id"" INTEGER NOT NULL CONSTRAINT ""PK_ImagingStudies"" PRIMARY KEY AUTOINCREMENT,
+                ""PatientId"" INTEGER NOT NULL,
+                ""DoctorId"" INTEGER NOT NULL,
+                ""AppointmentId"" INTEGER NULL,
+                ""Modality"" TEXT NOT NULL DEFAULT '',
+                ""BodyPart"" TEXT NOT NULL DEFAULT '',
+                ""Status"" TEXT NOT NULL DEFAULT 'Requested',
+                ""RequestedAt"" TEXT NOT NULL,
+                ""ReportedAt"" TEXT NULL,
+                ""ReportText"" TEXT NOT NULL DEFAULT '',
+                ""FilePath"" TEXT NOT NULL DEFAULT '',
+                CONSTRAINT ""FK_ImagingStudies_Users_PatientId"" FOREIGN KEY (""PatientId"") REFERENCES ""Users"" (""Id"") ON DELETE CASCADE,
+                CONSTRAINT ""FK_ImagingStudies_Doctors_DoctorId"" FOREIGN KEY (""DoctorId"") REFERENCES ""Doctors"" (""Id"") ON DELETE CASCADE,
+                CONSTRAINT ""FK_ImagingStudies_Appointments_AppointmentId"" FOREIGN KEY (""AppointmentId"") REFERENCES ""Appointments"" (""Id"") ON DELETE CASCADE
+            );
+        ");
     }
 
     // Seed verisi tasarım sisteminden (data.js) alındı.

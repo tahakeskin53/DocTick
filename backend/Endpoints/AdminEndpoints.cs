@@ -7,7 +7,8 @@ using DocTick.Api.Services;
 namespace DocTick.Api.Endpoints;
 
 public record DeptUpsertRequest(string Name, bool IsActive);
-public record DoctorUpsertRequest(string Name, int DepartmentId, bool IsActive);
+public record DoctorUpsertRequest(string Name, int DepartmentId, bool IsActive, string? Bio = null, string? Education = null, string? Interests = null, bool? IsChief = null);
+public record RoleChangeRequest(string Role, int? DoctorId);
 public record DoctorPhotoRequest(string? DataUrl, string? Url);
 public record ScheduleCell(int DayOfWeek, string Time, bool IsOpen);
 public record ScheduleGrid(int DoctorId, List<ScheduleCell> Slots);
@@ -15,7 +16,7 @@ public record SettingsDto(bool ReminderEnabled, int ReminderHoursBefore);
 public record AdminApptDto(int Id, string Code, string Date, string Time,
     int DoctorId, string DoctorName, string DepartmentName, string UserEmail, string Status);
 public record OverviewDto(int WeekAppointments, int OpenDepartments, int ActiveDoctors, int PendingUsers, List<AdminApptDto> Today);
-public record UserDto(int Id, string Email, string Name, string Role, string Status, DateTime CreatedAt);
+public record UserDto(int Id, string Email, string Name, string Role, string Status, DateTime CreatedAt, int? DoctorId);
 
 public static class AdminEndpoints
 {
@@ -62,7 +63,7 @@ public static class AdminEndpoints
             Results.Ok(await (from d in db.Doctors.AsNoTracking().Include(x => x.Department)
                               where !d.IsDeleted
                               orderby d.Name
-                              select new { d.Id, d.Name, d.DepartmentId, DepartmentName = d.Department!.Name, d.IsActive, d.PhotoUrl }).ToListAsync(ct)));
+                              select new { d.Id, d.Name, d.DepartmentId, DepartmentName = d.Department!.Name, d.IsActive, d.PhotoUrl, d.Bio, d.Education, d.Interests, d.IsChief }).ToListAsync(ct)));
 
         grp.MapPost("/doctors", async (DoctorUpsertRequest req, AppDb db, CancellationToken ct) =>
         {
@@ -82,15 +83,19 @@ public static class AdminEndpoints
             var doc = await db.Doctors.FindAsync([id], ct);
             if (doc is null) return Results.NotFound();
             doc.Name = req.Name.Trim(); doc.DepartmentId = req.DepartmentId; doc.IsActive = req.IsActive;
+            doc.Bio = req.Bio ?? doc.Bio;
+            doc.Education = req.Education ?? doc.Education;
+            doc.Interests = req.Interests ?? doc.Interests;
+            doc.IsChief = req.IsChief ?? doc.IsChief;
             await db.SaveChangesAsync(ct);
-            return Results.Ok(new { doc.Id, doc.Name, doc.DepartmentId, doc.IsActive, doc.PhotoUrl });
+            return Results.Ok(new { doc.Id, doc.Name, doc.DepartmentId, doc.IsActive, doc.PhotoUrl, doc.Bio, doc.Education, doc.Interests, doc.IsChief });
         });
 
         // Silme = yumuşak silme. Gerçek DELETE, Appointments FK'si ON DELETE CASCADE olduğu için
         // hastaların randevu geçmişini de silerdi. Bunun yerine: doktor listelerden kaybolur,
         // geçmiş randevular olduğu gibi kalır, henüz gerçekleşmemiş randevular iptal edilip
         // sahiplerine bilgilendirme e-postası gider.
-        grp.MapDelete("/doctors/{id}", async (int id, AppDb db, EmailService email, ILogger<Program> log, CancellationToken ct) =>
+        grp.MapDelete("/doctors/{id}", async (int id, AppDb db, EmailService email, ILogger<Program> log, UserGate gate, CancellationToken ct) =>
         {
             var doc = await db.Doctors.Include(d => d.Department).FirstOrDefaultAsync(d => d.Id == id && !d.IsDeleted, ct);
             if (doc is null) return Results.NotFound();
@@ -103,6 +108,14 @@ public static class AdminEndpoints
             foreach (var a in toCancel) a.Status = ApptStatus.Cancelled;
             doc.IsDeleted = true;
             doc.IsActive = false; // yeni randevu alınamasın
+            
+            var user = await db.Users.FirstOrDefaultAsync(u => u.DoctorId == id, ct);
+            if (user != null)
+            {
+                user.Role = UserRole.Patient;
+                user.DoctorId = null;
+                gate.Invalidate(user.Id);
+            }
             await db.SaveChangesAsync(ct);
 
             // Bilgilendirme best-effort: gönderim hatası iptali geri almaz (PatientEndpoints ile aynı kural).
@@ -126,17 +139,18 @@ public static class AdminEndpoints
             return Results.Ok(new { cancelled = toCancel.Count, notified = sent });
         });
 
-        grp.MapPut("/doctors/{id}/photo", async (int id, DoctorPhotoRequest req, AppDb db, PhotoStore store, CancellationToken ct) =>
+        grp.MapPut("/doctors/{id}/photo", async (int id, DoctorPhotoRequest req, AppDb db, PhotoFileStore pstore, CancellationToken ct) =>
         {
+            var store = pstore.Store;
             var doc = await db.Doctors.FindAsync([id], ct);
             if (doc is null) return Results.NotFound();
 
             string newUrl;
             if (!string.IsNullOrWhiteSpace(req.DataUrl))
             {
-                var bytes = PhotoStore.DecodeDataUrl(req.DataUrl);
+                var bytes = FileStore.DecodeDataUrl(req.DataUrl);
                 if (bytes is null) return Results.BadRequest("Geçersiz veya 5 MB'tan büyük görüntü.");
-                var ext = PhotoStore.SniffExt(bytes);
+                var ext = FileStore.SniffExt(bytes);
                 if (ext is null) return Results.BadRequest("Yalnız PNG, JPEG, WebP veya GIF kabul edilir.");
                 newUrl = store.Save(id, bytes, ext, doc.PhotoUrl);
             }
@@ -154,8 +168,9 @@ public static class AdminEndpoints
             return Results.Ok(new { doc.Id, doc.PhotoUrl });
         });
 
-        grp.MapDelete("/doctors/{id}/photo", async (int id, AppDb db, PhotoStore store, CancellationToken ct) =>
+        grp.MapDelete("/doctors/{id}/photo", async (int id, AppDb db, PhotoFileStore pstore, CancellationToken ct) =>
         {
+            var store = pstore.Store;
             var doc = await db.Doctors.FindAsync([id], ct);
             if (doc is null) return Results.NotFound();
 
@@ -190,7 +205,35 @@ public static class AdminEndpoints
         // ---- Kullanıcı onayı ----
         grp.MapGet("/users", async (AppDb db, CancellationToken ct) =>
             Results.Ok(await db.Users.AsNoTracking().OrderByDescending(u => u.CreatedAt)
-                .Select(u => new UserDto(u.Id, u.Email, u.Name, u.Role.ToString(), u.Status.ToString(), u.CreatedAt)).ToListAsync(ct)));
+                .Select(u => new UserDto(u.Id, u.Email, u.Name, u.Role.ToString(), u.Status.ToString(), u.CreatedAt, u.DoctorId)).ToListAsync(ct)));
+
+        grp.MapPost("/users/{id}/role", async (int id, RoleChangeRequest req, AppDb db, UserGate gate, CancellationToken ct) =>
+        {
+            var u = await db.Users.FindAsync([id], ct);
+            if (u is null) return Results.NotFound();
+            
+            if (req.Role == "Doctor")
+            {
+                if (req.DoctorId is null) return Results.BadRequest("DoctorId gerekli.");
+                var doc = await db.Doctors.FindAsync([req.DoctorId], ct);
+                if (doc is null || doc.IsDeleted || !doc.IsActive) return Results.BadRequest("Geçerli ve aktif bir doktor bulunamadı.");
+                if (await db.Users.AnyAsync(x => x.DoctorId == req.DoctorId && x.Id != id, ct)) return Results.BadRequest("Bu doktora atanmış başka bir kullanıcı var.");
+                
+                u.Role = UserRole.Doctor;
+                u.DoctorId = req.DoctorId;
+                u.Status = UserStatus.Active;
+            }
+            else if (req.Role == "Patient")
+            {
+                u.Role = UserRole.Patient;
+                u.DoctorId = null;
+            }
+            else return Results.BadRequest("Geçersiz rol.");
+            
+            await db.SaveChangesAsync(ct);
+            gate.Invalidate(id);
+            return Results.Ok(new UserDto(u.Id, u.Email, u.Name, u.Role.ToString(), u.Status.ToString(), u.CreatedAt, u.DoctorId));
+        });
 
         grp.MapPost("/users/{id}/approve", async (int id, AppDb db, EmailService email, UserGate gate, CancellationToken ct) =>
         {
@@ -202,7 +245,7 @@ public static class AdminEndpoints
             // Best-effort: e-posta başarısız olsa da onay geri alınmaz (ör. Resend test modu 403).
             try { await email.SendAsync(u.Email, "DocTick — Hesabınız onaylandı", EmailTemplates.Approved(u.Name)); }
             catch { /* onay tamamlandı; bildirim gönderilemedi */ }
-            return Results.Ok(new UserDto(u.Id, u.Email, u.Name, u.Role.ToString(), u.Status.ToString(), u.CreatedAt));
+            return Results.Ok(new UserDto(u.Id, u.Email, u.Name, u.Role.ToString(), u.Status.ToString(), u.CreatedAt, u.DoctorId));
         });
 
         grp.MapPost("/users/{id}/reject", async (int id, AppDb db, EmailService email, UserGate gate, CancellationToken ct) =>
@@ -215,7 +258,7 @@ public static class AdminEndpoints
             // Best-effort: e-posta başarısız olsa da red geri alınmaz.
             try { await email.SendAsync(u.Email, "DocTick — Hesap başvurunuz", EmailTemplates.Rejected(u.Name)); }
             catch { /* red tamamlandı; bildirim gönderilemedi */ }
-            return Results.Ok(new UserDto(u.Id, u.Email, u.Name, u.Role.ToString(), u.Status.ToString(), u.CreatedAt));
+            return Results.Ok(new UserDto(u.Id, u.Email, u.Name, u.Role.ToString(), u.Status.ToString(), u.CreatedAt, u.DoctorId));
         });
 
         grp.MapDelete("/users/{id}", async (int id, AppDb db, ClaimsPrincipal me, UserGate gate, CancellationToken ct) =>
@@ -232,6 +275,19 @@ public static class AdminEndpoints
             await db.SaveChangesAsync(ct);
             gate.Invalidate(id); // silinen kullanıcının önbellekteki kaydı kalmasın
             return Results.NoContent();
+        });
+
+        grp.MapGet("/users/{id}/results", async (int id, AppDb db, CancellationToken ct) =>
+        {
+            var labs = await db.LabResults.AsNoTracking().Include(r => r.Doctor).Include(r => r.Values)
+                .Where(r => r.PatientId == id).OrderByDescending(r => r.RequestedAt).ToListAsync(ct);
+            var imaging = await db.ImagingStudies.AsNoTracking().Include(s => s.Doctor)
+                .Where(s => s.PatientId == id).OrderByDescending(s => s.RequestedAt).ToListAsync(ct);
+                
+            return Results.Ok(new {
+                labs = labs.Select(r => new { r.Id, r.PanelName, Status = r.Status.ToString(), r.RequestedAt, r.ReportedAt, r.DoctorNote, r.FilePath, DoctorName = r.Doctor!.Name, Values = r.Values.Select(v => new { v.TestName, v.Value, v.Unit, v.RefLow, v.RefHigh }) }),
+                imaging = imaging.Select(s => new { s.Id, s.Modality, s.BodyPart, Status = s.Status.ToString(), s.RequestedAt, s.ReportedAt, s.ReportText, s.FilePath, DoctorName = s.Doctor!.Name })
+            });
         });
 
         // ---- Genel bakış ----

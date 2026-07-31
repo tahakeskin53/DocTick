@@ -9,6 +9,7 @@ import { ScrollVideo } from '../../components/scroll/ScrollVideo';
 import { AutoTour } from '../../components/scroll/AutoTour';
 import { useSmoothScroll } from '../../components/scroll/SmoothScroll';
 import { LogoIcon } from '../../components/display/Logo.jsx';
+import heroPng from '../../assets/hero.png';
 import '../../styles/landing.css';
 
 const REDUCED =
@@ -25,6 +26,7 @@ const CHAPTERS = [
   { id: 'yonlendirme', label: 'Yönlendirme' },
   { id: 'anlik', label: 'Anlık' },
   { id: 'hatirlatma', label: 'Hatırlatma' },
+  { id: 'hakkimizda', label: 'Hakkımızda' },
   { id: 'onay', label: 'Onay' },
 ];
 
@@ -191,7 +193,7 @@ export function Login() {
 
   return (
     <div className="dt-landing" ref={rootRef}>
-      <ScrollVideo src={HERO_VIDEO_SRC} />
+      <ScrollVideo src={HERO_VIDEO_SRC} poster={heroPng} />
 
       <header className="dt-top">
         <button className="dt-top__brand" type="button" onClick={() => api.scrollTo(0)} aria-label="DocTick — başa dön">
@@ -269,6 +271,18 @@ export function Login() {
               <div className="dt-ann__row"><dt className="dt-ann__k">Hatırlatma</dt><dd className="dt-ann__v">−24 saat <small>· varsayılan pencere</small></dd></div>
               <div className="dt-ann__row"><dt className="dt-ann__k">Onay e-postası</dt><dd className="dt-ann__v">Anında</dd></div>
             </dl>
+          </div></div>
+        </section>
+
+        <section className="dt-ch" id="dt-ch-hakkimizda" data-align="left">
+          <div className="dt-ch__inner"><div className="dt-panel">
+            <p className="dt-eyebrow dt-fade">Hakkımızda</p>
+            <h2 className="dt-h">{splitWords('Sağlığınız için her an yanınızdayız.')}</h2>
+            <div className="dt-about-text dt-fade">
+              <p>1998 yılından bu yana sağlık sektöründe öncü adımlar atan DocTick Hastanesi, modern tıbbın sunduğu en güncel teşhis ve tedavi yöntemlerini, alanında uzman hekim kadrosuyla hastalarına sunmaktadır.</p>
+              <p>Misyonumuz, etik değerlerden ödün vermeden, hasta haklarına saygılı, uluslararası kalite standartlarında, güvenilir ve yenilikçi sağlık hizmeti vermektir.</p>
+              <p>Vizyonumuz, tıbbi etik ilkelerine bağlı kalarak, sağlıkta mükemmeliyet odaklı ve insana değer veren, şefkatli yaklaşımımızla daima referans kabul edilen bir kurum olmaktır.</p>
+            </div>
           </div></div>
         </section>
 

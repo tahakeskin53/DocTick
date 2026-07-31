@@ -88,6 +88,8 @@ backend/wwwroot/
 
 # Azure log indirmeleri (az webapp log download)
 azure-logs.zip
+applogs.zip
+applogs/
 
 # Gecici / arac ciktilari
 .scratch/
