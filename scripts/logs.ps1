@@ -1,14 +1,15 @@
 # DocTick denetim kaydi okuyucu - prod'daki JSONL log'u tablo halinde gosterir.
 #
 # Kullanim:
-#   .\scripts\loglar.ps1                        # bugun, son 30 islem
-#   .\scripts\loglar.ps1 -Son 100               # son 100
-#   .\scripts\loglar.ps1 -Tarih 2026-07-30      # baska bir gun
-#   .\scripts\loglar.ps1 -Filtre appointments   # sadece randevu islemleri
-#   .\scripts\loglar.ps1 -Filtre admin          # sadece admin islemleri
-#   .\scripts\loglar.ps1 -Kim ahmet@ornek.com   # tek kullanicinin yaptiklari
-#   .\scripts\loglar.ps1 -SadeceHatalar         # 4xx/5xx (reddedilen/basarisiz denemeler)
-#   .\scripts\loglar.ps1 -Ham                   # islenmemis JSON
+#   .\scripts\logs.ps1                        # bugun, son 30 islem
+#   .\scripts\logs.ps1 -Son 100               # son 100
+#   .\scripts\logs.ps1 -Tarih 2026-07-30      # baska bir gun
+#   .\scripts\logs.ps1 -Filtre appointments   # sadece randevu islemleri
+#   .\scripts\logs.ps1 -Filtre admin          # sadece admin islemleri
+#   .\scripts\logs.ps1 -Kim ahmet@ornek.com   # tek kullanicinin yaptiklari
+#   .\scripts\logs.ps1 -Ip 151.135            # tek IP / IP onekiyle filtrele
+#   .\scripts\logs.ps1 -SadeceHatalar         # 4xx/5xx (reddedilen/basarisiz denemeler)
+#   .\scripts\logs.ps1 -Ham                   # islenmemis JSON
 #
 # Gereksinim: az login yapilmis olmali ("az account show" ile teyit et).
 #
@@ -19,6 +20,7 @@ param(
     [string]$Tarih = (Get-Date -Format 'yyyy-MM-dd'),
     [string]$Filtre,
     [string]$Kim,
+    [string]$Ip,
     [int]$Son = 30,
     [switch]$SadeceHatalar,
     [switch]$Ham
@@ -46,6 +48,7 @@ $kayitlar = $resp.Content -split "`n" | Where-Object { $_.Trim() } | ForEach-Obj
 
 if ($Filtre)        { $kayitlar = $kayitlar | Where-Object { $_.path -like "*$Filtre*" } }
 if ($Kim)           { $kayitlar = $kayitlar | Where-Object { $_.email -like "*$Kim*" -or $_.detail -like "*$Kim*" } }
+if ($Ip)            { $kayitlar = $kayitlar | Where-Object { $_.ip -like "*$Ip*" } }
 if ($SadeceHatalar) { $kayitlar = $kayitlar | Where-Object { $_.status -ge 400 } }
 
 $kayitlar = $kayitlar | Select-Object -Last $Son
@@ -59,6 +62,7 @@ $kayitlar |
         @{ n = 'saat';    e = { ([datetime]$_.ts).ToLocalTime().ToString('HH:mm:ss') } },
         @{ n = 'kim';     e = { if ($_.email) { $_.email } else { '(oturumsuz)' } } },
         @{ n = 'rol';     e = { $_.role } },
+        @{ n = 'ip';      e = { $_.ip } },
         @{ n = 'islem';   e = { $_.method + ' ' + $_.path } },
         @{ n = 'sonuc';   e = { $_.status } },
         @{ n = 'olay';    e = { $_.evt } },
