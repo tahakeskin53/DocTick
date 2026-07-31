@@ -19,7 +19,7 @@ APP="${APP:-doctick}"                 # → <APP>.azurewebsites.net (global benz
 LOC="${LOC:-westeurope}"
 RUNTIME="${RUNTIME:-DOTNETCORE|10.0}"   # CLI 2.88+ pipe formatı (colon değil); list-runtimes çıktısıyla birebir olmalı
 ADMIN_EMAIL="${ADMIN_EMAIL:-tahakeskin06@hotmail.com}"
-FROM_EMAIL="${FROM_EMAIL:-randevu@doctick.me}"   # Resend domain doğrulanana dek test gönderici döner
+FROM_EMAIL="${FROM_EMAIL:-randevu@doctick.me}"   # doctick.me Resend'de doğrulandı (DKIM+SPF, eu-west-1)
 
 # --- Önkoşullar ---
 command -v az >/dev/null 2>&1 || { echo "Azure CLI yok. kur: https://aka.ms/installazurecliwindows"; exit 1; }
@@ -43,6 +43,12 @@ az webapp create -g "$RG" -p "$PLAN" -n "$APP" --runtime "$RUNTIME" -o table
 az webapp config set -g "$RG" -n "$APP" --always-on true --number-of-workers 1 -o table
 
 # ============ FAZ 3 — Yapılandırma ve sırlar ============
+# E-posta alıcısı ortama göre değişir (kural: EmailService.SendAsync → RedirectTo):
+#   PROD (burası)  Resend__RedirectTo=""  → e-posta GERÇEK ÜYEYE gider.
+#   YEREL          backend/appsettings.Development.json içindeki RedirectTo dolu
+#                  → tüm e-postalar o tek adrese düşer, gerçek hastalara gitmez.
+# Yerelde bu emniyet kemerini kaldırma: doktor silme gibi akışlar tek işlemde
+# birden çok hastaya iptal bildirimi gönderir.
 echo ">>> Faz 3: app settings (TZ, DB yolu, Resend, admin)"
 az webapp config appsettings set -g "$RG" -n "$APP" --settings \
   TZ="Europe/Istanbul" \
@@ -97,8 +103,11 @@ cat <<EOF
      https://$APP.azurewebsites.net   (önce bununla test et)
      https://doctick.me               (DNS yayıldıktan sonra ekle)
      http://localhost:5173  KALSIN (geliştirme)
-  Resend → Domains → doctick.me ekle, DNS kayıtlarını gir, doğrula.
-     (Doğrulanana dek e-postalar test göndericiden / boş RedirectTo kuralına takılır.)
+  Resend → Domains → doctick.me  ✔ DOĞRULANDI (DKIM + SPF canlı, bölge eu-west-1).
+     Yeni kurulumda tekrar gerekmez; domain silinip yeniden eklenirse DKIM 'p=' değeri
+     değişir, DNS kayıtları da yenilenmeli.
+     E-posta alıcısı: prod → gerçek üye · yerel → appsettings.Development.json'daki
+     RedirectTo adresi. (Ayrıntı: Faz 3 blokundaki not.)
 
 ▶ İlk deploy sonrası Doğrulama listesi:  docs/12-azure-deployment.md (son bölüm)
 
