@@ -139,9 +139,8 @@ public static class AdminEndpoints
             return Results.Ok(new { cancelled = toCancel.Count, notified = sent });
         });
 
-        grp.MapPut("/doctors/{id}/photo", async (int id, DoctorPhotoRequest req, AppDb db, PhotoFileStore pstore, CancellationToken ct) =>
+        grp.MapPut("/doctors/{id}/photo", async (int id, DoctorPhotoRequest req, AppDb db, PhotoStore store, CancellationToken ct) =>
         {
-            var store = pstore.Store;
             var doc = await db.Doctors.FindAsync([id], ct);
             if (doc is null) return Results.NotFound();
 
@@ -168,9 +167,8 @@ public static class AdminEndpoints
             return Results.Ok(new { doc.Id, doc.PhotoUrl });
         });
 
-        grp.MapDelete("/doctors/{id}/photo", async (int id, AppDb db, PhotoFileStore pstore, CancellationToken ct) =>
+        grp.MapDelete("/doctors/{id}/photo", async (int id, AppDb db, PhotoStore store, CancellationToken ct) =>
         {
-            var store = pstore.Store;
             var doc = await db.Doctors.FindAsync([id], ct);
             if (doc is null) return Results.NotFound();
 

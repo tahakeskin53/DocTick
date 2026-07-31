@@ -96,6 +96,3 @@ public class FileStore(string dir, string urlPrefix)
         }
     }
 }
-
-public record PhotoFileStore(FileStore Store);
-public record ResultFileStore(FileStore Store);
