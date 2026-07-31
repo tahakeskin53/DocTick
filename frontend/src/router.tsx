@@ -19,6 +19,7 @@ const Appointments = lazy(() => import('./pages/hasta/Appointments').then(m => (
 const Iletisim = lazy(() => import('./pages/hasta/Iletisim').then(m => ({ default: m.Iletisim })));
 const Sonuclarim = lazy(() => import('./pages/hasta/Sonuclarim').then(m => ({ default: m.Sonuclarim })));
 const Doktorlarimiz = lazy(() => import('./pages/hasta/Doktorlarimiz').then(m => ({ default: m.Doktorlarimiz })));
+const Hakkimizda = lazy(() => import('./pages/hasta/Hakkimizda').then(m => ({ default: m.Hakkimizda })));
 
 // --- Admin sayfaları ---
 const AdminLayout = lazy(() => import('./pages/admin/AdminLayout').then(m => ({ default: m.AdminLayout })));
@@ -83,6 +84,7 @@ export const router = createBrowserRouter([
           { path: 'randevularim', element: <Suspense fallback={null}><Appointments /></Suspense> },
           { path: 'sonuclarim', element: <Suspense fallback={null}><Sonuclarim /></Suspense> },
           { path: 'doktorlarimiz', element: <Suspense fallback={null}><Doktorlarimiz /></Suspense> },
+          { path: 'hakkimizda', element: <Suspense fallback={null}><Hakkimizda /></Suspense> },
           { path: 'iletisim', element: <Suspense fallback={null}><Iletisim /></Suspense> },
         ],
       },

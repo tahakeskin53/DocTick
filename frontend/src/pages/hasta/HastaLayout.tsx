@@ -35,10 +35,12 @@ export function HastaLayout() {
       <header style={{ position: 'sticky', top: 0, zIndex: 20, background: 'var(--surface-brand)', color: '#fff' }}>
         <div style={{ maxWidth: 'var(--page-max)', margin: '0 auto', padding: '0 var(--page-pad)', height: 58, display: 'flex', alignItems: 'center', gap: 24 }}>
           <Logo size={30} onDark onClick={() => nav('/')} />
-          <nav style={{ display: 'flex', gap: 4 }}>
+          <nav style={{ display: 'flex', gap: 4, overflowX: 'auto', scrollbarWidth: 'none' }}>
             {tab('/', 'Ana sayfa', true)}
             {tab('/randevu-al', 'Randevu al')}
             {tab('/randevularim', 'Randevularım')}
+            {tab('/sonuclarim', 'Sonuçlarım')}
+            {tab('/doktorlarimiz', 'Doktorlarımız')}
             {tab('/iletisim', 'İletişim')}
           </nav>
           <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 10 }}>

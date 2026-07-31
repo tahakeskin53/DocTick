@@ -162,7 +162,7 @@ public class AuthAuditTests
     {
         var ctx = new DefaultHttpContext();
         var marker = "test-" + Guid.NewGuid().ToString("N");
-        AuthAudit.Write(ctx, marker, "a@b.c", "sebep-x");
+        AuditLog.Write(new { evt = marker, email = "a@b.c", reason = "sebep-x" });
 
         var path = Path.Combine(Directory.GetCurrentDirectory(), "logs", $"auth-{DateTime.UtcNow:yyyy-MM-dd}.log");
         var last = WaitForLine(path, marker);

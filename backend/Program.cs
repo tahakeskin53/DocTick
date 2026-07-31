@@ -146,6 +146,14 @@ app.UseStaticFiles(new StaticFileOptions
 });
 
 app.UseAuthentication();
+
+// Denetim kaydı — sıra kritik ve iki taraflı:
+//   UseAuthentication'dan SONRA: işlemi kimin yaptığını yazabilmek için ctx.User dolu olmalı.
+//   UseAuthorization'dan ÖNCE:   yetkisiz istekleri authorization 401/403 ile burada keser; sonraya
+//                                koyarsak reddedilen denemeler hiç loglanmaz — oysa "yetkisi olmayan
+//                                biri kullanıcı silmeye çalıştı" kaydın en çok işe yarayan satırıdır.
+app.UseAuditLog();
+
 app.UseAuthorization();
 
 if (app.Environment.IsDevelopment())

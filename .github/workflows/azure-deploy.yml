@@ -54,6 +54,9 @@ jobs:
         with:
           dotnet-version: '10.x'
 
+      - name: Test backend
+        run: dotnet test backend.Tests/DocTick.Api.Tests.csproj -c Release --nologo
+
       - name: Publish backend
         run: dotnet publish backend/DocTick.Api.csproj -c Release -o publish
 
@@ -63,3 +66,18 @@ jobs:
           app-name: doctick
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: publish
+
+      # Deploy "success" demek uygulamanın AÇILDIĞI anlamına GELMEZ: zip kabul edilir, container
+      # saniyeler sonra sessizce ölebilir (2026-07-31: eksik DI kaydı → SIGABRT → site 2.5 saat 503,
+      # üç deploy üst üste "success" raporladı). Uygulamanın gerçekten yanıt verdiğini burada kanıtla.
+      - name: Smoke check
+        run: |
+          for i in $(seq 1 20); do
+            code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 https://doctick.me/api/auth/me || echo 000)
+            echo "deneme $i: HTTP $code"
+            # Oturumsuz istek 401 döner — uygulama ayakta ve rota tablosu kurulmuş demektir.
+            [ "$code" = "401" ] && echo "Uygulama ayakta." && exit 0
+            sleep 15
+          done
+          echo "::error::Uygulama deploy sonrası 5 dakika içinde yanıt vermedi (son durum: HTTP $code)."
+          exit 1

@@ -25,7 +25,7 @@ public static class AuthEndpoints
             var clientId = cfg["Google:ClientId"];
             if (string.IsNullOrWhiteSpace(clientId))
             {
-                AuthAudit.Write(ctx, "config_error", reason: "Google:ClientId missing");
+                AuditLog.Event(ctx, "config_error", "Google:ClientId missing");
                 return Results.Problem("Google Client ID yapılandırılmamış.", statusCode: 500);
             }
 
@@ -38,7 +38,7 @@ public static class AuthEndpoints
             }
             catch (Exception ex)
             {
-                AuthAudit.Write(ctx, "token_invalid", reason: ex.Message);
+                AuditLog.Event(ctx, "token_invalid", ex.Message);
                 return Results.Unauthorized();
             }
 
@@ -102,7 +102,8 @@ public static class AuthEndpoints
                 new ClaimsPrincipal(identity),
                 new AuthenticationProperties { IsPersistent = true, ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7) });
 
-            AuthAudit.Write(ctx, "login_success", user.Email);
+            // Giriş anında ctx.User henüz dolmaz (SignInAsync yalnız cookie yazar) — e-postayı burada geç.
+            AuditLog.Event(ctx, "login_success", user.Email);
             return Results.Ok(ToDto(user));
         });
 

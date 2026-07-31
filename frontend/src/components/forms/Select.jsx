@@ -5,13 +5,13 @@ const css=`
 .dt-select:hover{border-color:var(--ink-300)}
 .dt-select:focus{outline:none;border-color:var(--border-focus);box-shadow:var(--focus-ring)}
 `;
-export function Select({label,hint,error,options=[],placeholder,style,...rest}){
+export function Select({label,hint,error,options=[],placeholder,style,children,...rest}){
   dtInject('dt-select-css',css);
   return <label className="dt-field" style={style}>
     {label&&<span className="dt-field-label">{label}</span>}
     <select className={`dt-select ${error?'dt-input-error':''}`} defaultValue={rest.value===undefined?'':undefined} {...rest}>
       {placeholder&&<option value="" disabled>{placeholder}</option>}
-      {options.map(o=><option key={o.value} value={o.value}>{o.label}</option>)}
+      {children ? children : options.map(o=><option key={o.value} value={o.value}>{o.label}</option>)}
     </select>
     {error?<span className="dt-field-err">{error}</span>:hint?<span className="dt-field-hint">{hint}</span>:null}
   </label>;

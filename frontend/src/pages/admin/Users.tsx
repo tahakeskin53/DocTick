@@ -59,6 +59,9 @@ export function Users() {
     onError: () => toast('error', 'Rol güncellenemedi.'),
   });
 
+  const assignedDoctorIds = new Set((users || []).map(u => u.doctorId).filter(Boolean));
+  const availableDoctors = (doctors || []).filter(d => d.isActive && !assignedDoctorIds.has(d.id));
+
   const filteredUsers = (users || []).filter(u => 
     u.name.toLowerCase().includes(search.toLowerCase()) || 
     u.email.toLowerCase().includes(search.toLowerCase())
@@ -123,12 +126,18 @@ export function Users() {
         </>}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <p style={{ margin: 0 }}>Lütfen bağlanacak doktor kaydını seçin:</p>
-          <Select value={selectedDoctorId} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedDoctorId(e.target.value)}>
-            <option value="">Seçiniz...</option>
-            {doctors?.map(d => (
-              <option key={d.id} value={d.id}>{d.name} ({d.departmentName})</option>
-            ))}
-          </Select>
+          {availableDoctors.length === 0 ? (
+            <p style={{ color: 'var(--danger-700)', margin: 0, font: 'var(--text-body-sm)' }}>
+              Bağlanabilecek boşta doktor kaydı bulunmuyor. Önce Doktorlar sayfasından yeni doktor ekleyin.
+            </p>
+          ) : (
+            <Select value={selectedDoctorId} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedDoctorId(e.target.value)}>
+              <option value="">Seçiniz...</option>
+              {availableDoctors.map(d => (
+                <option key={d.id} value={d.id}>{d.name} ({d.departmentName})</option>
+              ))}
+            </Select>
+          )}
         </div>
       </Dialog>
 
