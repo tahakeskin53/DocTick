@@ -18,21 +18,42 @@ public static class ResultsEndpoints
         grp.MapGet("/", async (AppDb db, ClaimsPrincipal p, CancellationToken ct) =>
             Results.Ok(await LoadAsync(db, CurrentUser.Uid(p), ct)));
 
-        grp.MapGet("/lab/{id}/file", async (int id, AppDb db, ClaimsPrincipal p, ResultFileStore store, CancellationToken ct) =>
+        // İndirme uçları üç rolün de kullandığı TEK çift. Hasta/doktor/admin için ayrı ayrı
+        // uç açmak yerine kapsam kontrolü içeride dallanıyor — dosya URL'i her arayüzde aynı.
+        // (ActiveGuard.Patient yalnız "hesap aktif mi" bakar, rolü daraltmaz.)
+        grp.MapGet("/lab/{id}/file", async (int id, AppDb db, ClaimsPrincipal p, UserGate gate, ResultFileStore store, CancellationToken ct) =>
         {
             var row = await db.LabResults.AsNoTracking().FirstOrDefaultAsync(r => r.Id == id, ct);
-            if (row is null || row.PatientId != CurrentUser.Uid(p)) return Results.NotFound();
+            if (row is null || !await CanViewAsync(db, gate, p, row.PatientId, ct)) return Results.NotFound();
             return SendFile(store, row.FilePath);
         });
 
-        grp.MapGet("/imaging/{id}/file", async (int id, AppDb db, ClaimsPrincipal p, ResultFileStore store, CancellationToken ct) =>
+        grp.MapGet("/imaging/{id}/file", async (int id, AppDb db, ClaimsPrincipal p, UserGate gate, ResultFileStore store, CancellationToken ct) =>
         {
             var row = await db.ImagingStudies.AsNoTracking().FirstOrDefaultAsync(s => s.Id == id, ct);
-            if (row is null || row.PatientId != CurrentUser.Uid(p)) return Results.NotFound();
+            if (row is null || !await CanViewAsync(db, gate, p, row.PatientId, ct)) return Results.NotFound();
             return SendFile(store, row.FilePath);
         });
 
         return app;
+    }
+
+    /// <summary>
+    /// Sonuç dosyasını kim görebilir: hasta kendisininkini, doktor kendi hastasınınkini
+    /// (LoadAsync okuma kapsamıyla aynı kural), admin hepsini.
+    /// Yetkisiz durumda 403 değil 404 dönülür — "bu Id'de kayıt var mı" bilgisi de sızmasın.
+    /// </summary>
+    internal static async Task<bool> CanViewAsync(AppDb db, UserGate gate, ClaimsPrincipal p, int patientId, CancellationToken ct)
+    {
+        var uid = CurrentUser.Uid(p);
+        var me = await gate.GetAsync(uid, ct);
+        if (me is null) return false;
+        return me.Role switch
+        {
+            UserRole.Admin => true,
+            UserRole.Doctor => me.DoctorId is int did && await DoctorEndpoints.CanTouchAsync(db, did, patientId, ct),
+            _ => patientId == uid,
+        };
     }
 
     private static readonly FileExtensionContentTypeProvider Mime = new();

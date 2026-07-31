@@ -35,7 +35,6 @@ export function DoktorLayout() {
           <nav style={{ display: 'flex', gap: 4 }}>
             {tab('/doktor', 'Randevularım', true)}
             {tab('/doktor/hastalarim', 'Hastalarım')}
-            {tab('/doktor/sonuclarim', 'Sonuçlarım')}
           </nav>
           <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 10 }}>
             {/* Bağlandığı Doctor kaydının adı — hesabın Google adı değil, ikisi farklı olabilir.

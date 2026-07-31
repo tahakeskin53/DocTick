@@ -3,7 +3,7 @@ import { Card } from './Card.jsx';
 import { Icon } from './Icon.jsx';
 import { Badge } from './Badge.jsx';
 import { Tabs } from '../feedback/Tabs.jsx';
-import type { LabResult, ImagingStudy } from '../../api/client';
+import { Api, type LabResult, type ImagingStudy } from '../../api/client';
 import { labFlag } from '../../lib/labFlag';
 
 interface ResultsViewProps {
@@ -102,6 +102,23 @@ export function ResultsView({ labs, imaging }: ResultsViewProps) {
                             {lab.doctorNote}
                           </div>
                         )}
+
+                        {/* PDF dosyası statik servis edilmiyor; bağlantı yetkili uca gider. */}
+                        {lab.filePath && (
+                          <a
+                            href={Api.downloadLabFile(lab.id)}
+                            target="_blank"
+                            rel="noreferrer"
+                            style={{
+                              display: 'inline-flex', alignItems: 'center', gap: 8, alignSelf: 'flex-start',
+                              font: 'var(--text-label)', color: 'var(--text-link)', textDecoration: 'none',
+                              border: '1px solid var(--border-soft)', borderRadius: 8, padding: '8px 14px',
+                            }}
+                          >
+                            <Icon name="file" size={15} />
+                            Tahlil raporunu aç (PDF)
+                          </a>
+                        )}
                       </div>
                     )}
                   </div>
@@ -132,8 +149,26 @@ export function ResultsView({ labs, imaging }: ResultsViewProps) {
                 </div>
                 
                 {img.status === 'Reported' ? (
-                  <div style={{ background: 'var(--bg-card)', padding: 12, borderRadius: 8, whiteSpace: 'pre-wrap', font: 'var(--text-body)' }}>
-                    {img.reportText}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    {img.reportText && (
+                      <div style={{ background: 'var(--bg-card)', padding: 12, borderRadius: 8, whiteSpace: 'pre-wrap', font: 'var(--text-body)' }}>
+                        {img.reportText}
+                      </div>
+                    )}
+                    {/* Görsel de yetkili uçtan gelir — <img src> cookie'yi aynı köken olduğu için taşır. */}
+                    {img.filePath && (
+                      <a href={Api.downloadImagingFile(img.id)} target="_blank" rel="noreferrer" style={{ alignSelf: 'flex-start' }}>
+                        <img
+                          src={Api.downloadImagingFile(img.id)}
+                          alt={`${img.modality} — ${img.bodyPart}`}
+                          loading="lazy"
+                          style={{
+                            display: 'block', maxWidth: '100%', maxHeight: 320, borderRadius: 8,
+                            border: '1px solid var(--border-soft)', objectFit: 'contain', background: '#000',
+                          }}
+                        />
+                      </a>
+                    )}
                   </div>
                 ) : (
                   <p style={{ color: 'var(--text-muted)', margin: 0 }}>Rapor bekleniyor.</p>

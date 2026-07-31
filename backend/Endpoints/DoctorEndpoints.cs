@@ -13,12 +13,19 @@ public record DoctorApptDto(
     string DepartmentName, string Date, string DateLabel, string Time, string Status);
 
 public record LabValueInput(string? TestName, double Value, string? Unit, double? RefLow, double? RefHigh);
-public record LabInput(int PatientId, int? AppointmentId, string? PanelName, string? Status, string? DoctorNote, List<LabValueInput>? Values);
-public record ImagingInput(int PatientId, int? AppointmentId, string? Modality, string? BodyPart, string? Status, string? ReportText);
+// FileDataUrl: "data:...;base64,..." — doktor fotoğrafı yüklemesiyle aynı taşıma biçimi.
+// Tahlil için yalnız PDF, görüntüleme için yalnız görsel kabul edilir (bkz. LabExts/ImagingExts).
+public record LabInput(int PatientId, int? AppointmentId, string? PanelName, string? Status, string? DoctorNote, List<LabValueInput>? Values, string? FileDataUrl);
+public record ImagingInput(int PatientId, int? AppointmentId, string? Modality, string? BodyPart, string? Status, string? ReportText, string? FileDataUrl);
 
 public static class DoctorEndpoints
 {
     private static readonly string[] Modalities = ["Rontgen", "MR", "BT", "USG", "Diger"];
+
+    // Tür kısıtı uzantı adına değil, dosyanın ilk baytlarına bakılarak uygulanır
+    // (FileStore.SniffExt). Adı .pdf olan bir JPEG buradan geçemez.
+    internal static readonly string[] LabExts = [".pdf"];
+    internal static readonly string[] ImagingExts = [".png", ".jpg", ".webp", ".gif"];
 
     public static IEndpointRouteBuilder MapDoctorEndpoints(this IEndpointRouteBuilder app)
     {
@@ -62,7 +69,7 @@ public static class DoctorEndpoints
 
         // ---- Tahlil ----
 
-        grp.MapPost("/lab", async (LabInput req, AppDb db, UserGate gate, ClaimsPrincipal p, CancellationToken ct) =>
+        grp.MapPost("/lab", async (LabInput req, AppDb db, UserGate gate, ClaimsPrincipal p, ResultFileStore store, CancellationToken ct) =>
         {
             var docId = await MyDoctorIdAsync(gate, p, ct);
             if (!await CanTouchAsync(db, docId, req.PatientId, ct)) return Results.Forbid();
@@ -72,6 +79,9 @@ public static class DoctorEndpoints
             if (BadValues(req.Values) is string err) return Results.BadRequest(err);
             if (!await ApptBelongsAsync(db, req.AppointmentId, docId, req.PatientId, ct))
                 return Results.BadRequest("Randevu bu hastaya veya size ait değil.");
+
+            var (fileErr, filePath) = SaveUpload(store, req.PatientId, req.FileDataUrl, LabExts, "Tahlil için yalnız PDF");
+            if (fileErr is not null) return Results.BadRequest(fileErr);
 
             var reported = !string.Equals(req.Status, "Requested", StringComparison.OrdinalIgnoreCase);
             var row = new LabResult
@@ -84,6 +94,7 @@ public static class DoctorEndpoints
                 RequestedAt = DateTime.UtcNow,
                 ReportedAt = reported ? DateTime.UtcNow : null,
                 DoctorNote = (req.DoctorNote ?? "").Trim(),
+                FilePath = filePath ?? "",
                 Values = ToValues(req.Values),
             };
             db.LabResults.Add(row);
@@ -91,7 +102,7 @@ public static class DoctorEndpoints
             return Results.Created($"/api/doctor/lab/{row.Id}", new { row.Id });
         });
 
-        grp.MapPut("/lab/{id}", async (int id, LabInput req, AppDb db, UserGate gate, ClaimsPrincipal p, CancellationToken ct) =>
+        grp.MapPut("/lab/{id}", async (int id, LabInput req, AppDb db, UserGate gate, ClaimsPrincipal p, ResultFileStore store, CancellationToken ct) =>
         {
             var docId = await MyDoctorIdAsync(gate, p, ct);
             // Yazma kapsamı okumadan dar: ortak hasta olsa bile başkasının yüklediği kayda dokunulamaz.
@@ -101,6 +112,15 @@ public static class DoctorEndpoints
             var panel = (req.PanelName ?? "").Trim();
             if (panel.Length is 0 or > 100) return Results.BadRequest("Panel adı 1-100 karakter olmalı.");
             if (BadValues(req.Values) is string err) return Results.BadRequest(err);
+
+            // Yeni dosya gönderilmediyse mevcut dosya korunur.
+            var (fileErr, filePath) = SaveUpload(store, row.PatientId, req.FileDataUrl, LabExts, "Tahlil için yalnız PDF");
+            if (fileErr is not null) return Results.BadRequest(fileErr);
+            if (filePath is not null)
+            {
+                store.Delete(row.FilePath); // eskisi yetim kalmasın
+                row.FilePath = filePath;
+            }
 
             row.PanelName = panel;
             row.DoctorNote = (req.DoctorNote ?? "").Trim();
@@ -129,7 +149,7 @@ public static class DoctorEndpoints
 
         // ---- Görüntüleme ----
 
-        grp.MapPost("/imaging", async (ImagingInput req, AppDb db, UserGate gate, ClaimsPrincipal p, CancellationToken ct) =>
+        grp.MapPost("/imaging", async (ImagingInput req, AppDb db, UserGate gate, ClaimsPrincipal p, ResultFileStore store, CancellationToken ct) =>
         {
             var docId = await MyDoctorIdAsync(gate, p, ct);
             if (!await CanTouchAsync(db, docId, req.PatientId, ct)) return Results.Forbid();
@@ -139,6 +159,9 @@ public static class DoctorEndpoints
             if (!Modalities.Contains(req.Modality)) return Results.BadRequest("Geçersiz görüntüleme türü.");
             if (!await ApptBelongsAsync(db, req.AppointmentId, docId, req.PatientId, ct))
                 return Results.BadRequest("Randevu bu hastaya veya size ait değil.");
+
+            var (fileErr, filePath) = SaveUpload(store, req.PatientId, req.FileDataUrl, ImagingExts, "Görüntüleme için yalnız görsel (PNG, JPG, WEBP, GIF)");
+            if (fileErr is not null) return Results.BadRequest(fileErr);
 
             var reported = !string.Equals(req.Status, "Requested", StringComparison.OrdinalIgnoreCase);
             var row = new ImagingStudy
@@ -152,13 +175,14 @@ public static class DoctorEndpoints
                 RequestedAt = DateTime.UtcNow,
                 ReportedAt = reported ? DateTime.UtcNow : null,
                 ReportText = (req.ReportText ?? "").Trim(),
+                FilePath = filePath ?? "",
             };
             db.ImagingStudies.Add(row);
             await db.SaveChangesAsync(ct);
             return Results.Created($"/api/doctor/imaging/{row.Id}", new { row.Id });
         });
 
-        grp.MapPut("/imaging/{id}", async (int id, ImagingInput req, AppDb db, UserGate gate, ClaimsPrincipal p, CancellationToken ct) =>
+        grp.MapPut("/imaging/{id}", async (int id, ImagingInput req, AppDb db, UserGate gate, ClaimsPrincipal p, ResultFileStore store, CancellationToken ct) =>
         {
             var docId = await MyDoctorIdAsync(gate, p, ct);
             var row = await db.ImagingStudies.FirstOrDefaultAsync(s => s.Id == id && s.DoctorId == docId, ct);
@@ -167,6 +191,14 @@ public static class DoctorEndpoints
             var body = (req.BodyPart ?? "").Trim();
             if (body.Length is 0 or > 100) return Results.BadRequest("Vücut bölgesi 1-100 karakter olmalı.");
             if (!Modalities.Contains(req.Modality)) return Results.BadRequest("Geçersiz görüntüleme türü.");
+
+            var (fileErr, filePath) = SaveUpload(store, row.PatientId, req.FileDataUrl, ImagingExts, "Görüntüleme için yalnız görsel (PNG, JPG, WEBP, GIF)");
+            if (fileErr is not null) return Results.BadRequest(fileErr);
+            if (filePath is not null)
+            {
+                store.Delete(row.FilePath);
+                row.FilePath = filePath;
+            }
 
             row.Modality = req.Modality!;
             row.BodyPart = body;
@@ -209,6 +241,27 @@ public static class DoctorEndpoints
     // bu yüzden istek başına ekstra DB turu yok.
     private static async Task<int> MyDoctorIdAsync(UserGate gate, ClaimsPrincipal p, CancellationToken ct) =>
         (await gate.GetAsync(CurrentUser.Uid(p), ct))?.DoctorId ?? 0;
+
+    /// <summary>
+    /// Data URL'i çözer, türünü ilk baytlarından doğrular ve diske yazar.
+    /// Dönüş: (hata mesajı, kaydedilen dosya adı). İkisi de null ise dosya gönderilmemiş.
+    /// ponytail: dosya, satır yazılmadan önce diske iner — SaveChanges patlarsa ortada
+    /// sahipsiz bir dosya kalır. Tavan: nadir ve zararsız (disk sızıntısı, veri değil).
+    /// Yükseltme yolu: satırı önce yaz, dosyayı sonra ekle, FilePath'i ikinci turda güncelle.
+    /// </summary>
+    internal static (string? Error, string? Path) SaveUpload(
+        ResultFileStore store, int patientId, string? dataUrl, string[] allowed, string kindLabel)
+    {
+        if (string.IsNullOrWhiteSpace(dataUrl)) return (null, null);
+
+        var bytes = FileStore.DecodeDataUrl(dataUrl);
+        if (bytes is null) return ($"Dosya okunamadı veya 5 MB sınırını aşıyor.", null);
+
+        var ext = FileStore.SniffExt(bytes);
+        if (ext is null || !allowed.Contains(ext)) return ($"{kindLabel} kabul edilir.", null);
+
+        return (null, store.Save(patientId, bytes, ext, ""));
+    }
 
     private static string? BadValues(List<LabValueInput>? values)
     {

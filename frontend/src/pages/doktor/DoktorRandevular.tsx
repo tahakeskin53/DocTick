@@ -30,6 +30,32 @@ export function DoktorRandevular() {
   const [bodyPart, setBodyPart] = useState('');
   const [reportText, setReportText] = useState('');
 
+  // Ek dosya — aynı anda tek sonuç türü düzenlendiği için tek state yeter.
+  // Tahlilde PDF, görüntülemede görsel; tür değişince seçim temizlenir.
+  const [file, setFile] = useState<{ name: string; dataUrl: string } | null>(null);
+
+  const pickFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    e.target.value = ''; // aynı dosya tekrar seçilebilsin
+    if (!f) return;
+
+    const wantPdf = resultType === 'lab';
+    const okType = wantPdf ? f.type === 'application/pdf' : f.type.startsWith('image/');
+    if (!okType) {
+      toast('error', wantPdf ? 'Tahlil için yalnız PDF yükleyebilirsiniz.' : 'Görüntüleme için bir görsel seçin (PNG, JPG, WEBP).');
+      return;
+    }
+    // Sunucu da 5 MB sınırını uyguluyor; burada erken uyarıp boşuna yükleme yapmıyoruz.
+    if (f.size > 5 * 1024 * 1024) {
+      toast('error', 'Dosya boyutu 5 MB\'tan büyük olamaz.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = ev => setFile({ name: f.name, dataUrl: ev.target?.result as string });
+    reader.readAsDataURL(f);
+  };
+
   const { data: appts, isLoading } = useQuery({
     queryKey: ['doctor', 'appointments', date],
     queryFn: () => Api.doctorAppointments(date),
@@ -60,6 +86,7 @@ export function DoktorRandevular() {
   const resetForms = () => {
     setPanelName(''); setTestName(''); setTestVal(''); setUnit(''); setRefLow(''); setRefHigh(''); setDoctorNote('');
     setModality('Rontgen'); setBodyPart(''); setReportText('');
+    setFile(null);
   };
 
   const handleSave = () => {
@@ -81,6 +108,7 @@ export function DoktorRandevular() {
         status: 'Reported',
         doctorNote,
         values,
+        fileDataUrl: file?.dataUrl,
       });
     } else {
       if (!bodyPart.trim()) return toast('error', 'Vücut bölgesi zorunludur.');
@@ -91,6 +119,7 @@ export function DoktorRandevular() {
         bodyPart,
         status: 'Reported',
         reportText,
+        fileDataUrl: file?.dataUrl,
       });
     }
   };
@@ -162,17 +191,18 @@ export function DoktorRandevular() {
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div style={{ display: 'flex', gap: 8 }}>
+            {/* Tür değişince dosya seçimi düşer: PDF ile görsel yer değiştiremez. */}
             <Button
               variant={resultType === 'lab' ? 'primary' : 'secondary'}
               size="sm"
-              onClick={() => setResultType('lab')}
+              onClick={() => { setResultType('lab'); setFile(null); }}
             >
               Tahlil (Lab)
             </Button>
             <Button
               variant={resultType === 'imaging' ? 'primary' : 'secondary'}
               size="sm"
-              onClick={() => setResultType('imaging')}
+              onClick={() => { setResultType('imaging'); setFile(null); }}
             >
               Görüntüleme
             </Button>
@@ -211,6 +241,32 @@ export function DoktorRandevular() {
               <Input label="Rapor Metni" value={reportText} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setReportText(e.target.value)} />
             </>
           )}
+
+          {/* Ek dosya — tahlilde PDF, görüntülemede görsel. İsteğe bağlı. */}
+          <div style={{ borderTop: '1px solid var(--border-soft)', paddingTop: 14, display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <label style={{ font: 'var(--text-label)' }}>
+              {resultType === 'lab' ? 'Tahlil raporu (PDF)' : 'Görüntüleme görseli'}
+              <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}> — isteğe bağlı, en fazla 5 MB</span>
+            </label>
+            <input
+              type="file"
+              accept={resultType === 'lab' ? 'application/pdf' : 'image/png,image/jpeg,image/webp,image/gif'}
+              onChange={pickFile}
+              style={{ font: 'var(--text-body-sm)' }}
+            />
+            {file && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                {resultType === 'imaging' && (
+                  <img src={file.dataUrl} alt="Seçilen görselin önizlemesi"
+                    style={{ width: 56, height: 56, objectFit: 'cover', borderRadius: 6, border: '1px solid var(--border-soft)' }} />
+                )}
+                <span style={{ font: 'var(--text-caption)', color: 'var(--text-secondary)', overflowWrap: 'anywhere', flex: 1 }}>
+                  {file.name}
+                </span>
+                <Button variant="secondary" size="sm" onClick={() => setFile(null)}>Kaldır</Button>
+              </div>
+            )}
+          </div>
         </div>
       </Dialog>
     </div>

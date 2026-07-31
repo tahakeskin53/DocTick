@@ -36,7 +36,6 @@ const Users = lazy(() => import('./pages/admin/Users').then(m => ({ default: m.U
 const DoktorLayout = lazy(() => import('./pages/doktor/DoktorLayout').then(m => ({ default: m.DoktorLayout })));
 const DoktorRandevular = lazy(() => import('./pages/doktor/DoktorRandevular').then(m => ({ default: m.DoktorRandevular })));
 const DoktorHastalar = lazy(() => import('./pages/doktor/DoktorHastalar').then(m => ({ default: m.DoktorHastalar })));
-const DoktorSonuclar = lazy(() => import('./pages/doktor/DoktorSonuclar').then(m => ({ default: m.DoktorSonuclar })));
 
 // Aktif hasta gerektirir. Admin/pending/rejected kullanıcıları doğru yere yönlendir.
 function HastaGuard() {
@@ -118,7 +117,6 @@ export const router = createBrowserRouter([
         children: [
           { index: true, element: <Suspense fallback={null}><DoktorRandevular /></Suspense> },
           { path: 'hastalarim', element: <Suspense fallback={null}><DoktorHastalar /></Suspense> },
-          { path: 'sonuclarim', element: <Suspense fallback={null}><DoktorSonuclar /></Suspense> },
         ],
       },
     ],

@@ -1,3 +1,4 @@
+using DocTick.Api.Endpoints;
 using DocTick.Api.Services;
 
 namespace DocTick.Api.Tests;
@@ -54,5 +55,65 @@ public class ResultFileTests : IDisposable
         var photos = new PhotoStore(_dir);
         Assert.Null(photos.Resolve("7-deadbeef.png"));               // önek yok
         Assert.Null(photos.Resolve("/uploads/doctors/../gizli.png")); // önek var ama dolaşım deniyor
+    }
+
+    // ---- Yükleme tür kısıtı ----
+    // Tahlile PDF, görüntülemeye görsel. Karar dosya ADINDAN değil ilk baytlarından
+    // veriliyor; adı .pdf olan bir JPEG geçmemeli.
+
+    private static string DataUrl(byte[] bytes, string mime) =>
+        $"data:{mime};base64,{Convert.ToBase64String(bytes)}";
+
+    private static readonly byte[] Pdf = "%PDF-1.4 sahte icerik"u8.ToArray();
+    private static readonly byte[] Png = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
+
+    [Fact]
+    public void Tahlil_PdfKabulEder()
+    {
+        var (err, path) = DoctorEndpoints.SaveUpload(Store(), 7, DataUrl(Pdf, "application/pdf"), DoctorEndpoints.LabExts, "PDF");
+        Assert.Null(err);
+        Assert.EndsWith(".pdf", path);
+    }
+
+    // MIME başlığı "application/pdf" diyor ama içerik PNG — baytlar kazanmalı.
+    [Fact]
+    public void Tahlil_PdfKilikliGorseli_Reddeder()
+    {
+        var (err, path) = DoctorEndpoints.SaveUpload(Store(), 7, DataUrl(Png, "application/pdf"), DoctorEndpoints.LabExts, "PDF");
+        Assert.NotNull(err);
+        Assert.Null(path);
+    }
+
+    [Fact]
+    public void Goruntuleme_GorselKabulEder()
+    {
+        var (err, path) = DoctorEndpoints.SaveUpload(Store(), 7, DataUrl(Png, "image/png"), DoctorEndpoints.ImagingExts, "gorsel");
+        Assert.Null(err);
+        Assert.EndsWith(".png", path);
+    }
+
+    [Fact]
+    public void Goruntuleme_PdfiReddeder()
+    {
+        var (err, _) = DoctorEndpoints.SaveUpload(Store(), 7, DataUrl(Pdf, "image/png"), DoctorEndpoints.ImagingExts, "gorsel");
+        Assert.NotNull(err);
+    }
+
+    // Dosya göndermemek hata değil — ek dosya isteğe bağlı.
+    [Fact]
+    public void DosyaYok_HataDegil()
+    {
+        var (err, path) = DoctorEndpoints.SaveUpload(Store(), 7, null, DoctorEndpoints.LabExts, "PDF");
+        Assert.Null(err);
+        Assert.Null(path);
+    }
+
+    // Tanınmayan içerik (ne PDF ne görsel) her iki kapıdan da geçmemeli.
+    [Fact]
+    public void TaninmayanIcerik_Reddedilir()
+    {
+        var junk = DataUrl("MZ\0\0 calistirilabilir"u8.ToArray(), "application/pdf");
+        Assert.NotNull(DoctorEndpoints.SaveUpload(Store(), 7, junk, DoctorEndpoints.LabExts, "PDF").Error);
+        Assert.NotNull(DoctorEndpoints.SaveUpload(Store(), 7, junk, DoctorEndpoints.ImagingExts, "gorsel").Error);
     }
 }
