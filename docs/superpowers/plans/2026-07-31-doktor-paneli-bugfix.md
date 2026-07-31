@@ -148,13 +148,17 @@ gösterecek. Bu istenen davranış — sessiz boşluktan iyidir.
 1. `AuthEndpoints.cs:110` — `/api/auth/me` yanıtına `doctorName` eklenir.
    `User.DoctorId` null değilse ilgili `Doctor.Name`, değilse boş string.
 2. `client.ts` — `Me` arayüzüne `doctorName?: string`
-3. `DoktorLayout.tsx:41` — `Dr. {user?.name}` → `{user?.doctorName || user?.name}`
+3. `DoktorLayout.tsx:41` — `Dr. {user?.name}` → `{user?.doctorName}`
 
-`Dr. ` öneki **kaldırılır** (§2.2): `Doctor.Name` unvanı zaten taşıyor. `doctorName` boşsa
-hesap adına düşülür — rol atanmış ama bağ kopmuşsa boş başlık görünmez.
+`Dr. ` öneki **kaldırılır** (§2.2): `Doctor.Name` unvanı zaten taşıyor.
 
-**Kabul:** doktor hesabıyla girildiğinde sağ üstte `Doctor` tablosundaki tam ad görünür,
-unvan tekrarlanmaz.
+**Hesap adına düşülmez.** Kullanıcının Google hesabındaki adı ile bağlandığı doktor kaydının
+adı farklı olabilir — bağlayıcı olan `Doctor.Name`'dir. `ActiveGuard.Doctor` zaten
+`DoctorId != null` şartını arıyor (`Authz.cs:46`), yani doktor panelindeyken `doctorName`
+daima dolu. Boş gelirse bu bir veri tutarsızlığıdır ve hesap adını göstererek maskelenmemeli.
+
+**Kabul:** doktor hesabıyla girildiğinde sağ üstte, hesabın e-postasındaki ada bakılmaksızın,
+bağlandığı `Doctor` kaydının tam adı görünür; unvan tekrarlanmaz.
 
 ### F3 — Eksik uçları yaz
 
@@ -163,7 +167,9 @@ Spec §5, §6, §7'ye göre. İki yeni dosya:
 **`backend/Endpoints/DoctorEndpoints.cs`** — `MapGroup("/api/doctor")` +
 `RequireAuthorization()` + `AddEndpointFilter(ActiveGuard.Doctor)`:
 
-- `GET /appointments?date=` — `DoctorId == kendi`, `PatientEndpoints.ToDto` deseniyle
+- `GET /appointments?date=` — `DoctorId == kendi`. **`date` verilmezse tümü döner**
+  (yeni→eski sıralı); verilirse o güne filtrelenir. `PatientEndpoints.ToDto` deseniyle,
+  ama aşağıdaki DTO farkıyla (bkz. F4)
 - `GET /patients` — kendi randevusu olan hastalar, `DISTINCT`
 - `GET /patients/{id}/results` — `ResultsScope` kontrolünden sonra
 - `POST /lab`, `PUT /lab/{id}`, `DELETE /lab/{id}`
@@ -191,6 +197,64 @@ görünür.
 
 ---
 
+### F4 — Randevu listesi: tüm randevular + hasta kimliği
+
+Kullanıcı isteği ve teşhis sırasında çıkan iki ek kusur, aynı DTO'ya dokunduğu için birlikte.
+
+#### 4a — Varsayılan "tümü", filtre isteğe bağlı
+
+`DoktorRandevular.tsx:14-15` bugün tarihi state'e koyup **her zaman** gönderiyor:
+
+```
+const todayIso = new Date().toISOString().split('T')[0];
+const [date, setDate] = useState(todayIso);
+```
+
+Backend düzelse bile doktor yalnız bugünü görürdü. Düzeltme:
+
+- `useState('')` — varsayılan boş, yani filtresiz
+- `Api.doctorAppointments(date)` zaten boş string'de parametre eklemiyor (`client.ts:126`),
+  değişiklik gerekmez
+- Tarih kutusunun yanına **"Tümü"** butonu (`setDate('')`)
+- Başlık metni (`:104`) ve boş durum metni (`:121`) filtreye göre değişsin —
+  "Bu tarihte randevunuz bulunmuyor" filtresizken yanlış ifade
+
+#### 4b — Sonuç yanlış hastaya yazılıyor
+
+`DoktorRandevular.tsx:78` ve `:88`:
+
+```
+patientId: activeAppt.id,   // ← randevu Id'si, hasta Id'si DEĞİL
+```
+
+Satır 78'deki yorum ("backend reads patient via appointment or direct id") bir varsayım —
+o backend yazılmamıştı. `Appointment` DTO'sunda (`client.ts:26-27`) hasta alanı **hiç yok**:
+`id, code, doctorId, doctorName, departmentName, date, dateLabel, time, status, rating`.
+
+F3 yazılıp bu hâliyle kaydedilirse her sonuç, randevu Id'si ile aynı numaraya sahip
+**rastgele bir hastaya** bağlanır. Tespit edilmesi zor, hasta verisini karıştıran bir hata.
+
+Düzeltme — doktora özel DTO:
+
+```
+DoctorApptDto : AppointmentDto + { PatientId, PatientName }
+```
+
+- `DoctorEndpoints`'te `/appointments` bu DTO'yu döndürür
+- `client.ts`'e `DoctorAppointment` arayüzü, `doctorAppointments` dönüş tipi güncellenir
+- `DoktorRandevular.tsx:78,88` → `patientId: activeAppt.patientId`
+- Randevu kartı (`:130-133`) hasta adını gösterir — doktorun kimi gördüğünü bilmesi gerekir;
+  bugün yalnız randevu kodu ve bölüm yazıyor
+
+`ponytail:` Ayrı bir "hasta getir" ucu eklemiyoruz. Hasta kimliği zaten randevu satırında
+duruyor; DTO'ya iki alan eklemek fazladan bir tur atmaktan ucuz.
+
+**Kabul:** doktor panelinde filtresiz tüm randevular listelenir; tarih seçilince o güne
+iner, "Tümü" ile geri döner. Her kartta hasta adı görünür. Eklenen sonuç, o randevunun
+gerçek hastasına bağlanır.
+
+---
+
 ## 5. Regresyon testleri
 
 Spec §11'de tanımlanmış, `93b10f7`'de yazılmamış olanlar — F3 ile birlikte:
@@ -200,6 +264,7 @@ Spec §11'de tanımlanmış, `93b10f7`'de yazılmamış olanlar — F3 ile birli
 | `backend.Tests/ApiRouteTests.cs` | `/api/olmayan-uc` → **404**, `text/html` değil. F0'ın regresyon kilidi; bu sınıf hatanın tekrar sessizleşmesini engeller |
 | `backend.Tests/DoctorAccessTests.cs` | A doktoru B'nin hastasının sonucunu çekemez (403), ortak hastanın başkasınca yüklenmiş kaydını güncelleyemez |
 | `backend.Tests/ResultFileTests.cs` | Sonuç dosyası statik yoldan 404, yalnız yetkili uçtan 200 |
+| `backend.Tests/DoctorApptTests.cs` | `?date=` yokken tüm randevular döner, varken yalnız o gün; DTO'daki `PatientId` **randevu Id'sinden farklı** bir kayıtta doğru hastayı gösterir (F4b'nin regresyon kilidi — Id'ler çakışırsa test hatayı yakalayamaz, fixture bunu ayırmalı) |
 
 `labFlag.test.ts` zaten var ve geçiyor — tekrar yazılmaz.
 
@@ -217,8 +282,12 @@ F1  → yazım hatası                              (1 karakter)
 F2  → doktor adı                                (3 dosya)
 F3  → DoctorEndpoints + ResultsEndpoints + ResultsScope   (asıl iş)
       smoke-api.sh yeşile döner
-R   → üç regresyon testi
+F4  → randevu listesi: filtresiz varsayılan + hasta kimliği (F3'ün DTO'suyla birlikte)
+R   → dört regresyon testi
 ```
+
+F4b, F3 ile **aynı anda** yapılmalı: DTO'yu iki kez değiştirmemek için `/appointments`
+ucu ilk yazıldığında `PatientId`/`PatientName` ile yazılır.
 
 ---
 
