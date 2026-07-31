@@ -32,7 +32,7 @@ public static class PatientEndpoints
             return Results.Ok(list.Select(ToDto));
         });
 
-        grp.MapPost("/", async (CreateAppointmentRequest req, AppDb db, ClaimsPrincipal user, EmailService email, CancellationToken ct) =>
+        grp.MapPost("/", async (CreateAppointmentRequest req, AppDb db, ClaimsPrincipal user, EmailService email, HttpContext ctx, CancellationToken ct) =>
         {
             if (!DateTime.TryParseExact(req.Date, "yyyy-MM-dd", null, System.Globalization.DateTimeStyles.None, out var day))
                 return Results.BadRequest("Tarih yyyy-MM-dd biçiminde olmalı.");
@@ -84,6 +84,9 @@ public static class PatientEndpoints
                 return Results.Conflict("Bu saat az önce doldu.");
             }
 
+            // Randevu kodu yanıtta üretilir, yolda yok — kayda ayrıca geçir.
+            AuditLog.Event(ctx, "appt_create", $"{appt.Code} · {doctor.Name} · {appt.Date} {appt.Time}");
+
             // Onay e-postası best-effort: gönderim başarısızsa randevu yine oluşturuldu sayılır.
             var me = await db.Users.FindAsync([uid], ct);
             if (me is not null)
@@ -100,13 +103,14 @@ public static class PatientEndpoints
             return Results.Created($"/api/appointments/{appt.Id}", ToDto(appt, doctor));
         });
 
-        grp.MapPost("/{id}/cancel", async (int id, AppDb db, ClaimsPrincipal user, EmailService email, CancellationToken ct) =>
+        grp.MapPost("/{id}/cancel", async (int id, AppDb db, ClaimsPrincipal user, EmailService email, HttpContext ctx, CancellationToken ct) =>
         {
             var uid = CurrentUser.Uid(user);
             var appt = await db.Appointments.Include(a => a.Doctor!).ThenInclude(d => d!.Department)
                 .FirstOrDefaultAsync(a => a.Id == id && a.UserId == uid, ct);
             if (appt is null) return Results.NotFound();
             if (appt.Status != ApptStatus.Confirmed) return Results.BadRequest("Randevu zaten iptal edilmiş.");
+            AuditLog.Event(ctx, "appt_cancel", $"{appt.Code} · {appt.Doctor!.Name} · {appt.Date} {appt.Time}");
 
             appt.Status = ApptStatus.Cancelled;
             await db.SaveChangesAsync(ct);

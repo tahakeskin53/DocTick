@@ -205,11 +205,12 @@ public static class AdminEndpoints
             Results.Ok(await db.Users.AsNoTracking().OrderByDescending(u => u.CreatedAt)
                 .Select(u => new UserDto(u.Id, u.Email, u.Name, u.Role.ToString(), u.Status.ToString(), u.CreatedAt, u.DoctorId)).ToListAsync(ct)));
 
-        grp.MapPost("/users/{id}/role", async (int id, RoleChangeRequest req, AppDb db, UserGate gate, CancellationToken ct) =>
+        grp.MapPost("/users/{id}/role", async (int id, RoleChangeRequest req, AppDb db, UserGate gate, HttpContext ctx, CancellationToken ct) =>
         {
             var u = await db.Users.FindAsync([id], ct);
             if (u is null) return Results.NotFound();
-            
+            AuditLog.Event(ctx, "user_role", $"{u.Email} → {req.Role}");
+
             if (req.Role == "Doctor")
             {
                 if (req.DoctorId is null) return Results.BadRequest("DoctorId gerekli.");
@@ -233,10 +234,11 @@ public static class AdminEndpoints
             return Results.Ok(new UserDto(u.Id, u.Email, u.Name, u.Role.ToString(), u.Status.ToString(), u.CreatedAt, u.DoctorId));
         });
 
-        grp.MapPost("/users/{id}/approve", async (int id, AppDb db, EmailService email, UserGate gate, CancellationToken ct) =>
+        grp.MapPost("/users/{id}/approve", async (int id, AppDb db, EmailService email, UserGate gate, HttpContext ctx, CancellationToken ct) =>
         {
             var u = await db.Users.FindAsync([id], ct);
             if (u is null) return Results.NotFound();
+            AuditLog.Event(ctx, "user_approve", u.Email);
             u.Status = UserStatus.Active;
             await db.SaveChangesAsync(ct);
             gate.Invalidate(id); // yetki önbelleği bayat kalmasın — onay anında geçerli olmalı
@@ -246,10 +248,11 @@ public static class AdminEndpoints
             return Results.Ok(new UserDto(u.Id, u.Email, u.Name, u.Role.ToString(), u.Status.ToString(), u.CreatedAt, u.DoctorId));
         });
 
-        grp.MapPost("/users/{id}/reject", async (int id, AppDb db, EmailService email, UserGate gate, CancellationToken ct) =>
+        grp.MapPost("/users/{id}/reject", async (int id, AppDb db, EmailService email, UserGate gate, HttpContext ctx, CancellationToken ct) =>
         {
             var u = await db.Users.FindAsync([id], ct);
             if (u is null) return Results.NotFound();
+            AuditLog.Event(ctx, "user_reject", u.Email);
             u.Status = UserStatus.Rejected;
             await db.SaveChangesAsync(ct);
             gate.Invalidate(id); // reddedilen kullanıcı bir sonraki istekte 403 almalı
@@ -259,10 +262,12 @@ public static class AdminEndpoints
             return Results.Ok(new UserDto(u.Id, u.Email, u.Name, u.Role.ToString(), u.Status.ToString(), u.CreatedAt, u.DoctorId));
         });
 
-        grp.MapDelete("/users/{id}", async (int id, AppDb db, ClaimsPrincipal me, UserGate gate, CancellationToken ct) =>
+        grp.MapDelete("/users/{id}", async (int id, AppDb db, ClaimsPrincipal me, UserGate gate, HttpContext ctx, CancellationToken ct) =>
         {
             var u = await db.Users.FindAsync([id], ct);
             if (u is null) return Results.NotFound();
+            // Silinen kullanıcının id'si sonradan hiçbir şey ifade etmez — e-postayı kayda geçir.
+            AuditLog.Event(ctx, "user_delete", u.Email);
             // Admin kendini silemez — paneli kilitlemeyi önler.
             if (u.Id == CurrentUser.Uid(me)) return Results.BadRequest("Kendi hesabınızı silemezsiniz.");
             // Kullanıcının randevuları da silinir (FK ihlali olmasın). Doktor silmedeki gibi engellemek yerine
