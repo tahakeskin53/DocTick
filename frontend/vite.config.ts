@@ -12,7 +12,7 @@ export default defineConfig({
       manifest: {
         name: 'DocTick',
         short_name: 'DocTick',
-        description: 'Hastane online randevu sistemi',
+        description: 'Online randevu ve klinik yönetim sistemi',
         lang: 'tr',
         dir: 'ltr',
         start_url: '/',

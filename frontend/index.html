@@ -3,10 +3,45 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Google favicon tarayıcısı ICO/PNG'yi kesin destekler, SVG'de seçici davranır:
+         ikisi de veriliyor ve ICO 48×48 (Google'ın istediği en küçük boy). Sıra önemli —
+         modern tarayıcı SVG'yi, Google ICO'yu alır. -->
     <link rel="icon" type="image/svg+xml" href="/logo-icon.svg" />
-    <meta name="theme-color" content="#164478" />
+    <link rel="icon" type="image/x-icon" sizes="48x48" href="/favicon.ico" />
     <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" />
-    <title>DocTick — Randevu</title>
+    <meta name="theme-color" content="#164478" />
+
+    <title>DocTick — Online Randevu ve Klinik Yönetim Sistemi</title>
+    <meta
+      name="description"
+      content="DocTick ile klinik ve hastane randevunuzu online alın. Branş ve doktora göre uygun saati seçin; onay ve hatırlatma e-postaları otomatik gelir."
+    />
+    <link rel="canonical" href="https://doctick.me/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="DocTick" />
+    <meta property="og:locale" content="tr_TR" />
+    <meta property="og:url" content="https://doctick.me/" />
+    <meta property="og:title" content="DocTick — Online Randevu ve Klinik Yönetim Sistemi" />
+    <meta
+      property="og:description"
+      content="DocTick ile klinik ve hastane randevunuzu online alın. Branş ve doktora göre uygun saati seçin; onay ve hatırlatma e-postaları otomatik gelir."
+    />
+    <meta property="og:image" content="https://doctick.me/pwa-512x512.png" />
+    <meta name="twitter:card" content="summary" />
+
+    <!-- Google'ın arama sonucunda marka adı + logosunu kullanabilmesi için. SPA olduğu için
+         bot yalnızca bu kabuğu okur; JSON-LD statik kalmalı. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "DocTick",
+        "url": "https://doctick.me/",
+        "logo": "https://doctick.me/pwa-512x512.png",
+        "description": "Online randevu ve klinik yönetim sistemi."
+      }
+    </script>
     <script>
       // Bundle inerken auth + randevu isteklerini başlat.
       // React mount'unu beklersek bu iki round trip (~150 ms) şelalenin sonuna eklenirdi.

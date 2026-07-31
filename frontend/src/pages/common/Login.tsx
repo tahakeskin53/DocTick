@@ -44,6 +44,7 @@ function Counter({ value, suffix }: { value: number; suffix?: string }) {
     const el = ref.current;
     if (!el) return;
     if (REDUCED) { el.textContent = `${value}${suffix ?? ''}`; return; }
+    el.textContent = `0${suffix ?? ''}`; // animasyon başlangıcı; JSX gerçek sayıyla render eder (aşağıya bak)
     const obj = { n: 0 };
     const ctx = gsap.context(() => {
       ScrollTrigger.create({
@@ -58,7 +59,9 @@ function Counter({ value, suffix }: { value: number; suffix?: string }) {
     });
     return () => ctx.revert();
   }, [value, suffix]);
-  return <span className="dt-stat__n" ref={ref}>0{suffix ?? ''}</span>;
+  // Gerçek sayıyla render edilir, "0" ile DEĞİL: Googlebot scroll etmez, ScrollTrigger hiç
+  // ateşlenmez ve arama sonucundaki açıklamaya "0 Branş, 0 Uzman doktor" olarak düşerdi.
+  return <span className="dt-stat__n" ref={ref}>{value}{suffix ?? ''}</span>;
 }
 
 /** Scroll'a bağlı çizilen kalp atışı (ECG) görselleştirmesi. */
