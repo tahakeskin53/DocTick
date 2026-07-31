@@ -41,6 +41,7 @@ export function HastaLayout() {
             {tab('/randevularim', 'Randevularım')}
             {tab('/sonuclarim', 'Sonuçlarım')}
             {tab('/doktorlarimiz', 'Doktorlarımız')}
+            {tab('/hakkimizda', 'Hakkımızda')}
             {tab('/iletisim', 'İletişim')}
           </nav>
           <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 10 }}>
