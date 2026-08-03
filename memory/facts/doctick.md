@@ -78,3 +78,6 @@
 - api_fallback_maskeleme: MapFallbackToFile /api/* isteklerini de yakaliyor: eksik uc 200+text/html doner, client.ts JSON olmayani sessizce undefined yapar, hata gorunmez <!-- valid:[2026-07-31..) recorded:2026-07-31T14:26 -->
 - smoke_api_scripti: scripts/smoke-api.sh: kimliksiz istekte korumali uc 401 dönmeli. 404=uc kaydedilmemis, 200+text/html=SPA fallback yutuyor <!-- valid:[2026-07-31..) recorded:2026-07-31T15:05 -->
 - sonuc_dosyasi_kisiti: Tahlil=PDF, Goruntuleme=PNG/JPG/WEBP/GIF; karar FileStore.SniffExt ile ilk baytlardan verilir, uzantiya guvenilmez <!-- valid:[2026-07-31..) recorded:2026-07-31T15:20 -->
+- deploy_yolu: perf/login-to-home dalina push = Azure deploy (.github/workflows/azure-deploy.yml). App Service yeni surumu ~30 sn sonra servis etmeye basliyor, hemen sonra yapilan smoke eski instance a dusebilir <!-- valid:[2026-07-31..) recorded:2026-07-31T15:31 -->
+- scrollvideo_duration_kaynagi: her karede v.duration (latch yok) <!-- valid:[2026-08-03..) recorded:2026-08-03T09:02 -->
+- scrollvideo_regresyon_kontrolu: node scripts/check_scroll_video.mjs (MOBILE=1 / TARGET=... ; playwright-core devDep) <!-- valid:[2026-08-03..) recorded:2026-08-03T09:02 -->

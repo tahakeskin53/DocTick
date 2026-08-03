@@ -10,15 +10,17 @@ tier: core
 ## Tracking Config
 - **Type:** project
 - **Started:** 2026-07-21
-- **Last Update:** 2026-07-31
+- **Last Update:** 2026-08-03
 - **Last Accessed:** 2026-07-21 14:59:18
-- **Update Count:** 51
+- **Update Count:** 53
 - **Source:** setup
 
 ## Current State
 - **Status:** not_started. DNS'te resend._domainkey.doctick.me ve send.doctick.me NXDOMAIN. Kod ve Azure app settings DOGRU (RedirectTo bos, FromEmail=randevu@doctick.me, ApiKey dolu) - sorun yalnizca domain dogrul
 
 ## Recent Activity
+- **2026-08-03** | ScrollVideo yarisi duzeltildi (2026-08-03). TUZAK: medya olaylari tek atisliktir ve React prop handler'i baglanmadan once atesleneb1lir; <video> durumu OLAYDAN latch'lenmemeli, elemandan (duration/readyState/buffered) okunmali. Semptom soguk cache'e bagli oldugu icin sadece gizli sekmede goruluyordu; olcum: soguk profilde masaustu 4/6, mobil 5/6 kirmizi, yerel dev 10/10 kirmizi. Fix sonrasi 10/10 + prod build 6/6 yesil. NOT: duzeltme HENUZ DEPLOY EDILMEDI, uretimde eski kod duruyor. [Source: bugfix]
+- **2026-07-31** | Doktor paneli tamam: randevu listesi, hasta sonuclari, dosya yukleme/iliştirme, randevu iptali. Prod: https://doctick.me [Source: deploy]
 - **2026-07-31** | Doktor API uclari yazildi ve dogrulandi; /api/* fallback maskesi kaldirildi. Kalan: sonuc dosyasi yukleme arayuzu yok, FilePath simdilik hep bos. [Source: bugfix]
 - **2026-07-31** | Deploy takas penceresinde (~30-60sn) endpointler gecici olarak 502 ya da SPA fallback 200 dondurebiliyor; prod dogrulamasi container oturana kadar beklemeli, ilk cevaba bakip karar verilmemeli. [Source: deploy-note]
 - **2026-07-31** | Doktor rolu ozelliginin backend uclari eksik deploy edildi; bugfix plani docs/superpowers/plans/2026-07-31-doktor-paneli-bugfix.md [Source: bugfix-plan]
@@ -90,6 +92,10 @@ NOT: PublicEndpoints adina ragmen .RequireAuthorization() iceriyor — /api/depa
 ---
 
 ## Timeline (Full Record)
+
+- **2026-08-03** | ScrollVideo yarisi duzeltildi (2026-08-03). TUZAK: medya olaylari tek atisliktir ve React prop handler'i baglanmadan once atesleneb1lir; <video> durumu OLAYDAN latch'lenmemeli, elemandan (duration/readyState/buffered) okunmali. Semptom soguk cache'e bagli oldugu icin sadece gizli sekmede goruluyordu; olcum: soguk profilde masaustu 4/6, mobil 5/6 kirmizi, yerel dev 10/10 kirmizi. Fix sonrasi 10/10 + prod build 6/6 yesil. NOT: duzeltme HENUZ DEPLOY EDILMEDI, uretimde eski kod duruyor. [Source: bugfix]
+
+- **2026-07-31** | Doktor paneli tamam: randevu listesi, hasta sonuclari, dosya yukleme/iliştirme, randevu iptali. Prod: https://doctick.me [Source: deploy]
 
 - **2026-07-31** | Doktor API uclari yazildi ve dogrulandi; /api/* fallback maskesi kaldirildi. Kalan: sonuc dosyasi yukleme arayuzu yok, FilePath simdilik hep bos. [Source: bugfix]
 
