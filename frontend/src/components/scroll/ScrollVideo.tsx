@@ -24,12 +24,11 @@ export function ScrollVideo({ src, poster }: ScrollVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
 
-  const targetRef = useRef(0);       // scroll'tan gelen hedef currentTime
+  const progressRef = useRef(0);     // scroll ilerlemesi, 0..1
   const playheadRef = useRef(0);     // yumuşatılmış currentTime
   const seekingRef = useRef(false);  // aynı anda tek seek
   const rafRef = useRef(0);
   const lastRef = useRef(0);
-  const durationRef = useRef(0);
 
   const reduced = useRef(
     typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
@@ -49,7 +48,7 @@ export function ScrollVideo({ src, poster }: ScrollVideoProps) {
         start: 0,
         end: () => ScrollTrigger.maxScroll(window),
         onUpdate: (self) => {
-          targetRef.current = self.progress * durationRef.current;
+          progressRef.current = self.progress;
         },
       });
     });
@@ -65,10 +64,15 @@ export function ScrollVideo({ src, poster }: ScrollVideoProps) {
       lastRef.current = now;
 
       const v = videoRef.current;
-      if (!v || !durationRef.current) return;
+      // Süre her karede elemandan okunur, bir kez latch'lenmez: 'loadedmetadata' tek
+      // atışlıktır ve React handler'ı bağlanmadan önce ateşlenebilir (soğuk cache).
+      // Kaçan bir olaya latch'lenirsek burası sonsuza dek erken döner, video donar.
+      const dur = v?.duration ?? 0;
+      if (!v || !dur || !isFinite(dur)) return;
 
       const decay = reduced.current ? 1000 : SCROLL_VIDEO.DAMPING;
-      playheadRef.current += (targetRef.current - playheadRef.current) * (1 - Math.exp(-decay * dt));
+      const target = progressRef.current * dur;
+      playheadRef.current += (target - playheadRef.current) * (1 - Math.exp(-decay * dt));
 
       // Seek kuyruğa yığılmasın: uçaktaki seek'i gate'le, 'seeked' ile boşalt.
       if (!seekingRef.current && Math.abs(v.currentTime - playheadRef.current) > SCROLL_VIDEO.SEEK_THRESHOLD) {
@@ -80,22 +84,24 @@ export function ScrollVideo({ src, poster }: ScrollVideoProps) {
     return () => cancelAnimationFrame(rafRef.current);
   }, []);
 
-  const onLoadedMetadata = () => {
-    const v = videoRef.current;
-    if (!v) return;
-    // Süre asla sabit kodlanmaz — metadata'dan okunur.
-    durationRef.current = v.duration && isFinite(v.duration) ? v.duration : 0;
-    setPhase('ready');
-    seekingRef.current = true;
-    v.currentTime = 0; // ilk kareye park et
-  };
+  const onLoadedMetadata = () => setPhase('ready');
   const onSeeked = () => { seekingRef.current = false; };
   const onProgress = () => {
     const v = videoRef.current;
-    if (!v || !durationRef.current || !v.buffered.length) return;
-    setBuffered(v.buffered.end(v.buffered.length - 1) / durationRef.current);
+    const dur = v?.duration ?? 0;
+    if (!v || !dur || !isFinite(dur) || !v.buffered.length) return;
+    setBuffered(v.buffered.end(v.buffered.length - 1) / dur);
   };
   const onError = () => setPhase('error');
+
+  // Metadata React handler'ı bağlanmadan önce gelmiş olabilir; o durumda
+  // 'loadedmetadata'/'progress' bir daha ateşlenmez. Mount'ta elemandan oku.
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v || v.readyState < HTMLMediaElement.HAVE_METADATA) return;
+    setPhase('ready');
+    if (v.buffered.length) setBuffered(v.buffered.end(v.buffered.length - 1) / v.duration);
+  }, []);
 
   // Yükleme katmanı: hazır + tamponlandıysa gizle (ya da nazik zaman aşımı).
   useEffect(() => {
