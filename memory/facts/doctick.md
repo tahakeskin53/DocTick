@@ -81,3 +81,4 @@
 - deploy_yolu: perf/login-to-home dalina push = Azure deploy (.github/workflows/azure-deploy.yml). App Service yeni surumu ~30 sn sonra servis etmeye basliyor, hemen sonra yapilan smoke eski instance a dusebilir <!-- valid:[2026-07-31..) recorded:2026-07-31T15:31 -->
 - scrollvideo_duration_kaynagi: her karede v.duration (latch yok) <!-- valid:[2026-08-03..) recorded:2026-08-03T09:02 -->
 - scrollvideo_regresyon_kontrolu: node scripts/check_scroll_video.mjs (MOBILE=1 / TARGET=... ; playwright-core devDep) <!-- valid:[2026-08-03..) recorded:2026-08-03T09:02 -->
+- mac_setup_doc: docs/agents/mac-kurulum.md <!-- valid:[2026-08-04..) recorded:2026-08-04T12:15 -->

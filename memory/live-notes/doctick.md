@@ -10,15 +10,17 @@ tier: core
 ## Tracking Config
 - **Type:** project
 - **Started:** 2026-07-21
-- **Last Update:** 2026-08-03
+- **Last Update:** 2026-08-04
 - **Last Accessed:** 2026-07-21 14:59:18
-- **Update Count:** 53
+- **Update Count:** 55
 - **Source:** setup
 
 ## Current State
 - **Status:** not_started. DNS'te resend._domainkey.doctick.me ve send.doctick.me NXDOMAIN. Kod ve Azure app settings DOGRU (RedirectTo bos, FromEmail=randevu@doctick.me, ApiKey dolu) - sorun yalnizca domain dogrul
 
 ## Recent Activity
+- **2026-08-04** | Yeni Mac uzerinde iPhone uygulamasi geliistirilecek. Windows kurulumunun envanteri ve mac kurulum adimlari docs/agents/mac-kurulum.md dosyasinda: superpowers v5.0.7 plugin, mattpocock/skills (41, skills-lock.json), ponytail (6 markdown skill + CLAUDE.md merdiveni), impeccable v3.9.1 (npx impeccable install + PostToolUse hook), memkraft 3.0.3 venv, ~/.claude/commands/chatimi-sync-et.md, yerel MCP sunucusu yok. [Source: setup]
+- **2026-08-03** | ScrollVideo yaris duzeltmesi 2026-08-03'te uretime cikti ve dogrulandi (artik 'HENUZ DEPLOY EDILMEDI' notu gecersiz). Branch perf/login-to-home; bu branch'e push dogrudan Azure deploy tetikliyor (.github/workflows/azure-deploy.yml). [Source: deploy]
 - **2026-08-03** | ScrollVideo yarisi duzeltildi (2026-08-03). TUZAK: medya olaylari tek atisliktir ve React prop handler'i baglanmadan once atesleneb1lir; <video> durumu OLAYDAN latch'lenmemeli, elemandan (duration/readyState/buffered) okunmali. Semptom soguk cache'e bagli oldugu icin sadece gizli sekmede goruluyordu; olcum: soguk profilde masaustu 4/6, mobil 5/6 kirmizi, yerel dev 10/10 kirmizi. Fix sonrasi 10/10 + prod build 6/6 yesil. NOT: duzeltme HENUZ DEPLOY EDILMEDI, uretimde eski kod duruyor. [Source: bugfix]
 - **2026-07-31** | Doktor paneli tamam: randevu listesi, hasta sonuclari, dosya yukleme/iliştirme, randevu iptali. Prod: https://doctick.me [Source: deploy]
 - **2026-07-31** | Doktor API uclari yazildi ve dogrulandi; /api/* fallback maskesi kaldirildi. Kalan: sonuc dosyasi yukleme arayuzu yok, FilePath simdilik hep bos. [Source: bugfix]
@@ -92,6 +94,10 @@ NOT: PublicEndpoints adina ragmen .RequireAuthorization() iceriyor — /api/depa
 ---
 
 ## Timeline (Full Record)
+
+- **2026-08-04** | Yeni Mac uzerinde iPhone uygulamasi geliistirilecek. Windows kurulumunun envanteri ve mac kurulum adimlari docs/agents/mac-kurulum.md dosyasinda: superpowers v5.0.7 plugin, mattpocock/skills (41, skills-lock.json), ponytail (6 markdown skill + CLAUDE.md merdiveni), impeccable v3.9.1 (npx impeccable install + PostToolUse hook), memkraft 3.0.3 venv, ~/.claude/commands/chatimi-sync-et.md, yerel MCP sunucusu yok. [Source: setup]
+
+- **2026-08-03** | ScrollVideo yaris duzeltmesi 2026-08-03'te uretime cikti ve dogrulandi (artik 'HENUZ DEPLOY EDILMEDI' notu gecersiz). Branch perf/login-to-home; bu branch'e push dogrudan Azure deploy tetikliyor (.github/workflows/azure-deploy.yml). [Source: deploy]
 
 - **2026-08-03** | ScrollVideo yarisi duzeltildi (2026-08-03). TUZAK: medya olaylari tek atisliktir ve React prop handler'i baglanmadan once atesleneb1lir; <video> durumu OLAYDAN latch'lenmemeli, elemandan (duration/readyState/buffered) okunmali. Semptom soguk cache'e bagli oldugu icin sadece gizli sekmede goruluyordu; olcum: soguk profilde masaustu 4/6, mobil 5/6 kirmizi, yerel dev 10/10 kirmizi. Fix sonrasi 10/10 + prod build 6/6 yesil. NOT: duzeltme HENUZ DEPLOY EDILMEDI, uretimde eski kod duruyor. [Source: bugfix]
 
