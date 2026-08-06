@@ -61,8 +61,9 @@ public static class PublicEndpoints
             return Results.Ok(avail);
         });
 
-        // İletişim formu — mesajı hastane (admin) e-postasına iletir.
-        grp.MapPost("/contact", async (ContactRequest req, AppDb db, ClaimsPrincipal user, EmailService email, IConfiguration cfg, CancellationToken ct) =>
+        // İletişim formu — önce kalıcı kayıt (DB), sonra best-effort admin bildirimi.
+        // Sıra bilinçli: e-posta gitmese bile mesaj panelde durur; bildirim yalnız bir uyarı kanalı.
+        grp.MapPost("/contact", async (ContactRequest req, AppDb db, ClaimsPrincipal user, EmailService email, IConfiguration cfg, ILogger<Program> log, CancellationToken ct) =>
         {
             var subject = (req.Subject ?? "").Trim();
             var message = (req.Message ?? "").Trim();
@@ -73,20 +74,38 @@ public static class PublicEndpoints
             var me = await db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == uid, ct);
             if (me is null) return Results.Unauthorized();
 
-            var adminEmail = cfg["Admin:Email"] ?? "";
-            if (string.IsNullOrWhiteSpace(adminEmail)) return Results.Problem("İletişim e-postası yapılandırılmamış.", statusCode: 500);
+            // ponytail: CreatedAt = DateTime.Now (UtcNow değil) — EF Core SQLite DateTime'ı TEXT
+            // saklar, Kind=Unspecified okur, ToLocalTime() sessizce no-op olur. Uygulama baştan
+            // sona DateTime.Now + TZ=Europe/Istanbul üzerine kurulu; CreatedLabel de bunu varsayar.
+            db.ContactMessages.Add(new ContactMessage
+            {
+                UserId = uid,
+                Subject = subject,
+                Body = message, // ham metin — HtmlEncode yalnız e-posta gövdesinde uygulanır (double-encode olmasın)
+                CreatedAt = DateTime.Now,
+            });
+            await db.SaveChangesAsync(ct);
 
-            // HTML injection'a karşı kullanıcı metnini kaçır.
-            var safeSubject = System.Net.WebUtility.HtmlEncode(subject);
-            var safeMessage = System.Net.WebUtility.HtmlEncode(message).Replace("\n", "<br>");
-            try
+            var adminEmail = cfg["Admin:Email"] ?? "";
+            if (string.IsNullOrWhiteSpace(adminEmail))
             {
-                await email.SendAsync(adminEmail, $"DocTick İletişim — {safeSubject}",
-                    EmailTemplates.Contact(me.Name, me.Email, safeSubject, safeMessage));
+                log.LogWarning("Admin:Email yapılandırılmamış — iletişim bildirimi gönderilmedi.");
             }
-            catch
+            else
             {
-                return Results.Problem("Mesaj gönderilemedi, lütfen tekrar deneyin.", statusCode: 502);
+                // HTML injection'a karşı kullanıcı metnini kaçır (yalnız e-posta gövdesi için).
+                var safeSubject = System.Net.WebUtility.HtmlEncode(subject);
+                var safeMessage = System.Net.WebUtility.HtmlEncode(message).Replace("\n", "<br>");
+                try
+                {
+                    await email.SendAsync(adminEmail, $"DocTick İletişim — {safeSubject}",
+                        EmailTemplates.Contact(me.Name, me.Email, safeSubject, safeMessage));
+                }
+                catch (Exception ex)
+                {
+                    // Best-effort: mesaj zaten kaydedildi, bildirim gidememesi veri kaybı değildir.
+                    log.LogWarning(ex, "İletişim bildirim e-postası gönderilemedi.");
+                }
             }
             return Results.Ok();
         });

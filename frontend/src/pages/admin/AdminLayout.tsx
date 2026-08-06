@@ -12,8 +12,9 @@ const ITEMS = [
   { to: '/admin/doktorlar', icon: 'user', label: 'Doktorlar' },
   { to: '/admin/fotograflar', icon: 'camera', label: 'Doktor Fotoğrafları' },
   { to: '/admin/saatler', icon: 'clock', label: 'Çalışma saatleri' },
-  { to: '/admin/eposta', icon: 'mail', label: 'E-posta ayarları' },
-  { to: '/admin/kullanicilar', icon: 'bell', label: 'Kullanıcılar' },
+  { to: '/admin/mesajlar', icon: 'mail', label: 'Mesajlar' },
+  { to: '/admin/eposta', icon: 'bell', label: 'E-posta ayarları' },
+  { to: '/admin/kullanicilar', icon: 'check', label: 'Kullanıcılar' },
 ];
 
 export function AdminLayout() {

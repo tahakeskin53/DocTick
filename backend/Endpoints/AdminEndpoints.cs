@@ -15,8 +15,27 @@ public record ScheduleGrid(int DoctorId, List<ScheduleCell> Slots);
 public record SettingsDto(bool ReminderEnabled, int ReminderHoursBefore);
 public record AdminApptDto(int Id, string Code, string Date, string Time,
     int DoctorId, string DoctorName, string DepartmentName, string UserEmail, string Status);
-public record OverviewDto(int WeekAppointments, int OpenDepartments, int ActiveDoctors, int PendingUsers, List<AdminApptDto> Today);
+public record OverviewDto(int WeekAppointments, int OpenDepartments, int ActiveDoctors, int PendingUsers, List<AdminApptDto> Today, int UnansweredMessages);
 public record UserDto(int Id, string Email, string Name, string Role, string Status, DateTime CreatedAt, int? DoctorId);
+public record ContactMessageDto(int Id, string SenderName, string SenderEmail, string Subject,
+    string Body, string CreatedLabel, bool Replied, string ReplyText, string RepliedLabel);
+public record ContactReplyRequest(string Reply);
+
+// İletişim yanıtının doğrulama kuralı — DbContext'siz, saf (DoctorRemoval deseniyle aynı).
+public static class ContactMessages
+{
+    public static string? ValidateReply(ContactMessage msg, string reply)
+    {
+        if (string.IsNullOrWhiteSpace(reply)) return "Yanıt boş olamaz.";
+        if (reply.Trim().Length > 2000) return "Yanıt en fazla 2000 karakter olabilir.";
+        if (msg.RepliedAt is not null) return "Bu mesaj zaten yanıtlanmış.";
+        return null;
+    }
+
+    // ReminderService.FormatDate ile aynı kültür/biçim ailesi (tr-TR).
+    public static string FormatStamp(DateTime d) =>
+        d.ToString("dd MMM yyyy HH:mm", new System.Globalization.CultureInfo("tr-TR"));
+}
 
 public static class AdminEndpoints
 {
@@ -62,10 +81,24 @@ public static class AdminEndpoints
         grp.MapGet("/doctors", async (AppDb db, CancellationToken ct) =>
         {
             var list = await db.Doctors.AsNoTracking().Include(d => d.Department).Where(d => !d.IsDeleted).OrderBy(d => d.Name).ToListAsync(ct);
-            return Results.Ok(list.Select(d => new
+
+            // Tek GroupBy(DoctorId) sorgusu; yuvarlama RatingSummary ile aynı kural (DoctorEndpoints).
+            var ratingsByDoctor = await db.Appointments.AsNoTracking()
+                .Where(a => a.Rating != null)
+                .GroupBy(a => a.DoctorId)
+                .Select(g => new { DoctorId = g.Key, Ratings = g.Select(a => a.Rating!.Value).ToList() })
+                .ToListAsync(ct);
+            var byDoctor = ratingsByDoctor.ToDictionary(r => r.DoctorId, r => RatingSummary.From(r.Ratings));
+
+            return Results.Ok(list.Select(d =>
             {
-                d.Id, d.Name, d.DepartmentId, DepartmentName = d.Department!.Name, d.IsActive, 
-                PhotoUrl = d.PhotoUrl ?? "", Bio = d.Bio ?? "", Education = d.Education ?? "", Interests = d.Interests ?? "", d.IsChief
+                (double? Average, int Count) rating = byDoctor.TryGetValue(d.Id, out var s) ? s : (null, 0);
+                return new
+                {
+                    d.Id, d.Name, d.DepartmentId, DepartmentName = d.Department!.Name, d.IsActive,
+                    PhotoUrl = d.PhotoUrl ?? "", Bio = d.Bio ?? "", Education = d.Education ?? "", Interests = d.Interests ?? "", d.IsChief,
+                    AvgRating = rating.Average, RatingCount = rating.Count
+                };
             }));
         });
 
@@ -303,6 +336,7 @@ public static class AdminEndpoints
             var openDepts = await db.Departments.AsNoTracking().CountAsync(d => d.IsActive, ct);
             var activeDocs = await db.Doctors.AsNoTracking().CountAsync(d => d.IsActive, ct);
             var pending = await db.Users.AsNoTracking().CountAsync(u => u.Status == UserStatus.Pending, ct);
+            var unanswered = await db.ContactMessages.AsNoTracking().CountAsync(m => m.RepliedAt == null, ct);
 
             // Kart "yaklaşan" randevuları gösterir: bugün ve sonrası, ilk 10.
             var todayList = await (from a in db.Appointments.AsNoTracking().Include(x => x.Doctor!).ThenInclude(d => d!.Department).Include(x => x.User)
@@ -311,7 +345,7 @@ public static class AdminEndpoints
                                    select new AdminApptDto(a.Id, a.Code, a.Date, a.Time, a.DoctorId, a.Doctor!.Name, a.Doctor!.Department!.Name,
                                        a.User!.Email, a.Status == ApptStatus.Confirmed ? "confirmed" : "cancelled")).Take(10).ToListAsync(ct);
 
-            return Results.Ok(new OverviewDto(week, openDepts, activeDocs, pending, todayList));
+            return Results.Ok(new OverviewDto(week, openDepts, activeDocs, pending, todayList, unanswered));
         });
 
         grp.MapGet("/appointments", async (AppDb db, string? date, CancellationToken ct) =>
@@ -338,6 +372,60 @@ public static class AdminEndpoints
             s.ReminderHoursBefore = req.ReminderHoursBefore is >= 1 and <= 168 ? req.ReminderHoursBefore : s.ReminderHoursBefore;
             await db.SaveChangesAsync(ct);
             return Results.Ok(new SettingsDto(s.ReminderEnabled, s.ReminderHoursBefore));
+        });
+
+        // ---- İletişim mesajları ----
+        grp.MapGet("/contact-messages", async (bool? unanswered, AppDb db, CancellationToken ct) =>
+        {
+            var q = db.ContactMessages.AsNoTracking().Include(m => m.User).AsQueryable();
+            if (unanswered == true) q = q.Where(m => m.RepliedAt == null);
+            var list = await q.OrderByDescending(m => m.CreatedAt).ToListAsync(ct);
+            return Results.Ok(list.Select(m => new ContactMessageDto(
+                m.Id, m.User!.Name, m.User!.Email, m.Subject, m.Body,
+                ContactMessages.FormatStamp(m.CreatedAt), m.RepliedAt is not null, m.ReplyText,
+                m.RepliedAt is DateTime r ? ContactMessages.FormatStamp(r) : "")));
+        });
+
+        // E-posta BAŞARILI olmadan RepliedAt/ReplyText yazılmaz — mevcut approve/reject'in tersi,
+        // bilinçli asimetri: hastaya yanıt ulaşacağı başka bir kanal yok, "yanıtlandı" görünüp
+        // ulaşmamış mesaj birikmesin. Gönderim hatası 502 döner, satır değişmeden kalır.
+        grp.MapPost("/contact-messages/{id}/reply", async (int id, ContactReplyRequest req, AppDb db, EmailService email, ILogger<Program> log, HttpContext ctx, CancellationToken ct) =>
+        {
+            var msg = await db.ContactMessages.Include(m => m.User).FirstOrDefaultAsync(m => m.Id == id, ct);
+            if (msg is null) return Results.NotFound();
+            if (ContactMessages.ValidateReply(msg, req.Reply) is string err) return Results.BadRequest(err);
+
+            var reply = req.Reply.Trim();
+            var safeReply = System.Net.WebUtility.HtmlEncode(reply).Replace("\n", "<br>");
+            var safeOriginal = System.Net.WebUtility.HtmlEncode(msg.Body).Replace("\n", "<br>");
+            try
+            {
+                await email.SendAsync(msg.User!.Email, $"DocTick — Mesajınıza yanıt: {msg.Subject}",
+                    EmailTemplates.ContactReply(msg.User!.Name, msg.Subject, safeOriginal, safeReply));
+            }
+            catch (Exception ex)
+            {
+                // Resend'in ham hata metni yalnız log'a — gövde sabit ve kısa, sebep hastaya gösterilmez.
+                log.LogError(ex, "Yanıt e-postası gönderilemedi (mesaj {Id}).", id);
+                return Results.Problem("Yanıt e-postası gönderilemedi.", statusCode: 502);
+            }
+
+            // ponytail: RepliedAt = DateTime.Now — CreatedAt ile aynı gerekçe (PublicEndpoints.cs),
+            // RepliedLabel de FormatStamp ile aynı varsayımla (Kind=Unspecified, TZ=Europe/Istanbul) okunur.
+            msg.ReplyText = reply;
+            msg.RepliedAt = DateTime.Now;
+            await db.SaveChangesAsync(ct);
+            AuditLog.Event(ctx, "contact_reply", $"{msg.User!.Email} · {msg.Subject}");
+            return Results.Ok(new { id = msg.Id, replied = true, repliedLabel = ContactMessages.FormatStamp(msg.RepliedAt.Value) });
+        });
+
+        grp.MapDelete("/contact-messages/{id}", async (int id, AppDb db, CancellationToken ct) =>
+        {
+            var msg = await db.ContactMessages.FindAsync([id], ct);
+            if (msg is null) return Results.NotFound();
+            db.ContactMessages.Remove(msg);
+            await db.SaveChangesAsync(ct);
+            return Results.NoContent();
         });
 
         return app;

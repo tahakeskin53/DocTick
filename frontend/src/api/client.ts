@@ -27,7 +27,8 @@ export interface Me {
 
 
 export interface Department { id: number; name: string; isActive: boolean; doctors?: number }
-export interface Doctor { id: number; name: string; departmentId: number; departmentName: string; isActive: boolean; photoUrl: string; bio?: string; education?: string; interests?: string; isChief?: boolean }
+// avgRating/ratingCount yalnız /api/admin/doctors döner — public /api/doctors bu alanları içermez, bu yüzden opsiyonel.
+export interface Doctor { id: number; name: string; departmentId: number; departmentName: string; isActive: boolean; photoUrl: string; bio?: string; education?: string; interests?: string; isChief?: boolean; avgRating?: number | null; ratingCount?: number }
 export interface Appointment {
   id: number; code: string; doctorId: number; doctorName: string; departmentName: string;
   date: string; dateLabel: string; time: string; status: 'confirmed' | 'done' | 'cancelled'; rating: number | null;
@@ -39,8 +40,16 @@ export interface AdminAppt {
 }
 export interface Overview {
   weekAppointments: number; openDepartments: number; activeDoctors: number;
-  pendingUsers: number; today: AdminAppt[];
+  pendingUsers: number; unansweredMessages: number; today: AdminAppt[];
 }
+export interface ContactMessage {
+  id: number; senderName: string; senderEmail: string; subject: string; body: string;
+  createdLabel: string; // sunucuda biçimlenmiş metin — olduğu gibi bas, parse etme
+  replied: boolean;
+  replyText: string; // yanıtlanmamışsa ""
+  repliedLabel: string; // yanıtlanmamışsa ""
+}
+export interface DoctorRating { average: number | null; count: number }
 export interface ScheduleCell { dayOfWeek: number; time: string; isOpen: boolean }
 export interface Schedule { doctorId: number; slots: ScheduleCell[] }
 export interface Settings { reminderEnabled: boolean; reminderHoursBefore: number }
@@ -143,6 +152,7 @@ export const Api = {
   // date boş bırakılırsa tüm randevular döner; verilirse o güne filtrelenir.
   doctorAppointments: (date?: string) => api<DoctorAppointment[]>(`/api/doctor/appointments${date ? `?date=${date}` : ''}`),
   cancelDoctorAppointment: (id: number) => api<DoctorAppointment>(`/api/doctor/appointments/${id}/cancel`, { method: 'POST' }),
+  doctorRating: () => api<DoctorRating>('/api/doctor/rating'),
   doctorPatients: () => api<{id: number; name: string; email: string}[]>('/api/doctor/patients'),
   doctorPatientResults: (patientId: number) => api<PatientResults>(`/api/doctor/patients/${patientId}/results`),
   createLab: (data: any) => api('/api/doctor/lab', { method: 'POST', body: JSON.stringify(data) }),
@@ -153,6 +163,9 @@ export const Api = {
   deleteImaging: (id: number) => api(`/api/doctor/imaging/${id}`, { method: 'DELETE' }),
 
   adminOverview: () => api<Overview>('/api/admin/overview'),
+  adminContactMessages: (unansweredOnly?: boolean) => api<ContactMessage[]>(`/api/admin/contact-messages${unansweredOnly ? '?unanswered=true' : ''}`),
+  replyContactMessage: (id: number, reply: string) => api<{ id: number; replied: boolean; repliedLabel: string }>(`/api/admin/contact-messages/${id}/reply`, { method: 'POST', body: JSON.stringify({ reply }) }),
+  deleteContactMessage: (id: number) => api(`/api/admin/contact-messages/${id}`, { method: 'DELETE' }),
   adminAppointments: (date?: string) => api<AdminAppt[]>(`/api/admin/appointments${date ? `?date=${date}` : ''}`),
   adminUsers: () => api<UserRow[]>('/api/admin/users'),
   approveUser: (id: number) => api(`/api/admin/users/${id}/approve`, { method: 'POST' }),

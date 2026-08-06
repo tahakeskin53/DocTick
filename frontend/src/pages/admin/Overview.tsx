@@ -1,13 +1,24 @@
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router';
 import { Card } from '../../components/display/Card.jsx';
 import { Badge } from '../../components/display/Badge.jsx';
 import { Api } from '../../api/client';
 import { trDate } from './periodRange';
 
 export function Overview() {
+  const nav = useNavigate();
   const { data } = useQuery({ queryKey: ['overview'], queryFn: Api.adminOverview });
-  const stat = (n: number | string, l: string) => (
-    <Card style={{ flex: 1 }}>
+  // Card bir <section> — tıklanabilir olduğunda klavyeyle de çalışmalı, yoksa yalnız fareyle erişilir.
+  const stat = (n: number | string, l: string, onClick?: () => void) => (
+    <Card
+      style={{ flex: 1, cursor: onClick ? 'pointer' : undefined }}
+      onClick={onClick}
+      role={onClick && 'button'}
+      tabIndex={onClick && 0}
+      onKeyDown={onClick && ((e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); }
+      })}
+    >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
         <span style={{ font: '700 28px var(--font-display)', color: 'var(--brand)' }}>{n}</span>
         <span style={{ font: 'var(--text-body-sm)', color: 'var(--text-secondary)' }}>{l}</span>
@@ -23,6 +34,7 @@ export function Overview() {
         {stat(data?.openDepartments ?? '–', 'Açık bölüm')}
         {stat(data?.activeDoctors ?? '–', 'Aktif doktor')}
         {stat(data?.pendingUsers ?? '–', 'Onay bekleyen kullanıcı')}
+        {stat(data?.unansweredMessages ?? '–', 'Yanıt bekleyen mesaj', () => nav('/admin/mesajlar'))}
       </div>
       <Card title="Yaklaşan randevular" padded={false}>
         {(data?.today || []).length ? data!.today.map(r => (

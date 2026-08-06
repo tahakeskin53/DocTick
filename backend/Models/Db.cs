@@ -93,6 +93,18 @@ public class Setting
     public int ReminderHoursBefore { get; set; } = 24;
 }
 
+public class ContactMessage
+{
+    public int Id { get; set; }
+    public int UserId { get; set; }
+    public User? User { get; set; }
+    public string Subject { get; set; } = "";
+    public string Body { get; set; } = "";
+    public DateTime CreatedAt { get; set; }
+    public string ReplyText { get; set; } = ""; // yanıtlanana kadar ""
+    public DateTime? RepliedAt { get; set; }
+}
+
 public class LabResult
 {
     public int Id { get; set; }
@@ -160,6 +172,7 @@ public class AppDb(DbContextOptions<AppDb> options) : DbContext(options)
     public DbSet<LabResult> LabResults => Set<LabResult>();
     public DbSet<LabValue> LabValues => Set<LabValue>();
     public DbSet<ImagingStudy> ImagingStudies => Set<ImagingStudy>();
+    public DbSet<ContactMessage> ContactMessages => Set<ContactMessage>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -275,6 +288,17 @@ public static class DbSeeder
                 CONSTRAINT ""FK_ImagingStudies_Users_PatientId"" FOREIGN KEY (""PatientId"") REFERENCES ""Users"" (""Id"") ON DELETE CASCADE,
                 CONSTRAINT ""FK_ImagingStudies_Doctors_DoctorId"" FOREIGN KEY (""DoctorId"") REFERENCES ""Doctors"" (""Id"") ON DELETE CASCADE,
                 CONSTRAINT ""FK_ImagingStudies_Appointments_AppointmentId"" FOREIGN KEY (""AppointmentId"") REFERENCES ""Appointments"" (""Id"") ON DELETE CASCADE
+            );
+            CREATE TABLE IF NOT EXISTS ""ContactMessages"" (
+                ""Id""        INTEGER NOT NULL CONSTRAINT ""PK_ContactMessages"" PRIMARY KEY AUTOINCREMENT,
+                ""UserId""    INTEGER NOT NULL,
+                ""Subject""   TEXT NOT NULL DEFAULT '',
+                ""Body""      TEXT NOT NULL DEFAULT '',
+                ""CreatedAt"" TEXT NOT NULL,
+                ""ReplyText"" TEXT NOT NULL DEFAULT '',
+                ""RepliedAt"" TEXT NULL,
+                CONSTRAINT ""FK_ContactMessages_Users_UserId""
+                    FOREIGN KEY (""UserId"") REFERENCES ""Users"" (""Id"") ON DELETE CASCADE
             );
         ");
     }

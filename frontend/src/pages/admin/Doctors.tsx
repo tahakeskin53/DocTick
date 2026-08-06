@@ -71,6 +71,9 @@ export function Doctors() {
               <span style={{ font: 'var(--text-caption)', color: 'var(--text-muted)' }}>{r.departmentName}</span>
             </span>
             <Badge status={r.isActive ? 'confirmed' : 'neutral'}>{r.isActive ? 'Randevuya açık' : 'Kapalı'}</Badge>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 4, font: 'var(--text-body-sm)', color: 'var(--text-secondary)', width: 76, flex: 'none', justifyContent: 'flex-end' }}>
+              {r.ratingCount ? <><Icon name="star" size={13} style={{ color: 'var(--amber-600)' }} />{r.avgRating?.toFixed(1)} ({r.ratingCount})</> : '–'}
+            </span>
             <span style={{ display: 'flex', gap: 4 }}>
               <IconButton size="sm" label="Fotoğraf Yükle" onClick={() => nav('/admin/fotograflar')}><Icon name="camera" size={15} /></IconButton>
               <IconButton size="sm" label="Düzenle" onClick={() => setEdit({ id: r.id, name: r.name, deptId: r.departmentId, isActive: r.isActive })}><Icon name="pencil" size={15} /></IconButton>

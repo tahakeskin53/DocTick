@@ -1,13 +1,18 @@
 import { Outlet, NavLink, useNavigate } from 'react-router';
+import { useQuery } from '@tanstack/react-query';
 import { Icon } from '../../components/display/Icon.jsx';
 import { Logo } from '../../components/display/Logo.jsx';
 import { IconButton } from '../../components/forms/IconButton.jsx';
 import { Footer } from '../../components/display/Footer.jsx';
 import { useAuth } from '../../auth/Auth';
+import { Api } from '../../api/client';
 
 export function DoktorLayout() {
   const { user, logout } = useAuth();
   const nav = useNavigate();
+  // Anonimlik: doktor yalnız ortalama+adet görür, tekil puan hiçbir uçtan gelmiyor (spec B.2).
+  // count 0 veya hata/yükleme → rozet hiç render edilmez (yanıltıcı "0.0" gösterilmez).
+  const { data: rating } = useQuery({ queryKey: ['doctor', 'rating'], queryFn: Api.doctorRating });
 
   const tab = (to: string, label: string, end = false) => (
     <NavLink
@@ -40,6 +45,16 @@ export function DoktorLayout() {
             {/* Bağlandığı Doctor kaydının adı — hesabın Google adı değil, ikisi farklı olabilir.
                 Unvan (Uzm. Dr. / Prof. Dr.) zaten Doctor.Name içinde, ayrıca "Dr." eklenmez. */}
             <span style={{ font: 'var(--text-body-sm)', color: '#fff', fontWeight: 500 }}>{user?.doctorName}</span>
+            {!!rating?.count && (
+              <span
+                title={`${rating.count} değerlendirmenin ortalaması`}
+                aria-label={`${rating.count} değerlendirmenin ortalaması`}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 4, font: 'var(--text-caption)', color: '#fff', background: 'rgba(255,255,255,0.15)', padding: '3px 9px', borderRadius: 'var(--radius-pill)' }}
+              >
+                <Icon name="star" size={12} style={{ color: 'var(--amber-100)' }} />
+                {rating.average?.toFixed(1)} · {rating.count}
+              </span>
+            )}
             <IconButton label="Çıkış yap" onClick={doLogout} variant="outline" size="sm">
               <Icon name="logout" size={15} />
             </IconButton>

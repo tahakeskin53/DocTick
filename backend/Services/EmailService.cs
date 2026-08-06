@@ -147,4 +147,14 @@ public static class EmailTemplates
         Shell($"İletişim formu: {subject}",
             $"<p style='font-size:13px;color:#51626F;margin:0 0 4px'>Gönderen: <b style='color:#12222F'>{System.Net.WebUtility.HtmlEncode(name)}</b> · {System.Net.WebUtility.HtmlEncode(fromEmail)}</p>" +
             $"<div style='background:#F7F9FB;border:1px solid #E3E9EE;border-radius:10px;padding:14px 16px;margin-top:12px;font-size:14px;line-height:1.6'>{messageHtml}</div>");
+
+    // Admin'in iletişim mesajına yanıtı — orijinal mesaj Contact(...) şablonundaki gri alıntı
+    // kutusuyla aynı düzende altta gösterilir, hasta neye yanıt geldiğini hatırlar.
+    // name/subject burada, originalHtml/replyHtml çağıran tarafta HTML-encode edilir (Contact ile aynı desen).
+    public static string ContactReply(string name, string subject, string originalHtml, string replyHtml) =>
+        Shell("Mesajınıza yanıt",
+            $"<p>Sayın {System.Net.WebUtility.HtmlEncode(name)},</p>" +
+            $"<div style='font-size:14px;line-height:1.6'>{replyHtml}</div>" +
+            $"<p style='font-size:13px;color:#51626F;margin:18px 0 4px'>Mesajınız — {System.Net.WebUtility.HtmlEncode(subject)}:</p>" +
+            $"<div style='background:#F7F9FB;border:1px solid #E3E9EE;border-radius:10px;padding:14px 16px;font-size:14px;line-height:1.6'>{originalHtml}</div>");
 }

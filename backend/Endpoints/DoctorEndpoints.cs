@@ -259,6 +259,19 @@ public static class DoctorEndpoints
             return Results.NoContent();
         });
 
+        // Doktorun kendi puan özeti — anonim, yalnız toplu ortalama+adet (bkz. RatingSummary).
+        // Tekil puan hiçbir uçtan verilmez; parametre almaz, kimlik MyDoctorIdAsync'ten gelir.
+        grp.MapGet("/rating", async (AppDb db, UserGate gate, ClaimsPrincipal p, CancellationToken ct) =>
+        {
+            var docId = await MyDoctorIdAsync(gate, p, ct);
+            var ratings = await db.Appointments.AsNoTracking()
+                .Where(a => a.DoctorId == docId && a.Rating != null)
+                .Select(a => a.Rating!.Value)
+                .ToListAsync(ct);
+            var (average, count) = RatingSummary.From(ratings);
+            return Results.Ok(new { average, count });
+        });
+
         return app;
     }
 
@@ -348,4 +361,16 @@ public static class DoctorEndpoints
         a.Id, a.Code, a.UserId, a.User?.Name ?? "", a.User?.Email ?? "",
         a.Doctor?.Department?.Name ?? "",
         a.Date, ReminderService.FormatDate(a.Date), a.Time, PatientEndpoints.DisplayStatus(a));
+}
+
+// Puan ortalaması hesabı — DbContext'siz, saf. AdminEndpoints (doktor listesi) buradan çağırır;
+// DoctorRemoval / PatientEndpoints.DisplayStatus'la aynı dosyalar-arası statik paylaşım deseni.
+public static class RatingSummary
+{
+    public static (double? Average, int Count) From(IEnumerable<int> ratings)
+    {
+        var list = ratings as ICollection<int> ?? ratings.ToList();
+        if (list.Count == 0) return (null, 0);
+        return (Math.Round(list.Average(), 1), list.Count);
+    }
 }
