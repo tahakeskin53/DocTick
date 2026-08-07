@@ -31,6 +31,7 @@ const DoctorPhotos = lazy(() => import('./pages/admin/DoctorPhotos').then(m => (
 const Schedule = lazy(() => import('./pages/admin/Schedule').then(m => ({ default: m.Schedule })));
 const EmailSettings = lazy(() => import('./pages/admin/EmailSettings').then(m => ({ default: m.EmailSettings })));
 const Users = lazy(() => import('./pages/admin/Users').then(m => ({ default: m.Users })));
+const Degerlendirmeler = lazy(() => import('./pages/admin/Degerlendirmeler').then(m => ({ default: m.Degerlendirmeler })));
 const Mesajlar = lazy(() => import('./pages/admin/Mesajlar').then(m => ({ default: m.Mesajlar })));
 
 // --- Doktor sayfaları ---
@@ -106,6 +107,7 @@ export const router = createBrowserRouter([
           { path: 'eposta', element: <Suspense fallback={null}><EmailSettings /></Suspense> },
           { path: 'kullanicilar', element: <Suspense fallback={null}><Users /></Suspense> },
           { path: 'mesajlar', element: <Suspense fallback={null}><Mesajlar /></Suspense> },
+          { path: 'degerlendirmeler', element: <Suspense fallback={null}><Degerlendirmeler /></Suspense> },
         ],
       },
     ],

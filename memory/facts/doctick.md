@@ -82,3 +82,5 @@
 - scrollvideo_duration_kaynagi: her karede v.duration (latch yok) <!-- valid:[2026-08-03..) recorded:2026-08-03T09:02 -->
 - scrollvideo_regresyon_kontrolu: node scripts/check_scroll_video.mjs (MOBILE=1 / TARGET=... ; playwright-core devDep) <!-- valid:[2026-08-03..) recorded:2026-08-03T09:02 -->
 - mac_setup_doc: docs/agents/mac-kurulum.md <!-- valid:[2026-08-04..) recorded:2026-08-04T12:15 -->
+- contact_messages_table: ContactMessages (EnsureSchemaAsync ham SQL) <!-- valid:[2026-08-06..) recorded:2026-08-06T11:28 -->
+- doctor_rating_visibility: anonim: yalniz ortalama+adet, tekil puan hicbir uctan verilmez <!-- valid:[2026-08-06..) recorded:2026-08-06T11:28 -->

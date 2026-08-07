@@ -20,6 +20,8 @@ public record UserDto(int Id, string Email, string Name, string Role, string Sta
 public record ContactMessageDto(int Id, string SenderName, string SenderEmail, string Subject,
     string Body, string CreatedLabel, bool Replied, string ReplyText, string RepliedLabel);
 public record ContactReplyRequest(string Reply);
+public record AdminRatingDto(int Id, string Code, string PatientName, string PatientEmail,
+    int DoctorId, string DoctorName, string DepartmentName, string Date, string DateLabel, string Time, int Rating);
 
 // İletişim yanıtının doğrulama kuralı — DbContext'siz, saf (DoctorRemoval deseniyle aynı).
 public static class ContactMessages
@@ -356,6 +358,20 @@ public static class AdminEndpoints
                 : await q.Where(a => a.Date == date).OrderBy(a => a.Time).ToListAsync(ct);
             return Results.Ok(list.Select(a => new AdminApptDto(a.Id, a.Code, a.Date, a.Time, a.DoctorId, a.Doctor!.Name, a.Doctor!.Department!.Name,
                 a.User!.Email, a.Status == ApptStatus.Confirmed ? "confirmed" : "cancelled")).ToList());
+        });
+
+        // Tekil değerlendirmeler — kim, hangi doktora, hangi randevuda, kaç puan.
+        // Yalnız admin kapsamı: doktorun kendi ucu (/api/doctor/rating) anonim kalır, tekil puan oradan verilmez.
+        grp.MapGet("/ratings", async (AppDb db, int? doctorId, CancellationToken ct) =>
+        {
+            var list = await (from a in db.Appointments.AsNoTracking()
+                                  .Include(x => x.Doctor!).ThenInclude(d => d!.Department).Include(x => x.User)
+                              where a.Rating != null && (doctorId == null || a.DoctorId == doctorId)
+                              orderby a.Date descending, a.Time descending
+                              select a).ToListAsync(ct);
+            return Results.Ok(list.Select(a => new AdminRatingDto(
+                a.Id, a.Code, a.User!.Name, a.User!.Email, a.DoctorId, a.Doctor!.Name, a.Doctor!.Department!.Name,
+                a.Date, ReminderService.FormatDate(a.Date), a.Time, a.Rating!.Value)));
         });
 
         // ---- Ayarlar (gönderen adresi config kaynaklıdır: Resend:FromEmail) ----

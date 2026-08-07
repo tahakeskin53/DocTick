@@ -13,6 +13,7 @@ const ITEMS = [
   { to: '/admin/fotograflar', icon: 'camera', label: 'Doktor Fotoğrafları' },
   { to: '/admin/saatler', icon: 'clock', label: 'Çalışma saatleri' },
   { to: '/admin/mesajlar', icon: 'mail', label: 'Mesajlar' },
+  { to: '/admin/degerlendirmeler', icon: 'star', label: 'Değerlendirmeler' },
   { to: '/admin/eposta', icon: 'bell', label: 'E-posta ayarları' },
   { to: '/admin/kullanicilar', icon: 'check', label: 'Kullanıcılar' },
 ];

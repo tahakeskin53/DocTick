@@ -10,15 +10,29 @@ tier: core
 ## Tracking Config
 - **Type:** project
 - **Started:** 2026-07-21
-- **Last Update:** 2026-08-04
+- **Last Update:** 2026-08-06
 - **Last Accessed:** 2026-07-21 14:59:18
-- **Update Count:** 55
+- **Update Count:** 56
 - **Source:** setup
 
 ## Current State
 - **Status:** not_started. DNS'te resend._domainkey.doctick.me ve send.doctick.me NXDOMAIN. Kod ve Azure app settings DOGRU (RedirectTo bos, FromEmail=randevu@doctick.me, ApiKey dolu) - sorun yalnizca domain dogrul
 
 ## Recent Activity
+- **2026-08-06** | 2026-08-06 - Iletisim mesajlari paneli + doktor puan ozeti canliya alindi (commit 9f69750).
+
+Ogrenilenler:
+1. EnsureCreated() dolu bir DB'ye tablo EKLEMEZ. Yeni tablo daima DbSeeder.EnsureSchemaAsync
+   icindeki ham CREATE TABLE IF NOT EXISTS blokinda tanimlanmali. Dolu bir DB kopyasi uzerinde
+   uygulamayi baslatarak dogrulanabilir - build bunu gostermez.
+2. Deploy "success" + workflow smoke check YENI KODUN yuklendigini KANITLAMAZ: smoke check
+   /api/auth/me'ye bakar, o da eski kod ayaktayken 401 doner. Yeni bir ucun 401 (404 degil)
+   dondugunu ayrica kontrol et.
+3. Deploy sonrasi ilk ~1 dk container restart penceresi: yeni uclar gecici olarak 404 dondu,
+   sonra 401'e oturdu. 404 gorunce hemen basarisiz sayma, tekrar dene.
+4. EF Core SQLite DateTime'i TEXT saklar ve Kind=Unspecified okur -> ToLocalTime() sessizce
+   no-op. Gosterilecek tarihler sunucuda bicimlenip metin olarak tasinmali (DateLabel deseni).
+ [Source: claude-code]
 - **2026-08-04** | Yeni Mac uzerinde iPhone uygulamasi geliistirilecek. Windows kurulumunun envanteri ve mac kurulum adimlari docs/agents/mac-kurulum.md dosyasinda: superpowers v5.0.7 plugin, mattpocock/skills (41, skills-lock.json), ponytail (6 markdown skill + CLAUDE.md merdiveni), impeccable v3.9.1 (npx impeccable install + PostToolUse hook), memkraft 3.0.3 venv, ~/.claude/commands/chatimi-sync-et.md, yerel MCP sunucusu yok. [Source: setup]
 - **2026-08-03** | ScrollVideo yaris duzeltmesi 2026-08-03'te uretime cikti ve dogrulandi (artik 'HENUZ DEPLOY EDILMEDI' notu gecersiz). Branch perf/login-to-home; bu branch'e push dogrudan Azure deploy tetikliyor (.github/workflows/azure-deploy.yml). [Source: deploy]
 - **2026-08-03** | ScrollVideo yarisi duzeltildi (2026-08-03). TUZAK: medya olaylari tek atisliktir ve React prop handler'i baglanmadan once atesleneb1lir; <video> durumu OLAYDAN latch'lenmemeli, elemandan (duration/readyState/buffered) okunmali. Semptom soguk cache'e bagli oldugu icin sadece gizli sekmede goruluyordu; olcum: soguk profilde masaustu 4/6, mobil 5/6 kirmizi, yerel dev 10/10 kirmizi. Fix sonrasi 10/10 + prod build 6/6 yesil. NOT: duzeltme HENUZ DEPLOY EDILMEDI, uretimde eski kod duruyor. [Source: bugfix]
@@ -94,6 +108,21 @@ NOT: PublicEndpoints adina ragmen .RequireAuthorization() iceriyor — /api/depa
 ---
 
 ## Timeline (Full Record)
+
+- **2026-08-06** | 2026-08-06 - Iletisim mesajlari paneli + doktor puan ozeti canliya alindi (commit 9f69750).
+
+Ogrenilenler:
+1. EnsureCreated() dolu bir DB'ye tablo EKLEMEZ. Yeni tablo daima DbSeeder.EnsureSchemaAsync
+   icindeki ham CREATE TABLE IF NOT EXISTS blokinda tanimlanmali. Dolu bir DB kopyasi uzerinde
+   uygulamayi baslatarak dogrulanabilir - build bunu gostermez.
+2. Deploy "success" + workflow smoke check YENI KODUN yuklendigini KANITLAMAZ: smoke check
+   /api/auth/me'ye bakar, o da eski kod ayaktayken 401 doner. Yeni bir ucun 401 (404 degil)
+   dondugunu ayrica kontrol et.
+3. Deploy sonrasi ilk ~1 dk container restart penceresi: yeni uclar gecici olarak 404 dondu,
+   sonra 401'e oturdu. 404 gorunce hemen basarisiz sayma, tekrar dene.
+4. EF Core SQLite DateTime'i TEXT saklar ve Kind=Unspecified okur -> ToLocalTime() sessizce
+   no-op. Gosterilecek tarihler sunucuda bicimlenip metin olarak tasinmali (DateLabel deseni).
+ [Source: claude-code]
 
 - **2026-08-04** | Yeni Mac uzerinde iPhone uygulamasi geliistirilecek. Windows kurulumunun envanteri ve mac kurulum adimlari docs/agents/mac-kurulum.md dosyasinda: superpowers v5.0.7 plugin, mattpocock/skills (41, skills-lock.json), ponytail (6 markdown skill + CLAUDE.md merdiveni), impeccable v3.9.1 (npx impeccable install + PostToolUse hook), memkraft 3.0.3 venv, ~/.claude/commands/chatimi-sync-et.md, yerel MCP sunucusu yok. [Source: setup]
 

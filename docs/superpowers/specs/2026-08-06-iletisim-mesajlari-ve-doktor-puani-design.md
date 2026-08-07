@@ -209,6 +209,17 @@ Kullanıcı onayladı.
 `GET /api/admin/doctors` yanıtına `avgRating` (`double?`) + `ratingCount` (`int`). Tek `GroupBy(DoctorId)` sorgusu; `RatingSummary` ile aynı yuvarlama kuralı. `Doctors.tsx` listesinde `★ 4.3 (12)` sütunu; değerlendirme yoksa `–`.
 `client.ts` → `Doctor` arayüzüne iki opsiyonel alan (public `/api/doctors` bu alanları döndürmez, opsiyonel olmaları bu yüzden).
 
+**C.1b — Tekil değerlendirme listesi (sonradan eklendi, 2026-08-06)**
+`GET /api/admin/ratings?doctorId=` → puan verilmiş randevular, yeniden eskiye:
+`(Id, Code, PatientName, PatientEmail, DoctorId, DoctorName, DepartmentName, Date, DateLabel, Time, Rating)`.
+Admin paneli `/admin/degerlendirmeler` sayfası: doktor süzgeci + süzülen kümenin ortalaması + satır listesi
+(kim → hangi doktora, hangi randevu kodu/tarih/saat, kaç yıldız).
+
+**Anonimlik kararıyla çelişmez:** §B.2'deki anonimlik kısıtı *doktora* karşıdır — doktor kendi
+hastalarının tekil puanlarını göremez. Admin zaten tüm randevuları hasta e-postasıyla görüyor
+(`GET /api/admin/appointments`), dolayısıyla burada yeni bir mahremiyet yüzeyi açılmıyor.
+`/api/doctor/rating` değişmedi, hâlâ yalnız toplu ortalama döndürüyor.
+
 **C.2 — Yanıt bekleyen mesaj sayacı**
 `OverviewDto`'ya `UnansweredMessages` (`CountAsync(m => m.RepliedAt == null)`). `Overview.tsx`'te mevcut `stat(...)` yardımcısıyla beşinci kart: *"Yanıt bekleyen mesaj"*. Karta tıklama → `/admin/mesajlar`.
 
@@ -262,7 +273,7 @@ CLAUDE.md kuralı: "non-trivial logic leaves ONE runnable check behind". İki he
 
 - Konuşma dizisi / çoklu yanıt — tek yanıt modeli (kullanıcı kararı)
 - Hastaya panel içinde mesaj/yanıt ekranı — yanıt yalnız e-posta ile ulaşır (kullanıcı kararı)
-- Doktora tekil puan gösterimi — yalnız toplu ortalama (anonimlik kararı)
+- **Doktora** tekil puan gösterimi — yalnız toplu ortalama (anonimlik kararı). Admin tarafı için bkz. §C.1b
 - Puanla birlikte yorum/serbest metin — `Appointment.Rating` yalnız 1–5 tutar, değişmiyor
 - Mesajlarda arama, sayfalama, ek dosya
 - Yerel geliştirme kurulumu — plan üretimi hedefler

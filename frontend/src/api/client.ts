@@ -50,6 +50,12 @@ export interface ContactMessage {
   repliedLabel: string; // yanıtlanmamışsa ""
 }
 export interface DoctorRating { average: number | null; count: number }
+/** Tekil değerlendirme — yalnız admin kapsamı. Doktor tarafı anonimdir, bu tip oraya sızmaz. */
+export interface AdminRating {
+  id: number; code: string; patientName: string; patientEmail: string;
+  doctorId: number; doctorName: string; departmentName: string;
+  date: string; dateLabel: string; time: string; rating: number;
+}
 export interface ScheduleCell { dayOfWeek: number; time: string; isOpen: boolean }
 export interface Schedule { doctorId: number; slots: ScheduleCell[] }
 export interface Settings { reminderEnabled: boolean; reminderHoursBefore: number }
@@ -167,6 +173,7 @@ export const Api = {
   replyContactMessage: (id: number, reply: string) => api<{ id: number; replied: boolean; repliedLabel: string }>(`/api/admin/contact-messages/${id}/reply`, { method: 'POST', body: JSON.stringify({ reply }) }),
   deleteContactMessage: (id: number) => api(`/api/admin/contact-messages/${id}`, { method: 'DELETE' }),
   adminAppointments: (date?: string) => api<AdminAppt[]>(`/api/admin/appointments${date ? `?date=${date}` : ''}`),
+  adminRatings: (doctorId?: number) => api<AdminRating[]>(`/api/admin/ratings${doctorId ? `?doctorId=${doctorId}` : ''}`),
   adminUsers: () => api<UserRow[]>('/api/admin/users'),
   approveUser: (id: number) => api(`/api/admin/users/${id}/approve`, { method: 'POST' }),
   rejectUser: (id: number) => api(`/api/admin/users/${id}/reject`, { method: 'POST' }),
