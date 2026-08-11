@@ -1,9 +1,0 @@
-# İşletim sistemi / editör çöpü (kök düzey)
-.DS_Store
-Thumbs.db
-desktop.ini
-*.lnk
-
-# Not: windows/ ve mac/ içindeki .gitignore dosyaları derleme çıktılarını
-# (backend/bin, backend/obj, backend/wwwroot, doctick.db, frontend/node_modules,
-#  frontend/dist) zaten dışlıyor. Bunlar ilk çalıştırmada yeniden üretilir.
