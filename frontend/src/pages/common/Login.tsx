@@ -225,7 +225,7 @@ export function Login() {
           <div className="dt-ch__inner"><div className="dt-panel">
             <p className="dt-eyebrow dt-fade">DocTick · Online Randevu</p>
             <h1 className="dt-h">{splitWords('Doktorunuza giden yol, birkaç dokunuş uzağınızda.')}</h1>
-            <p className="dt-lead dt-fade">Bölümü seçin, doktorunuzu ve saatinizi ayırın. Onay ve hatırlatma e-postaları otomatik gelir — telefon beklemeden, kuyruk olmadan.</p>
+            <p className="dt-lead dt-fade">Bölümü seçin, doktorunuzu ve size uyan saati ayırın — randevunuz o anda kesinleşir. Onay, hatırlatma ve iptal bilgilendirmeleri e-posta ile kendiliğinden gelir. Santral saatini kollamak, telefonda sıra beklemek yok.</p>
             <div className="dt-cue dt-fade" aria-hidden="true"><span /> Kaydırın</div>
           </div></div>
         </section>
@@ -234,7 +234,7 @@ export function Login() {
           <div className="dt-ch__inner"><div className="dt-panel">
             <p className="dt-eyebrow dt-fade">01 · Yönlendirme</p>
             <h2 className="dt-h">{splitWords('Doğru doktora, en kısa yol.')}</h2>
-            <p className="dt-lead dt-fade">Klinik branşları ve uzman kadrosu tek ekranda. Aradığınız uzmanlık ve uygun saat yan yana; aynı saat iki hastaya verilmez.</p>
+            <p className="dt-lead dt-fade">Klinik branşları ve uzman kadrosu tek ekranda; hangi hekimin hangi güne baktığını görerek seçersiniz. Takvim hekimlerin gerçek çalışma saatlerinden beslenir — gösterilen her saat gerçekten açıktır, aynı saat iki hastaya verilmez.</p>
             <div className="dt-stats dt-fade">
               <div className="dt-stat"><Counter value={deptCount} /><div className="dt-stat__l">Branş</div></div>
               <div className="dt-stat"><Counter value={docCount} /><div className="dt-stat__l">Uzman doktor</div></div>
@@ -242,7 +242,8 @@ export function Login() {
             </div>
             <dl className="dt-ann dt-fade">
               <div className="dt-ann__row"><dt className="dt-ann__k">Çakışma</dt><dd className="dt-ann__v">İmkânsız <small>· tek saat, tek hasta</small></dd></div>
-              <div className="dt-ann__row"><dt className="dt-ann__k">Kayıt süresi</dt><dd className="dt-ann__v">~5 dk <small>· onay dahil</small></dd></div>
+              <div className="dt-ann__row"><dt className="dt-ann__k">Kayıt</dt><dd className="dt-ann__v">~5 dk <small>· seçimden onaya</small></dd></div>
+              <div className="dt-ann__row"><dt className="dt-ann__k">Erişim</dt><dd className="dt-ann__v">7/24 <small>· tarayıcıdan, kurulum yok</small></dd></div>
             </dl>
           </div></div>
         </section>
@@ -251,13 +252,13 @@ export function Login() {
           <div className="dt-ch__inner"><div className="dt-panel">
             <p className="dt-eyebrow dt-fade">02 · Anlık müsaitlik</p>
             <h2 className="dt-h">{splitWords('Uygun an, siz seçene kadar.')}</h2>
-            <p className="dt-lead dt-fade">Saatler anlık güncellenir. Seçtiğiniz anı başka biri alırsa DocTick aynı saniye kilitler; siz başka uygun saate yönlenirsiniz.</p>
+            <p className="dt-lead dt-fade">Saatler siz bakarken güncellenir. Randevunuzu onayladığınız anda o saat veritabanı düzeyinde size kilitlenir — aynı saniye aynı saati onaylayan ikinci bir istek gelse bile geri çevrilir. İptal edilen saatler ise havuza geri döner, başka hastalara yeniden açılır.</p>
             <div className="dt-slots dt-fade" role="group" aria-label="Örnek müsait saatler">
               {SLOTS.map((t) => (
                 <button key={t} className="dt-slot" type="button" aria-pressed={slot === t} onClick={() => setSlot(t)}>{t}</button>
               ))}
             </div>
-            <p className="dt-slot__note dt-fade">{slot ? `${slot} önizleme için ayrıldı — giriş yapınca onaylayın.` : 'Bir saat seçerek akışı deneyin.'}</p>
+            <p className="dt-slot__note dt-fade">{slot ? `${slot} işaretlendi. Bu yalnızca örnek bir önizleme — gerçek saatler, giriş yaptığınızda seçtiğiniz hekimin takviminden gelir.` : 'Bir saate dokunun — seçim akışını giriş yapmadan deneyin.'}</p>
           </div></div>
         </section>
 
@@ -265,11 +266,13 @@ export function Login() {
           <div className="dt-ch__inner"><div className="dt-panel">
             <p className="dt-eyebrow dt-fade">03 · Hatırlatma</p>
             <h2 className="dt-h">{splitWords('Hiçbir randevu unutulmaz.')}</h2>
-            <p className="dt-lead dt-fade">Randevunuzdan önce otomatik hatırlatma e-postası gönderilir. Hatırlatma penceresini klinik yöneticisi belirler.</p>
+            <p className="dt-lead dt-fade">Randevunuz oluşur oluşmaz onay e-postası gider. Görüşmeden önce ise otomatik hatırlatma düşer — kliniğin seçtiği pencereye göre 2, 24 veya 48 saat önce. Planınız değişirse randevunuzu tek dokunuşla iptal edebilir, yerini başka hastaya açabilirsiniz.</p>
             <ECG />
             <dl className="dt-ann dt-fade">
-              <div className="dt-ann__row"><dt className="dt-ann__k">Hatırlatma</dt><dd className="dt-ann__v">−24 saat <small>· varsayılan pencere</small></dd></div>
-              <div className="dt-ann__row"><dt className="dt-ann__k">Onay e-postası</dt><dd className="dt-ann__v">Anında</dd></div>
+              <div className="dt-ann__row"><dt className="dt-ann__k">Onay</dt><dd className="dt-ann__v">Anında <small>· randevu kurulur kurulmaz</small></dd></div>
+              <div className="dt-ann__row"><dt className="dt-ann__k">Hatırlatma</dt><dd className="dt-ann__v">2 / 24 / 48 sa <small>· klinik seçer</small></dd></div>
+              <div className="dt-ann__row"><dt className="dt-ann__k">İptal</dt><dd className="dt-ann__v">Serbest <small>· randevu saatine kadar</small></dd></div>
+              <div className="dt-ann__row"><dt className="dt-ann__k">E-posta</dt><dd className="dt-ann__v">Her adımda <small>· otomatik</small></dd></div>
             </dl>
           </div></div>
         </section>
@@ -282,6 +285,7 @@ export function Login() {
               <p>1998 yılından bu yana sağlık sektöründe öncü adımlar atan DocTick Hastanesi, modern tıbbın sunduğu en güncel teşhis ve tedavi yöntemlerini, alanında uzman hekim kadrosuyla hastalarına sunmaktadır.</p>
               <p>Misyonumuz, etik değerlerden ödün vermeden, hasta haklarına saygılı, uluslararası kalite standartlarında, güvenilir ve yenilikçi sağlık hizmeti vermektir.</p>
               <p>Vizyonumuz, tıbbi etik ilkelerine bağlı kalarak, sağlıkta mükemmeliyet odaklı ve insana değer veren, şefkatli yaklaşımımızla daima referans kabul edilen bir kurum olmaktır.</p>
+              <p>Bu yaklaşımın dijital karşılığı DocTick'tir: hastanın randevusunu kendi seçtiği saatte alabildiği, geçmişini ve sonuçlarını tek yerden izleyebildiği, hekimin takviminin şeffaf olduğu bir sistem.</p>
             </div>
           </div></div>
         </section>
@@ -291,7 +295,7 @@ export function Login() {
             <svg className="dt-climax__tick" viewBox="0 0 48 48" aria-hidden="true"><path d="M10 25 L20 35 L39 13" /></svg>
             <p className="dt-climax__sub dt-fade">Onaylandı</p>
             <h2 className="dt-h dt-fade">{splitWords('Randevunuz hazır.')}</h2>
-            <p className="dt-climax__note dt-fade">Google hesabınızla güvenle giriş yapın. Hesabınız yönetici onayından sonra aktifleşir; kişisel verileriniz yalnızca randevu işlemleri için kullanılır.</p>
+            <p className="dt-climax__note dt-fade">Google hesabınızla tek dokunuşla girin — DocTick'te ayrı parola oluşturmanız gerekmez. İlk girişinizde hesabınız klinik yöneticisinin onayına düşer; onaylandığı anda randevu almaya, geçmişinizi ve tahlil sonuçlarınızı görmeye başlarsınız. Kişisel verileriniz yalnızca randevu işlemleri için kullanılır.</p>
             <div className="dt-cta dt-fade">
               {clientId
                 ? <GoogleLogin onSuccess={onSuccess} onError={() => toast('error', 'Google girişi iptal edildi.')} text="continue_with" width="300" />
