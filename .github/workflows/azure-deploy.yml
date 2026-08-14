@@ -11,9 +11,12 @@
 # dotnet publish satırına  -r linux-x64 --self-contained true  ekle → runtime uygulamayla birlikte gider.
 name: Deploy to Azure
 
+# Bu repo yalnizca yayin deposudur: main = doctick.me'de calisan surum.
+# Gelistirme tahakeskin53/DocTick-Local (private) deposunda yapilir; oraya
+# push etmek deploy tetiklemez. Buraya main'e push = CANLI DEPLOY.
 on:
   push:
-    branches: [main, perf/login-to-home]
+    branches: [main]
   workflow_dispatch:
 
 # Aynı branch için eski deploy'u iptal et (yarım kalan eşzamanlı çalışmayı önler).

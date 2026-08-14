@@ -100,3 +100,12 @@ nul
 backend/_probe.py
 # MemKraft'in yanlis yola yazdigi digest (uzantisiz, repo kokunde) - gercek indeks memory/ altinda
 /DocTick
+
+# Agent skills paketi bu YAYIN deposunda tutulmaz (deploy icin gereksiz; ayni
+# 107 dosya bes ayri dizinde commit'liydi). Gelistirme kopyasi icin bkz.
+# tahakeskin53/DocTick-Local -> .claude/skills/
+/.agents/
+/.claude/
+/agent/
+/data/
+/skills/

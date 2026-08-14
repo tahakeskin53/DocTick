@@ -3,6 +3,19 @@
 Hastaneden online randevu alma, görüntüleme, hatırlatma ve değerlendirme. İki yüzey:
 **Hasta uygulaması** ve **Admin paneli** (bölüm/doktor/saat yönetimi + kullanıcı onayı + e-posta ayarları).
 
+## ⚠️ Bu, yayın deposudur
+
+`main` = **[doctick.me](https://doctick.me)** üzerinde çalışan sürüm. Buraya `main`'e yapılan her push,
+`.github/workflows/azure-deploy.yml` üzerinden **canlı Azure App Service deploy'unu tetikler**.
+
+Günlük geliştirme burada değil, ayrı depolarda yapılır:
+
+| Depo | İçerik |
+|---|---|
+| [`DocTick`](https://github.com/tahakeskin53/DocTick) (burası) | Yayın sürümü — doctick.me |
+| `DocTick-Local` (private) | Local geliştirme sürümü; deploy tetiklemez |
+| [`DocTick-Mobile`](https://github.com/tahakeskin53/DocTick-Mobile) | Expo / React Native mobil uygulaması |
+
 ## 📚 Teknik dökümantasyon
 
 Detaylı teknik el kitabı (mimari diyagramları, ERD, API, auth/akış sequence diyagramları, ADR'ler) → **[`docs/`](docs/README.md)**. Alan sözlüğü → **[`CONTEXT.md`](CONTEXT.md)**. Hızlı başlangıç aşağıda.
