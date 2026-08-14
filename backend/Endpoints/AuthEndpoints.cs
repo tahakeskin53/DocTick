@@ -73,7 +73,7 @@ public static class AuthEndpoints
                 db.Users.Add(user);
                 await db.SaveChangesAsync();
             }
-            else if (user.Email.Equals(adminEmail, StringComparison.OrdinalIgnoreCase) && user.Role != UserRole.Admin)
+            else if (adminEmail.Length > 0 && user.Email.Equals(adminEmail, StringComparison.OrdinalIgnoreCase) && user.Role != UserRole.Admin)
             {
                 // İlk kurulumdan sonra admin e-postası eşleşirse yükselt.
                 user.Role = UserRole.Admin;
